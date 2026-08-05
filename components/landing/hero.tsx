@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, ArrowRight, Sparkles } from 'lucide-react';
 import { LoadingScreen } from '@/components/landing/loading-screen';
+import { analyzeProject } from '@/lib/api';
+import { useAnalysisContext } from '@/lib/analysis-context';
 
 const popularSearches = [
   'YouTube',
@@ -17,26 +19,33 @@ const popularSearches = [
 
 export function Hero() {
   const router = useRouter();
+  const { saveAnalysis } = useAnalysisContext();
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingQuery, setLoadingQuery] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSearch = (q: string) => {
+  const handleSearch = async (q: string) => {
     const clean = q.trim();
     if (!clean) return;
 
     setLoadingQuery(clean);
     setLoading(true);
+    setError(null);
 
-    // Play the loading animation for 1.5 seconds before navigating
-    setTimeout(() => {
+    try {
+      const analysis = await analyzeProject(clean);
+      saveAnalysis(clean, analysis);
       router.push(`/results?q=${encodeURIComponent(clean)}`);
-    }, 1500);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+      setLoading(false);
+    }
   };
 
-  // Render the LoadingScreen while loading is true
+  // Render the LoadingScreen while the AI analysis is running
   if (loading) {
-    return <LoadingScreen query={loadingQuery} />;
+    return <LoadingScreen query={loadingQuery} autoNavigate={false} />;
   }
 
   return (
@@ -85,6 +94,12 @@ export function Hero() {
               </button>
             </div>
           </form>
+
+          {error && (
+            <p role="alert" className="mt-4 rounded-xl glass px-4 py-3 text-sm text-destructive">
+              {error}
+            </p>
+          )}
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
             <span className="text-xs text-muted-foreground">Popular:</span>

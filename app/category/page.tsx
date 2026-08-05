@@ -10,6 +10,7 @@ import { categories } from '@/lib/categories';
 import { providersByCategory, type Provider } from '@/lib/providers';
 import { CurrentStack } from '@/components/landing/current-stack';
 import { useStack } from '@/lib/stack-context';
+import { useAnalysisContext } from '@/lib/analysis-context';
 
 type FilterKey = 'freeTier' | 'openSource' | 'paid' | 'beginnerFriendly' | 'popular';
 
@@ -102,6 +103,7 @@ function CategoryContent() {
   const categoryId = searchParams.get('id') || 'database';
   const category = categories.find((c) => c.id === categoryId) || categories[1];
   const providers = providersByCategory[categoryId] || [];
+  const { query: analysisQuery } = useAnalysisContext();
 
   const [search, setSearch] = useState('');
   const [activeFilters, setActiveFilters] = useState<Set<FilterKey>>(new Set());
@@ -135,7 +137,7 @@ function CategoryContent() {
       <div className="mx-auto max-w-7xl px-6 py-8">
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
           <Link
-            href={`/results?q=${encodeURIComponent('your project')}`}
+            href={`/results?q=${encodeURIComponent(analysisQuery ?? 'your project')}`}
             className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" />

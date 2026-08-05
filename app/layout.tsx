@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/lib/theme-provider';
 import { StackProvider } from '@/lib/stack-context';
+import { AnalysisProvider } from '@/lib/analysis-context';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -39,7 +40,9 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <ThemeProvider>
-          <StackProvider>{children}</StackProvider>
+          <AnalysisProvider>
+            <StackProvider>{children}</StackProvider>
+          </AnalysisProvider>
         </ThemeProvider>
       </body>
     </html>

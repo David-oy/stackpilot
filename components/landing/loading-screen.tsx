@@ -6,7 +6,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Sparkles, Loader2 } from 'lucide-react';
 import { loadingSteps } from '@/lib/categories';
 
-export function LoadingScreen({ query }: { query: string }) {
+export function LoadingScreen({
+  query,
+  autoNavigate = true,
+}: {
+  query: string;
+  autoNavigate?: boolean;
+}) {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
@@ -32,12 +38,14 @@ export function LoadingScreen({ query }: { query: string }) {
 
     timers.push(
       setTimeout(() => {
-        router.push(`/results?q=${encodeURIComponent(query)}`);
+        if (autoNavigate) {
+          router.push(`/results?q=${encodeURIComponent(query)}`);
+        }
       }, loadingSteps.length * stepDuration + 600),
     );
 
     return () => timers.forEach(clearTimeout);
-  }, [query, router]);
+  }, [query, router, autoNavigate]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">

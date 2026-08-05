@@ -8,6 +8,7 @@ import {
   Bell,
   BarChart3,
   Cloud,
+  Layers,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -114,6 +115,21 @@ export const categories: Category[] = [
     recommended: 'Vercel',
   },
 ];
+
+export const fallbackCategory: Category = {
+  id: 'technology',
+  name: 'Technology',
+  icon: Layers,
+  providers: 0,
+  description: '',
+  gradient: 'from-slate-500/20 to-zinc-500/20',
+  iconColor: 'text-slate-300',
+  recommended: '',
+};
+
+export function getCategoryMeta(id: string): Category {
+  return categories.find((c) => c.id === id) ?? fallbackCategory;
+}
 
 export const loadingSteps = [
   'Understanding your project...',

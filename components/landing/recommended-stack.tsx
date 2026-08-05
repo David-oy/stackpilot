@@ -2,9 +2,38 @@
 
 import { motion } from 'framer-motion';
 import { Check, Layers } from 'lucide-react';
-import { categories } from '@/lib/categories';
+import type { LucideIcon } from 'lucide-react';
+import { categories, getCategoryMeta } from '@/lib/categories';
+import type { StackAnalysis } from '@/lib/types';
 
-export function RecommendedStack() {
+type StackItem = {
+  id: string;
+  name: string;
+  icon: LucideIcon;
+  iconColor: string;
+  recommended: string;
+};
+
+export function RecommendedStack({ analysis }: { analysis?: StackAnalysis }) {
+  const items: StackItem[] = analysis
+    ? analysis.categories.map((cat) => {
+        const meta = getCategoryMeta(cat.id);
+        return {
+          id: cat.id,
+          name: cat.name,
+          icon: meta.icon,
+          iconColor: meta.iconColor,
+          recommended: cat.providers[0]?.name ?? 'Recommended',
+        };
+      })
+    : categories.map((cat) => ({
+        id: cat.id,
+        name: cat.name,
+        icon: cat.icon,
+        iconColor: cat.iconColor,
+        recommended: cat.recommended,
+      }));
+
   return (
     <div className="sticky top-24">
       <motion.div
@@ -24,7 +53,7 @@ export function RecommendedStack() {
         </div>
 
         <div className="mt-5 space-y-2">
-          {categories.map((cat, i) => (
+          {items.map((cat, i) => (
             <motion.div
               key={cat.id}
               initial={{ opacity: 0, y: 8 }}
