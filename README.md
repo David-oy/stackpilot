@@ -201,41 +201,6 @@ Save • Share • Email
 
 ---
 
-# 🚀 Roadmap
-
-## ✅ v0.1
-- Modern Landing Page
-- AI-inspired Search Experience
-- Mock AI Analysis
-- Technology Categories
-
----
-
-## 🚧 v0.2
-- Category Pages
-- Provider Listings
-
----
-
-## 🚧 v0.3
-- Provider Details
-- Build Stack
-
----
-
-## 🚧 v0.4
-- Gemini AI Integration
-
----
-
-## 🚧 v0.5
-- PostgreSQL Integration
-
----
-
-## 🚧 v0.6
-- Authentication
-- Saved Projects
 
 ---
 
