@@ -7,8 +7,8 @@ const footerLinks = {
 };
 
 const socialLinks = [
-  { icon: Github, href: '#', label: 'GitHub' },
-  { icon: Twitter, href: '#', label: 'Twitter' },
+  { icon: Github, href: 'https://github.com/David-oy/get.stack', label: 'GitHub' },
+  { icon: Twitter, href: 'https://x.com/vijayyyyy_7', label: 'Twitter' },
   { icon: Linkedin, href: '#', label: 'LinkedIn' },
 ];
 
@@ -67,7 +67,7 @@ export function Footer() {
             © {new Date().getFullYear()} StackPilot. All rights reserved.
           </p>
           <p className="text-xs text-muted-foreground">
-            Built for developers, by developers.
+            Built for developers, by developers with LOVE!.
           </p>
         </div>
       </div>
