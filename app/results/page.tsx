@@ -74,10 +74,13 @@ function ResultsContent() {
                     {cat.description}
                   </p>
 
-                  <button className="mt-5 flex w-full items-center justify-between rounded-lg border border-white/5 bg-white/[0.02] px-4 py-2.5 text-sm text-muted-foreground transition-all hover:border-violet-500/20 hover:bg-white/[0.04] hover:text-white">
+                  <a
+                    href={`/category?id=${cat.id}`}
+                    className="mt-5 flex w-full items-center justify-between rounded-lg border border-white/5 bg-white/[0.02] px-4 py-2.5 text-sm text-muted-foreground transition-all hover:border-violet-500/20 hover:bg-white/[0.04] hover:text-white"
+                  >
                     Explore Providers
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                  </button>
+                  </a>
                 </motion.div>
               ))}
             </div>
