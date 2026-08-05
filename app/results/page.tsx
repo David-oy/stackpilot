@@ -25,7 +25,7 @@ function ResultsContent() {
         >
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-white"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" />
             New search
@@ -37,7 +37,7 @@ function ResultsContent() {
                 <Sparkles className="h-3 w-3 text-violet-400" />
                 <span>AI analysis complete</span>
               </div>
-              <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+              <h1 className="mt-3 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
                 Tech stack for <span className="gradient-text">{query}</span>
               </h1>
               <p className="mt-2 text-sm text-muted-foreground">
@@ -60,23 +60,23 @@ function ResultsContent() {
                 >
                   <div className="flex items-start justify-between">
                     <div
-                      className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${cat.gradient} ring-1 ring-white/10 transition-transform group-hover:scale-110`}
+                      className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${cat.gradient} ring-1 ring-foreground/10 transition-transform group-hover:scale-110`}
                     >
                       <cat.icon className={`h-6 w-6 ${cat.iconColor}`} />
                     </div>
-                    <span className="rounded-full border border-white/5 bg-white/[0.03] px-2.5 py-1 text-xs text-muted-foreground">
+                    <span className="rounded-full border border-foreground/5 bg-foreground/[0.03] px-2.5 py-1 text-xs text-muted-foreground">
                       {cat.providers} providers
                     </span>
                   </div>
 
-                  <h3 className="mt-5 text-lg font-semibold text-white">{cat.name}</h3>
+                  <h3 className="mt-5 text-lg font-semibold text-foreground">{cat.name}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                     {cat.description}
                   </p>
 
                   <a
                     href={`/category?id=${cat.id}`}
-                    className="mt-5 flex w-full items-center justify-between rounded-lg border border-white/5 bg-white/[0.02] px-4 py-2.5 text-sm text-muted-foreground transition-all hover:border-violet-500/20 hover:bg-white/[0.04] hover:text-white"
+                    className="mt-5 flex w-full items-center justify-between rounded-lg border border-foreground/5 bg-foreground/[0.02] px-4 py-2.5 text-sm text-muted-foreground transition-all hover:border-violet-500/20 hover:bg-foreground/[0.04] hover:text-foreground"
                   >
                     Explore Providers
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
@@ -99,7 +99,7 @@ export default function ResultsPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-[#06060a]">
+        <div className="flex min-h-screen items-center justify-center bg-background">
           <div className="flex items-center gap-2 text-muted-foreground">
             <Search className="h-5 w-5 animate-spin" />
             <span className="text-sm">Loading results...</span>

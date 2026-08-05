@@ -30,7 +30,7 @@ export function HowItWorks() {
       <div className="mx-auto max-w-7xl px-6">
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-sm font-medium text-violet-400">How It Works</p>
-          <h2 className="mt-3 text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+          <h2 className="mt-3 text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
             From idea to stack in <span className="gradient-text">three steps</span>
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
@@ -46,9 +46,9 @@ export function HowItWorks() {
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/20 to-blue-500/20 ring-1 ring-violet-500/20">
                     <step.icon className="h-6 w-6 text-violet-300" />
                   </div>
-                  <span className="text-4xl font-bold text-white/10">{step.number}</span>
+                  <span className="text-4xl font-bold text-foreground/10">{step.number}</span>
                 </div>
-                <h3 className="mt-6 text-xl font-semibold text-white">{step.title}</h3>
+                <h3 className="mt-6 text-xl font-semibold text-foreground">{step.title}</h3>
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{step.description}</p>
               </div>
               {i < steps.length - 1 && (

@@ -75,7 +75,7 @@ export function Features() {
       <div className="mx-auto max-w-7xl px-6">
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-sm font-medium text-violet-400">Features</p>
-          <h2 className="mt-3 text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+          <h2 className="mt-3 text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
             Everything you need to <span className="gradient-text">build smarter</span>
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
@@ -90,11 +90,11 @@ export function Features() {
               className="glass glass-hover group rounded-2xl p-6"
             >
               <div
-                className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${feature.gradient} ring-1 ring-white/10 transition-transform group-hover:scale-110`}
+                className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${feature.gradient} ring-1 ring-foreground/10 transition-transform group-hover:scale-110`}
               >
                 <feature.icon className={`h-6 w-6 ${feature.iconColor}`} />
               </div>
-              <h3 className="mt-5 text-base font-semibold text-white">{feature.title}</h3>
+              <h3 className="mt-5 text-base font-semibold text-foreground">{feature.title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                 {feature.description}
               </p>

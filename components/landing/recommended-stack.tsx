@@ -18,7 +18,7 @@ export function RecommendedStack() {
             <Layers className="h-5 w-5 text-violet-300" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-white">Recommended Stack</h3>
+            <h3 className="text-sm font-semibold text-foreground">Recommended Stack</h3>
             <p className="text-xs text-muted-foreground">AI-curated for your project</p>
           </div>
         </div>
@@ -30,14 +30,14 @@ export function RecommendedStack() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 + i * 0.06 }}
-              className="group flex items-center justify-between rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2.5 transition-colors hover:border-violet-500/20 hover:bg-white/[0.04]"
+              className="group flex items-center justify-between rounded-lg border border-foreground/5 bg-foreground/[0.02] px-3 py-2.5 transition-colors hover:border-violet-500/20 hover:bg-foreground/[0.04]"
             >
               <div className="flex items-center gap-2.5">
                 <cat.icon className={`h-4 w-4 ${cat.iconColor}`} />
                 <span className="text-xs text-muted-foreground">{cat.name}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-medium text-white">{cat.recommended}</span>
+                <span className="text-xs font-medium text-foreground">{cat.recommended}</span>
                 <div className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500/15">
                   <Check className="h-2.5 w-2.5 text-emerald-400" />
                 </div>

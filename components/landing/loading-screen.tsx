@@ -40,7 +40,7 @@ export function LoadingScreen({ query }: { query: string }) {
   }, [query, router]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#06060a]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
       <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-600/15 blur-[120px]" />
 
       <div className="w-full max-w-md px-6">
@@ -58,7 +58,7 @@ export function LoadingScreen({ query }: { query: string }) {
             />
             <Sparkles className="relative h-8 w-8 text-white" />
           </div>
-          <h2 className="text-xl font-semibold text-white">Analyzing your project</h2>
+          <h2 className="text-xl font-semibold text-foreground">Analyzing your project</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             {query ? `"${query}"` : 'Your idea'}
           </p>
@@ -90,15 +90,15 @@ export function LoadingScreen({ query }: { query: string }) {
                   ) : isActive ? (
                     <Loader2 className="h-5 w-5 animate-spin text-violet-400" />
                   ) : (
-                    <div className="h-2 w-2 rounded-full bg-white/15" />
+                    <div className="h-2 w-2 rounded-full bg-foreground/15" />
                   )}
                 </div>
                 <span
                   className={`text-sm transition-colors duration-300 ${
                     isCompleted
-                      ? 'text-white'
+                      ? 'text-foreground'
                       : isActive
-                        ? 'text-white'
+                        ? 'text-foreground'
                         : isPending
                           ? 'text-muted-foreground/50'
                           : 'text-muted-foreground'
@@ -111,7 +111,7 @@ export function LoadingScreen({ query }: { query: string }) {
           })}
         </div>
 
-        <div className="mt-8 h-1 w-full overflow-hidden rounded-full bg-white/5">
+        <div className="mt-8 h-1 w-full overflow-hidden rounded-full bg-foreground/5">
           <motion.div
             initial={{ width: '0%' }}
             animate={{ width: '100%' }}

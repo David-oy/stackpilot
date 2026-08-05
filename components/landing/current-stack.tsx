@@ -22,7 +22,7 @@ export function CurrentStack() {
             <Layers className="h-5 w-5 text-violet-300" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-white">My Current Stack</h3>
+            <h3 className="text-sm font-semibold text-foreground">My Current Stack</h3>
             <p className="text-xs text-muted-foreground">Build as you go</p>
           </div>
         </div>
@@ -30,9 +30,9 @@ export function CurrentStack() {
         <div className="mt-5">
           <div className="flex items-center justify-between text-xs">
             <span className="text-muted-foreground">Progress</span>
-            <span className="font-medium text-white">{completedCount}/{totalCount} Categories</span>
+            <span className="font-medium text-foreground">{completedCount}/{totalCount} Categories</span>
           </div>
-          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/5">
+          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-foreground/5">
             <motion.div
               animate={{ width: `${progress}%` }}
               transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -53,7 +53,7 @@ export function CurrentStack() {
                 className={`group flex items-center justify-between rounded-lg border px-3 py-2.5 transition-colors ${
                   entry
                     ? 'border-violet-500/20 bg-violet-500/[0.04]'
-                    : 'border-white/5 bg-white/[0.02]'
+                    : 'border-foreground/5 bg-foreground/[0.02]'
                 }`}
               >
                 <div className="flex items-center gap-2.5">
@@ -70,10 +70,10 @@ export function CurrentStack() {
                         exit={{ opacity: 0, scale: 0.8 }}
                         className="flex items-center gap-1.5"
                       >
-                        <span className="text-xs font-medium text-white">{entry.providerName}</span>
+                        <span className="text-xs font-medium text-foreground">{entry.providerName}</span>
                         <button
                           onClick={() => removeFromStack(cat.id)}
-                          className="flex h-4 w-4 items-center justify-center rounded-full bg-white/5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-white"
+                          className="flex h-4 w-4 items-center justify-center rounded-full bg-foreground/5 text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground"
                           aria-label="Remove from stack"
                         >
                           <X className="h-2.5 w-2.5" />

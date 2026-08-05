@@ -14,7 +14,7 @@ export function CTA() {
             <span>Start building for free</span>
           </div>
 
-          <h2 className="mt-6 text-balance text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+          <h2 className="mt-6 text-balance text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
             Start Planning Your <span className="gradient-text">Next Project</span>
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
@@ -26,7 +26,7 @@ export function CTA() {
               Get Started
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-            <Button variant="outline" className="h-12 border-white/10 bg-transparent px-8 text-base text-white hover:bg-white/5">
+            <Button variant="outline" className="h-12 border-foreground/10 bg-transparent px-8 text-base text-foreground hover:bg-foreground/5">
               View Demo
             </Button>
           </div>

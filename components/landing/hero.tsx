@@ -50,7 +50,7 @@ export function Hero() {
           <span>AI-powered tech stack discovery</span>
         </div>
 
-        <h1 className="animate-fade-up text-balance text-5xl font-semibold tracking-tight text-white sm:text-6xl md:text-7xl" style={{ animationDelay: '0.05s' }}>
+        <h1 className="animate-fade-up text-balance text-5xl font-semibold tracking-tight text-foreground sm:text-6xl md:text-7xl" style={{ animationDelay: '0.05s' }}>
           What do you want to <span className="gradient-text">build?</span>
         </h1>
 
@@ -74,7 +74,7 @@ export function Hero() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="I want to build YouTube..."
-                className="w-full bg-transparent text-base text-white placeholder:text-muted-foreground focus:outline-none"
+                className="w-full bg-transparent text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
               />
               <button
                 type="submit"
@@ -97,7 +97,7 @@ export function Hero() {
                   setQuery(searchQuery);
                   handleSearch(searchQuery);
                 }}
-                className="rounded-full glass glass-hover px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:text-white"
+                className="rounded-full glass glass-hover px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
               >
                 {item}
               </button>

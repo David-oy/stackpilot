@@ -40,7 +40,7 @@ function ProviderCard({ provider, categoryId, index }: { provider: Provider; cat
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-lg font-semibold text-white">{provider.name}</h3>
+            <h3 className="text-lg font-semibold text-foreground">{provider.name}</h3>
             {provider.popular && (
               <span className="flex items-center gap-1 rounded-full bg-violet-500/15 px-2 py-0.5 text-[10px] font-medium text-violet-300 ring-1 ring-violet-500/20">
                 <span className="h-1 w-1 rounded-full bg-violet-400" />
@@ -59,14 +59,14 @@ function ProviderCard({ provider, categoryId, index }: { provider: Provider; cat
 
       <div className="mt-4 flex flex-wrap gap-1.5">
         {provider.tags.map((tag) => (
-          <span key={tag} className="rounded-md border border-white/5 bg-white/[0.03] px-2 py-1 text-[11px] text-muted-foreground">
+          <span key={tag} className="rounded-md border border-foreground/5 bg-foreground/[0.03] px-2 py-1 text-[11px] text-muted-foreground">
             {tag}
           </span>
         ))}
       </div>
 
       <div className="mt-5 flex gap-2">
-        <button className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-white/5 bg-white/[0.02] py-2.5 text-sm text-muted-foreground transition-all hover:border-violet-500/20 hover:bg-white/[0.04] hover:text-white">
+        <button className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-foreground/5 bg-foreground/[0.02] py-2.5 text-sm text-muted-foreground transition-all hover:border-violet-500/20 hover:bg-foreground/[0.04] hover:text-foreground">
           <Info className="h-4 w-4" />
           View Details
         </button>
@@ -136,18 +136,18 @@ function CategoryContent() {
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
           <Link
             href={`/results?q=${encodeURIComponent('your project')}`}
-            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-white"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to categories
           </Link>
 
           <div className="mt-6 flex items-center gap-4">
-            <div className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${category.gradient} ring-1 ring-white/10`}>
+            <div className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${category.gradient} ring-1 ring-foreground/10`}>
               <category.icon className={`h-7 w-7 ${category.iconColor}`} />
             </div>
             <div>
-              <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+              <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
                 {category.name} Providers
               </h1>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -172,7 +172,7 @@ function CategoryContent() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search providers..."
-                  className="w-full rounded-xl glass py-3 pl-11 pr-4 text-sm text-white placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-violet-500/30"
+                  className="w-full rounded-xl glass py-3 pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-violet-500/30"
                 />
               </div>
 
@@ -190,7 +190,7 @@ function CategoryContent() {
                       className={`rounded-full px-3 py-1.5 text-xs transition-all ${
                         active
                           ? 'bg-gradient-to-r from-violet-500 to-blue-500 text-white'
-                          : 'glass text-muted-foreground hover:text-white'
+                          : 'glass text-muted-foreground hover:text-foreground'
                       }`}
                     >
                       {opt.label}
@@ -238,7 +238,7 @@ export default function CategoryPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-[#06060a]">
+        <div className="flex min-h-screen items-center justify-center bg-background">
           <div className="flex items-center gap-2 text-muted-foreground">
             <Search className="h-5 w-5 animate-spin" />
             <span className="text-sm">Loading providers...</span>
