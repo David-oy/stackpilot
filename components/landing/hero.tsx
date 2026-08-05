@@ -22,12 +22,19 @@ export function Hero() {
   const [loadingQuery, setLoadingQuery] = useState('');
 
   const handleSearch = (q: string) => {
-    const clean = q.trim().replace(/^I want to build\s*/i, '').replace(/\.{2,}$/, '').trim();
+    const clean = q.trim();
     if (!clean) return;
+
     setLoadingQuery(clean);
     setLoading(true);
+
+    // Play the loading animation for 1.5 seconds before navigating
+    setTimeout(() => {
+      router.push(`/results?q=${encodeURIComponent(clean)}`);
+    }, 1500);
   };
 
+  // Render the LoadingScreen while loading is true
   if (loading) {
     return <LoadingScreen query={loadingQuery} />;
   }
@@ -84,9 +91,11 @@ export function Hero() {
             {popularSearches.map((item) => (
               <button
                 key={item}
+                type="button"
                 onClick={() => {
-                  setQuery(`I want to build ${item}...`);
-                  handleSearch(item);
+                  const searchQuery = `I want to build ${item}`;
+                  setQuery(searchQuery);
+                  handleSearch(searchQuery);
                 }}
                 className="rounded-full glass glass-hover px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:text-white"
               >
