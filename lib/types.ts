@@ -1,8 +1,12 @@
 export type AnalysisProvider = {
   id: string;
+  rank?: number;
   name: string;
   description: string;
   reason?: string;
+  bestUseCases?: string[];
+  website?: string;
+  documentation?: string;
 };
 
 export type AnalysisCategory = {

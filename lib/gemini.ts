@@ -19,9 +19,13 @@ Return ONLY valid JSON. Do not wrap it in markdown, code fences, or add any comm
       "providers": [
         {
           "id": "lowercase kebab-case slug",
+          "rank": 1,
           "name": "Provider name",
-          "description": "What this provider does",
-          "reason": "Why this provider fits this project"
+          "description": "Short description of what this provider does",
+          "reason": "Why this provider is recommended for this project",
+          "bestUseCases": ["use case 1", "use case 2", "use case 3"],
+          "website": "https://official-website.com",
+          "documentation": "https://docs-url.com"
         }
       ]
     }
@@ -30,16 +34,41 @@ Return ONLY valid JSON. Do not wrap it in markdown, code fences, or add any comm
 
 Rules:
 - Always include between 3 and 7 categories.
-- Include 1 to 4 providers per category. Use real, specific, well-known providers.
 - Only include categories that are genuinely required by the described project.
+- For every technology category, return ONLY the TOP 6 providers, ranked from best to least recommended. Do not recommend duplicate providers; if multiple providers are very similar, return only the best one.
+- Choose providers based on: popularity, reliability, production readiness, active maintenance, community adoption, quality of documentation, free tier (when available), ease of integration, security, scalability, and performance.
+- Return providers in this order:
+  rank 1 = best overall recommendation,
+  rank 2 = best alternative,
+  rank 3 = excellent choice,
+  rank 4 = good production option,
+  rank 5 = specialized option,
+  rank 6 = beginner-friendly or niche option.
+- For every provider, return: rank, name, short description, why it is recommended, best use cases, official website, and documentation URL.
+- If the official website or documentation URL is unknown, return an empty string. Never invent URLs.
 - When a category matches one of the known ids, use exactly that id: authentication, database, storage, video-apis, cdn, email, notifications, analytics, hosting. For any other category, create your own concise kebab-case id.
 - complexity should reflect the overall build effort: "Low", "Medium", or "High".`;
 
 const providerSchema = z.object({
   id: z.string().trim().min(1),
+  rank: z.number().int().min(1).max(6).optional(),
   name: z.string().trim().min(1),
   description: z.string().trim().min(1),
   reason: z.string().trim().min(1).optional(),
+  bestUseCases: z
+    .union([z.array(z.string().trim().min(1)), z.string().trim().min(1)])
+    .transform((value) =>
+      Array.isArray(value)
+        ? value
+        : value
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean),
+    )
+    .optional()
+    .default([]),
+  website: z.string().trim().optional().default(''),
+  documentation: z.string().trim().optional().default(''),
 });
 
 const categorySchema = z.object({
