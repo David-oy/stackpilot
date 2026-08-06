@@ -6,8 +6,9 @@ import { Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Search, Check, Plus, Info, SlidersHorizontal } from 'lucide-react';
 import Link from 'next/link';
-import { categories } from '@/lib/categories';
+import { getCategoryMeta } from '@/lib/categories';
 import { providersByCategory, type Provider } from '@/lib/providers';
+import type { AnalysisProvider } from '@/lib/types';
 import { CurrentStack } from '@/components/landing/current-stack';
 import { useStack } from '@/lib/stack-context';
 import { useAnalysisContext } from '@/lib/analysis-context';
@@ -21,6 +22,30 @@ const filterOptions: { key: FilterKey; label: string }[] = [
   { key: 'beginnerFriendly', label: 'Beginner Friendly' },
   { key: 'popular', label: 'Most Popular' },
 ];
+
+const aiProviderGradients = [
+  'from-violet-500 to-purple-500',
+  'from-blue-500 to-cyan-500',
+  'from-emerald-500 to-teal-500',
+  'from-amber-500 to-orange-500',
+  'from-pink-500 to-rose-500',
+];
+
+function toProvider(ap: AnalysisProvider, index: number): Provider {
+  return {
+    id: ap.id,
+    name: ap.name,
+    description: ap.description || ap.reason || '',
+    tags: [],
+    freeTier: false,
+    openSource: false,
+    paid: false,
+    beginnerFriendly: false,
+    popular: false,
+    logoColor: aiProviderGradients[index % aiProviderGradients.length],
+    logoText: ap.name.charAt(0).toUpperCase(),
+  };
+}
 
 function ProviderCard({ provider, categoryId, index }: { provider: Provider; categoryId: string; index: number }) {
   const { stack, addToStack, removeFromStack } = useStack();
@@ -100,10 +125,22 @@ function ProviderCard({ provider, categoryId, index }: { provider: Provider; cat
 
 function CategoryContent() {
   const searchParams = useSearchParams();
-  const categoryId = searchParams.get('id') || 'database';
-  const category = categories.find((c) => c.id === categoryId) || categories[1];
-  const providers = providersByCategory[categoryId] || [];
-  const { query: analysisQuery } = useAnalysisContext();
+  const categoryId = searchParams.get('id') ?? '';
+  const categoryName = searchParams.get('name');
+  const category = getCategoryMeta(categoryId);
+  const displayName = categoryName || category.name;
+  const { query: analysisQuery, analysis } = useAnalysisContext();
+  const aiCategory = analysis?.categories.find((c) => c.id === categoryId);
+  const staticProviders = useMemo(
+    () => (categoryId ? providersByCategory[categoryId] ?? [] : []),
+    [categoryId],
+  );
+  const aiProviders = useMemo(
+    () => (aiCategory?.providers ?? []).map((p, i) => toProvider(p, i)),
+    [aiCategory],
+  );
+  const providers = staticProviders.length > 0 ? staticProviders : aiProviders;
+  const hasProviders = providers.length > 0;
 
   const [search, setSearch] = useState('');
   const [activeFilters, setActiveFilters] = useState<Set<FilterKey>>(new Set());
@@ -150,7 +187,7 @@ function CategoryContent() {
             </div>
             <div>
               <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-                {category.name} Providers
+                {displayName} Providers
               </h1>
               <p className="mt-1 text-sm text-muted-foreground">
                 {providers.length} providers available for your project
@@ -210,20 +247,27 @@ function CategoryContent() {
               </AnimatePresence>
             </motion.div>
 
-            {filtered.length === 0 && (
+            {!hasProviders ? (
               <div className="flex flex-col items-center justify-center rounded-2xl glass py-16 text-center">
                 <Search className="h-8 w-8 text-muted-foreground/50" />
-                <p className="mt-3 text-sm text-muted-foreground">No providers match your filters.</p>
-                <button
-                  onClick={() => {
-                    setActiveFilters(new Set());
-                    setSearch('');
-                  }}
-                  className="mt-4 text-sm text-violet-400 hover:text-violet-300"
-                >
-                  Clear all filters
-                </button>
+                <p className="mt-3 text-sm text-muted-foreground">No providers found.</p>
               </div>
+            ) : (
+              filtered.length === 0 && (
+                <div className="flex flex-col items-center justify-center rounded-2xl glass py-16 text-center">
+                  <Search className="h-8 w-8 text-muted-foreground/50" />
+                  <p className="mt-3 text-sm text-muted-foreground">No providers match your filters.</p>
+                  <button
+                    onClick={() => {
+                      setActiveFilters(new Set());
+                      setSearch('');
+                    }}
+                    className="mt-4 text-sm text-violet-400 hover:text-violet-300"
+                  >
+                    Clear all filters
+                  </button>
+                </div>
+              )
             )}
           </div>
 

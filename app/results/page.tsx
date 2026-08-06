@@ -136,6 +136,7 @@ function ResultsContent() {
             <div className="grid gap-5 sm:grid-cols-2">
               {analysis.categories.map((cat, i) => {
                 const meta = getCategoryMeta(cat.id);
+                const categoryHref = `/category?id=${cat.id}&name=${encodeURIComponent(cat.name)}`;
                 return (
                   <motion.div
                     key={cat.id}
@@ -173,7 +174,7 @@ function ResultsContent() {
                     </div>
 
                     <a
-                      href={`/category?id=${cat.id}`}
+                      href={categoryHref}
                       className="mt-5 flex w-full items-center justify-between rounded-lg border border-foreground/5 bg-foreground/[0.02] px-4 py-2.5 text-sm text-muted-foreground transition-all hover:border-violet-500/20 hover:bg-foreground/[0.04] hover:text-foreground"
                     >
                       Explore Providers
