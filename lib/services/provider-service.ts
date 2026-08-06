@@ -1,5 +1,6 @@
 import type { AnalysisProvider } from '@/lib/types';
-import { analysisCache, categoryCache, normalizeCacheKey, providerCache, searchCache } from '@/lib/db/cache';
+import { categoryCache, normalizeCacheKey, providerCache, searchCache } from '@/lib/db/cache';
+import { getPersistedAnalysis, setPersistedAnalysis } from '@/lib/db/analysis-cache-db';
 import { fromAnalysisProvider, providerToAnalysis } from '@/lib/db/mappers';
 import type {
   CategoryRecord,
@@ -129,11 +130,10 @@ export const providerService = {
   },
 
   async getAnalysis(cacheKey: string): Promise<unknown | null> {
-    const cached = analysisCache.get(cacheKey);
-    return cached ?? null;
+    return getPersistedAnalysis(cacheKey);
   },
 
-  async setAnalysis(cacheKey: string, analysis: unknown): Promise<void> {
-    analysisCache.set(cacheKey, analysis);
+  async setAnalysis(cacheKey: string, analysis: unknown, description?: string): Promise<void> {
+    await setPersistedAnalysis(cacheKey, description ?? cacheKey, analysis);
   },
 };

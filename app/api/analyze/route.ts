@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
       integrations: gemini.integrations,
     };
 
-    await providerService.setAnalysis(cacheKey, analysis);
+    await providerService.setAnalysis(cacheKey, analysis, parsed.data.description);
 
     return NextResponse.json(analysis);
   } catch (error) {
