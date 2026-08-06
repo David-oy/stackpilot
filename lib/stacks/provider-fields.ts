@@ -68,7 +68,11 @@ export function buildProviderInput(provider: ProviderLike): StackProviderInput {
       reason: buildProviderReason(ai),
       website: ai.website,
       documentation: ai.documentation,
-      tags: [],
+      pricingModel: ai.pricingModel,
+      popularityScore: ai.popularityScore,
+      freeTier: ai.freeTier,
+      openSource: ai.openSource,
+      tags: ai.tags ?? [],
       features: ai.bestUseCases,
     };
   }

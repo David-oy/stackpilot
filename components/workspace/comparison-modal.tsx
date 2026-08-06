@@ -7,6 +7,7 @@ import { useStack } from '@/lib/stack-context';
 import type { StackProviderItem } from '@/lib/stacks/types';
 import { buildComparison } from '@/lib/stacks/comparison';
 import { ProviderLogo } from './logo';
+import { ProviderCostHover } from './cost-hover';
 import {
   Dialog,
   DialogContent,
@@ -153,6 +154,12 @@ export function ComparisonModal({
                                 Link
                               </a>
                             )
+                          ) : row.label === 'Est. Cost' ? (
+                            <ProviderCostHover provider={selectedProviders[i]}>
+                              <span className="cursor-help underline decoration-dotted decoration-foreground/30 underline-offset-2">
+                                {value}
+                              </span>
+                            </ProviderCostHover>
                           ) : (
                             value
                           )}

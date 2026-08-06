@@ -22,7 +22,6 @@ import {
   toJsonExport,
   toMarkdown,
 } from '@/lib/stacks/export';
-import { downloadPdf } from '@/lib/stacks/export-pdf';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -87,7 +86,8 @@ export function ExportMenu({
     toast.success('Stack exported as Markdown');
   };
 
-  const downloadPdfFile = () => {
+  const downloadPdfFile = async () => {
+    const { downloadPdf } = await import('@/lib/stacks/export-pdf');
     downloadPdf(stack, health, `${slugifyFileName(stack.name)}.pdf`);
     toast.success('Stack exported as PDF');
   };

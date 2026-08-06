@@ -12,14 +12,20 @@ import {
   Loader2,
   RefreshCw,
   Type,
+  Plug,
+  Plus,
+  Check,
+  ExternalLink,
 } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import { getCategoryMeta } from '@/lib/categories';
 import { RecommendedStack } from '@/components/landing/recommended-stack';
 import { CurrentStack } from '@/components/landing/current-stack';
 import { useStack } from '@/lib/stack-context';
 import { useAnalysis } from '@/hooks/use-analysis';
-import type { Complexity } from '@/lib/types';
+import { buildProviderInput } from '@/lib/stacks/provider-fields';
+import type { AnalysisProvider, Complexity } from '@/lib/types';
 
 const complexityStyles: Record<Complexity, string> = {
   Low: 'bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/20',
@@ -75,7 +81,7 @@ function ResultsContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || 'your project';
   const { data: analysis, isLoading, error, retry } = useAnalysis(query);
-  const { activeStack, hydrated } = useStack();
+  const { activeStack, hydrated, addProvider } = useStack();
 
   if (isLoading) {
     return <LoadingState />;
@@ -84,6 +90,13 @@ function ResultsContent() {
   if (error || !analysis) {
     return <ErrorState message={error ?? 'No analysis available for this project.'} onRetry={retry} />;
   }
+
+  const integrations = analysis.integrations ?? [];
+
+  const handleAddIntegration = (provider: AnalysisProvider, categoryId: string, categoryName: string) => {
+    addProvider(`integration-${categoryId}`, categoryName, buildProviderInput(provider), query);
+    toast.success(`${provider.name} added to your stack`);
+  };
 
   return (
     <main className="relative min-h-screen overflow-x-hidden pt-20">
@@ -130,7 +143,11 @@ function ResultsContent() {
                   {analysis.summary}
                 </p>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  We identified {analysis.categories.length} technology categories for your project.
+                  We identified {analysis.categories.length} technology categories
+                  {integrations.length > 0
+                    ? ` and ${integrations.length} project integrations`
+                    : ''}{' '}
+                  for your project.
                 </p>
               </div>
             </div>
@@ -190,6 +207,131 @@ function ResultsContent() {
                 );
               })}
             </div>
+
+            {integrations.length > 0 && (
+              <section className="mt-10">
+                <div className="mb-5">
+                  <h2 className="flex items-center gap-2 text-xl font-semibold text-foreground">
+                    <Plug className="h-5 w-5 text-violet-400" />
+                    Project Integrations
+                  </h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    External APIs, SDKs, services, and datasets your project will realistically
+                    rely on.
+                  </p>
+                </div>
+
+                <div className="grid gap-5 lg:grid-cols-2">
+                  {integrations.map((cat, i) => (
+                    <motion.article
+                      key={cat.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: i * 0.06 }}
+                      className="glass rounded-2xl p-6"
+                    >
+                      <div className="flex items-start justify-between">
+                        <h3 className="text-base font-semibold text-foreground">{cat.name}</h3>
+                        <span className="rounded-full border border-foreground/5 bg-foreground/[0.03] px-2.5 py-1 text-xs text-muted-foreground">
+                          {cat.providers.length} providers
+                        </span>
+                      </div>
+                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                        {cat.description}
+                      </p>
+
+                      <div className="mt-4 space-y-2">
+                        {cat.providers.map((provider) => {
+                          const inStack = activeStack?.categories
+                            .find((c) => c.categoryId === `integration-${cat.id}`)
+                            ?.providers.some((p) => p.providerId === provider.id);
+                          return (
+                            <div
+                              key={provider.id}
+                              className="rounded-lg border border-foreground/5 bg-foreground/[0.02] p-3"
+                            >
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                  <div className="flex flex-wrap items-center gap-1.5">
+                                    <span className="text-sm font-medium text-foreground">
+                                      {provider.name}
+                                    </span>
+                                    {provider.freeTier && (
+                                      <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] text-emerald-300 ring-1 ring-emerald-500/20">
+                                        Free tier
+                                      </span>
+                                    )}
+                                    {provider.openSource && (
+                                      <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] text-blue-300 ring-1 ring-blue-500/20">
+                                        Open source
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                                    {provider.description}
+                                  </p>
+                                  <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+                                    {provider.pricingModel && (
+                                      <span>{provider.pricingModel}</span>
+                                    )}
+                                    {typeof provider.popularityScore === 'number' && (
+                                      <span>Popularity {provider.popularityScore}/100</span>
+                                    )}
+                                  </div>
+                                  {provider.tags && provider.tags.length > 0 && (
+                                    <div className="mt-1.5 flex flex-wrap gap-1.5">
+                                      {provider.tags.map((tag) => (
+                                        <span
+                                          key={tag}
+                                          className="rounded-md border border-foreground/5 bg-foreground/[0.03] px-2 py-0.5 text-[10px] text-muted-foreground"
+                                        >
+                                          {tag}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex shrink-0 flex-col items-end gap-2">
+                                  {provider.website && (
+                                    <a
+                                      href={provider.website}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      title={provider.website}
+                                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-foreground/5 bg-foreground/[0.03] text-muted-foreground transition-colors hover:text-foreground"
+                                    >
+                                      <ExternalLink className="h-3.5 w-3.5" />
+                                    </a>
+                                  )}
+                                  <button
+                                    onClick={() =>
+                                      handleAddIntegration(provider, cat.id, cat.name)
+                                    }
+                                    disabled={inStack}
+                                    className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                                      inStack
+                                        ? 'cursor-default bg-emerald-500/10 text-emerald-300 ring-1 ring-emerald-500/20'
+                                        : 'bg-gradient-to-r from-violet-500 to-blue-500 text-white hover:opacity-90'
+                                    }`}
+                                  >
+                                    {inStack ? (
+                                      <Check className="h-3.5 w-3.5" />
+                                    ) : (
+                                      <Plus className="h-3.5 w-3.5" />
+                                    )}
+                                    {inStack ? 'Added' : 'Add'}
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </motion.article>
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
 
           <div className="space-y-8">

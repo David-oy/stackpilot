@@ -118,6 +118,7 @@ export async function POST(request: NextRequest) {
       summary: gemini.summary,
       complexity: gemini.complexity,
       categories,
+      integrations: gemini.integrations,
     };
 
     await providerService.setAnalysis(cacheKey, analysis);

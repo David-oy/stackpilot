@@ -28,6 +28,11 @@ export function providerToAnalysis(
     bestUseCases,
     website: provider.officialWebsite || undefined,
     documentation: provider.documentation || undefined,
+    freeTier: provider.freeTier || undefined,
+    pricingModel: provider.pricingModel || undefined,
+    popularityScore: provider.popularityScore || undefined,
+    openSource: provider.openSource || undefined,
+    tags: provider.tags.length ? provider.tags : undefined,
   };
 }
 
@@ -37,6 +42,17 @@ export function fromAnalysisProvider(
 ): ProviderInput {
   const slug = provider.id && provider.id.trim() ? provider.id.trim() : slugify(provider.name);
   const now = new Date().toISOString();
+  const normalizedPricing = (
+    provider.pricingModel ? provider.pricingModel.toLowerCase() : 'freemium'
+  ) as PricingModel;
+  const validPricingModels: PricingModel[] = [
+    'free',
+    'freemium',
+    'usage-based',
+    'subscription',
+    'per-seat',
+    'open-source',
+  ];
   return {
     id: slug,
     categoryId,
@@ -48,16 +64,19 @@ export function fromAnalysisProvider(
     officialWebsite: provider.website ?? '',
     documentation: provider.documentation ?? '',
     github: null,
-    pricingModel: 'freemium' as PricingModel,
-    freeTier: false,
-    openSource: false,
-    popularityScore: Math.max(1, 100 - (provider.rank ?? 6) * 10),
+    pricingModel: validPricingModels.includes(normalizedPricing)
+      ? normalizedPricing
+      : 'freemium',
+    freeTier: provider.freeTier ?? false,
+    openSource: provider.openSource ?? false,
+    popularityScore:
+      provider.popularityScore ?? Math.max(1, 100 - (provider.rank ?? 6) * 10),
     featured: (provider.rank ?? 6) === 1,
     status: 'active',
     createdAt: now,
     updatedAt: now,
     features: provider.bestUseCases ?? [],
-    tags: [],
+    tags: provider.tags ?? [],
     alternatives: [],
   };
 }

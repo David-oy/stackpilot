@@ -10,41 +10,76 @@ export type GeminiCategory = {
   providers: AnalysisProvider[];
 };
 
+export type GeminiIntegrationCategory = {
+  id: string;
+  name: string;
+  description: string;
+  providers: AnalysisProvider[];
+};
+
 export type GeminiAnalysis = {
   projectType: string;
   summary: string;
   complexity: Complexity;
   categories: GeminiCategory[];
+  integrations: GeminiIntegrationCategory[];
 };
 
+function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60);
+}
+
 function buildSystemPrompt(knownCategorySlugs: string[]): string {
-  return `You are StackPilot, an expert software architect and developer. Your job is to analyze a software project idea and return the technology categories required to build it.
+  return `You are StackPilot, an expert software architect and developer. Analyze a software project idea and return the technology stack required to build it, PLUS the project-specific external integrations (APIs, SDKs, services, datasets, and developer tools) the project will rely on.
+
+STEP 1 — UNDERSTAND THE PROJECT DOMAIN
+Identify the domain the project belongs to, e.g.: Game Deals, AI Chatbot, Food Delivery, Video Streaming, E-commerce, Social Network, Finance, Healthcare, Education, Music, Maps, Travel, Real Estate, IoT, Cybersecurity, DevTools, Productivity, Blockchain, etc.
+
+STEP 2 — DETECT ALL EXTERNAL INTEGRATIONS
+Determine every external API, SDK, official platform API, public dataset, search API, AI provider, payment provider, authentication provider, analytics, notifications, email provider, maps, cloud service, CDN, search engine, web scraping tool, monitoring, logging, media service, video API, OCR API, translation API, speech API, image API, gaming API, weather API, finance API, sports API, news API, government API, and open data API the project would realistically integrate with. Only include categories genuinely relevant to the project's domain.
 
 Return ONLY valid JSON. Do not wrap it in markdown, code fences, or add any commentary. The JSON must match exactly this schema:
 
 {
-  "projectType": "short label for the kind of app, e.g. Video Streaming Platform",
+  "projectType": "short label for the kind of app, e.g. Game Deals Platform",
   "summary": "2-3 sentence overview of what building this project requires",
   "complexity": "Low" | "Medium" | "High",
-  "categories": [
+  "technologyCategories": [
     {
       "id": "lowercase kebab-case slug",
       "name": "Human readable category name",
       "description": "Why this technology category is needed for this project",
       "providers": []
     }
+  ],
+  "projectIntegrations": [
+    {
+      "category": "Game APIs",
+      "description": "Why these APIs matter for this project",
+      "providers": []
+    }
   ]
 }
 
-Rules:
-- Always include between 3 and 7 categories.
-- Only include categories that are genuinely required by the described project.
+Rules for technologyCategories:
+- Always include between 3 and 7 core technology categories genuinely required to build the project (e.g. frontend, backend, database, authentication, hosting, caching, storage).
 - The following category ids are already curated in our database. When one matches, use exactly that id and return an EMPTY "providers" array for it: ${knownCategorySlugs.join(', ')}.
-- For any OTHER category (not in that list), return the top 6 providers with full details using this provider shape:
-  { "id": "lowercase kebab-case slug", "rank": 1, "name": "Provider name", "description": "Short description of what this provider does", "reason": "Why this provider is recommended", "bestUseCases": ["use case 1", "use case 2", "use case 3"], "website": "https://...", "documentation": "https://..." }
-- For providers, return ONLY the TOP 6, ranked best to least. Choose based on popularity, reliability, production readiness, maintenance, community adoption, documentation quality, free tier, integration ease, security, scalability, and performance.
-- For every provider include: rank, name, short description, why it is recommended, best use cases, official website, documentation URL. If a URL is unknown return an empty string. Never invent URLs.
-- complexity should reflect overall build effort: "Low", "Medium", or "High".`;
+- For any OTHER technology category, return the top 6 providers using this provider shape:
+  { "id": "lowercase kebab-case slug", "rank": 1, "name": "Provider name", "description": "Short description", "reason": "Why this provider is recommended", "bestUseCases": ["use case 1", "use case 2", "use case 3"], "website": "https://...", "documentation": "https://..." }
+- Choose providers based on popularity, reliability, production readiness, maintenance, community adoption, documentation quality, free tier, integration ease, security, scalability, and performance. Never invent URLs.
+
+Rules for projectIntegrations:
+- Return between 1 and 8 integration categories. Every category must be genuinely relevant to this project's domain — never return a generic list that would apply to any project.
+- For EVERY integration provider include ALL of these fields:
+  { "id": "lowercase kebab-case slug", "rank": 1, "name": "Provider name", "description": "Short description of what this API/service does", "reason": "Why this API/service fits this project", "website": "https://official-website.com", "documentation": "https://docs-url.com", "freeTier": true, "pricingModel": "Free" | "Freemium" | "Subscription" | "Usage-based" | "Per-seat" | "Paid", "popularityScore": 8, "openSource": false, "tags": ["tag1", "tag2"] }
+- popularityScore is an integer from 1 to 10, where 10 means the most widely used and adopted.
+- Return providers ranked best to least, up to 8 per category. Only recommend providers that actually exist. If a URL is unknown return an empty string. Never invent URLs.
+- Example: for a project about discounted games, the category "Game APIs" should include providers like CheapShark, Steam Web API, RAWG, IGDB, and IsThereAnyDeal.`;
 }
 
 const providerSchema = z.object({
@@ -67,6 +102,26 @@ const providerSchema = z.object({
     .default([]),
   website: z.string().trim().optional().default(''),
   documentation: z.string().trim().optional().default(''),
+  freeTier: z
+    .union([z.boolean(), z.string().trim()])
+    .transform((value) => (typeof value === 'boolean' ? value : value.toLowerCase() === 'true'))
+    .optional()
+    .default(false),
+  pricingModel: z.string().trim().optional().default(''),
+  popularityScore: z
+    .union([z.number().min(1).max(10), z.string().trim()])
+    .transform((value) => {
+      if (typeof value === 'number') return value;
+      const parsed = Number(value);
+      return Number.isFinite(parsed) && parsed >= 1 && parsed <= 10 ? parsed : undefined;
+    })
+    .optional(),
+  openSource: z
+    .union([z.boolean(), z.string().trim()])
+    .transform((value) => (typeof value === 'boolean' ? value : value.toLowerCase() === 'true'))
+    .optional()
+    .default(false),
+  tags: z.array(z.string().trim().min(1)).optional().default([]),
 });
 
 const geminiCategorySchema = z.object({
@@ -76,11 +131,20 @@ const geminiCategorySchema = z.object({
   providers: z.array(providerSchema).optional().default([]),
 });
 
+const geminiIntegrationCategorySchema = z.object({
+  category: z.string().trim().min(1).optional(),
+  name: z.string().trim().min(1).optional(),
+  description: z.string().trim().optional().default(''),
+  providers: z.array(providerSchema).min(1),
+});
+
 const analysisSchema = z.object({
   projectType: z.string().trim().min(1),
-  summary: z.string().trim().min(1),
+  summary: z.string().trim().min(1).optional().default(''),
   complexity: z.enum(['Low', 'Medium', 'High']),
-  categories: z.array(geminiCategorySchema).min(1),
+  technologyCategories: z.array(geminiCategorySchema).optional(),
+  categories: z.array(geminiCategorySchema).optional(),
+  projectIntegrations: z.array(geminiIntegrationCategorySchema).optional().default([]),
 });
 
 const fallbackSchema = z.object({
@@ -214,6 +278,26 @@ function toAnalysisProvider(p: z.infer<typeof providerSchema>): AnalysisProvider
     bestUseCases: p.bestUseCases,
     website: p.website || undefined,
     documentation: p.documentation || undefined,
+    freeTier: p.freeTier,
+    pricingModel: p.pricingModel || undefined,
+    popularityScore:
+      typeof p.popularityScore === 'number'
+        ? Math.min(100, Math.round(p.popularityScore * 10))
+        : undefined,
+    openSource: p.openSource,
+    tags: p.tags,
+  };
+}
+
+function toIntegrationCategory(
+  cat: z.infer<typeof geminiIntegrationCategorySchema>,
+): GeminiIntegrationCategory {
+  const name = cat.category ?? cat.name ?? '';
+  return {
+    id: slugify(name),
+    name,
+    description: cat.description,
+    providers: cat.providers.map(toAnalysisProvider),
   };
 }
 
@@ -231,16 +315,22 @@ export async function analyzeWithGemini(
     throw new AnalysisError('Gemini returned a response that did not match the expected schema.');
   }
 
+  const techCategories = result.data.technologyCategories ?? result.data.categories ?? [];
+  if (techCategories.length === 0) {
+    throw new AnalysisError('Gemini returned a response that did not match the expected schema.');
+  }
+
   return {
     projectType: result.data.projectType,
     summary: result.data.summary,
     complexity: result.data.complexity,
-    categories: result.data.categories.map((cat) => ({
+    categories: techCategories.map((cat) => ({
       id: cat.id,
       name: cat.name,
       description: cat.description,
       providers: cat.providers.map(toAnalysisProvider),
     })),
+    integrations: result.data.projectIntegrations.map(toIntegrationCategory),
   };
 }
 
@@ -308,5 +398,6 @@ export function toStackAnalysis(gemini: GeminiAnalysis): StackAnalysis {
       description: cat.description,
       providers: cat.providers,
     })),
+    integrations: gemini.integrations,
   };
 }

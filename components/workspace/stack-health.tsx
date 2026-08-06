@@ -12,9 +12,10 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { useStack } from '@/lib/stack-context';
-import { computeStackHealth, complexityDifficulty, formatCurrency } from '@/lib/stacks/health';
+import { computeCostBreakdown, computeStackHealth, complexityDifficulty, formatCurrency } from '@/lib/stacks/health';
 import { stackCategoryCount, stackProviderCount } from '@/lib/stacks/health';
 import { Progress } from '@/components/ui/progress';
+import { CostBreakdownHover } from './cost-hover';
 
 type Metric = {
   key: string;
@@ -37,6 +38,7 @@ export function StackHealth() {
   const health = activeStack ? computeStackHealth(activeStack) : null;
   if (!activeStack || !health) return null;
 
+  const costBreakdown = computeCostBreakdown(activeStack);
   const difficulty = complexityDifficulty(activeStack.sourceAnalysis?.complexity);
 
   const metrics: Metric[] = [
@@ -116,9 +118,11 @@ export function StackHealth() {
             <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
               <DollarSign className="h-3 w-3" /> Est. Monthly Cost
             </p>
-            <p className="mt-1 text-lg font-semibold text-foreground">
-              {formatCurrency(health.estimatedMonthlyCost)}
-            </p>
+            <CostBreakdownHover breakdown={costBreakdown}>
+              <p className="mt-1 inline-block cursor-help text-lg font-semibold text-foreground underline decoration-dotted decoration-foreground/30 underline-offset-4">
+                {formatCurrency(health.estimatedMonthlyCost)}
+              </p>
+            </CostBreakdownHover>
           </div>
         </div>
       </div>

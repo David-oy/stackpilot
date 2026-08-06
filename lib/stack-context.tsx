@@ -76,7 +76,7 @@ function blankStack(name: string, prompt: string, analysis: StackAnalysis | null
 }
 
 function stackFromAnalysis(prompt: string, analysis: StackAnalysis): UserStack {
-  const categories: StackCategory[] = analysis.categories.map((cat) => ({
+  const toCategory = (cat: StackAnalysis['categories'][number]): StackCategory => ({
     categoryId: cat.id,
     categoryName: cat.name,
     collapsed: false,
@@ -87,9 +87,21 @@ function stackFromAnalysis(prompt: string, analysis: StackAnalysis): UserStack {
       reason: p.reason,
       website: p.website,
       documentation: p.documentation,
+      pricingModel: p.pricingModel,
+      popularityScore: p.popularityScore,
+      freeTier: p.freeTier,
+      openSource: p.openSource,
+      tags: p.tags,
       features: p.bestUseCases,
     })),
-  }));
+  });
+  const categories: StackCategory[] = [
+    ...analysis.categories.map(toCategory),
+    ...(analysis.integrations ?? []).map((cat) => ({
+      ...toCategory(cat),
+      categoryId: `integration-${cat.id}`,
+    })),
+  ];
   return {
     id: generateId(),
     name: `Stack for "${prompt}"`.slice(0, 60),
@@ -385,7 +397,13 @@ export function StackProvider({
 
   const { completedCount, totalCount } = useMemo(() => {
     if (!activeStack) return { completedCount: 0, totalCount: 0 };
-    const recommended = analysis?.categories ?? activeStack.categories;
+    const recommended = [
+      ...(analysis?.categories ?? activeStack.categories),
+      ...(analysis?.integrations ?? []).map((cat) => ({
+        ...cat,
+        id: `integration-${cat.id}`,
+      })),
+    ];
     const total = recommended.length;
     const completed = recommended.filter((cat) => {
       const categoryId = 'categoryId' in cat ? cat.categoryId : cat.id;

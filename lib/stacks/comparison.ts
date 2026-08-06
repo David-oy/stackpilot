@@ -1,4 +1,5 @@
 import type { Comparison, ComparisonRow, StackProviderItem } from './types';
+import { providerCostLabel } from './health';
 
 export function pricingLabel(item: StackProviderItem): string {
   const model = item.pricingModel ? item.pricingModel.replace('-', ' ') : 'n/a';
@@ -47,6 +48,10 @@ export function buildComparison(providers: StackProviderItem[]): Comparison | nu
     {
       label: 'Free Tier',
       values: providers.map((p) => (p.freeTier ? 'Yes' : 'No')),
+    },
+    {
+      label: 'Est. Cost',
+      values: providers.map((p) => providerCostLabel(p)),
     },
     {
       label: 'Popularity',

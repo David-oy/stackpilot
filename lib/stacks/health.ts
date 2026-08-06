@@ -8,11 +8,75 @@ const MONTHLY_COST_BY_MODEL: Record<string, number> = {
   subscription: 30,
   'usage-based': 50,
   'per-seat': 15,
+  paid: 30,
 };
 
+function normalizePricingModel(model?: string): string {
+  if (!model) return '';
+  return model.trim().toLowerCase().replace(/\s+/g, '-');
+}
+
 export function pricingModelMonthlyCost(model?: string): number {
-  if (!model) return 0;
-  return MONTHLY_COST_BY_MODEL[model] ?? 0;
+  return MONTHLY_COST_BY_MODEL[normalizePricingModel(model)] ?? 0;
+}
+
+export function isProviderFree(p: { freeTier?: boolean; pricingModel?: string }): boolean {
+  const model = normalizePricingModel(p.pricingModel);
+  return !!p.freeTier || model === 'free' || model === 'open-source' || model === 'freemium';
+}
+
+export function providerPaidCost(p: { pricingModel?: string }): number {
+  return pricingModelMonthlyCost(p.pricingModel);
+}
+
+export function providerCostLabel(p: {
+  freeTier?: boolean;
+  pricingModel?: string;
+}): string {
+  const paid = providerPaidCost(p);
+  if (paid > 0) {
+    return isProviderFree(p)
+      ? `Free tier · ${formatCurrency(paid)}/mo if paid`
+      : `${formatCurrency(paid)}/mo`;
+  }
+  return 'Free';
+}
+
+export type CostProviderInfo = {
+  providerId: string;
+  providerName: string;
+  pricingModel?: string;
+  freeTier: boolean;
+  paidCost: number;
+};
+
+export type CostCategoryBreakdown = {
+  categoryId: string;
+  categoryName: string;
+  countedCost: number;
+  providers: CostProviderInfo[];
+};
+
+export function computeCostBreakdown(stack: UserStack): CostCategoryBreakdown[] {
+  const breakdown: CostCategoryBreakdown[] = [];
+  for (const entry of stack.categories) {
+    if (entry.providers.length === 0) continue;
+    const providers: CostProviderInfo[] = entry.providers.map((p) => ({
+      providerId: p.providerId,
+      providerName: p.name,
+      pricingModel: p.pricingModel,
+      freeTier: isProviderFree(p),
+      paidCost: providerPaidCost(p),
+    }));
+    const countedCost = Math.min(...providers.map((p) => (p.freeTier ? 0 : p.paidCost)));
+    breakdown.push({
+      categoryId: entry.categoryId,
+      categoryName: entry.categoryName,
+      countedCost,
+      providers,
+    });
+  }
+  return breakdown;
 }
 
 export function complexityDifficulty(complexity?: Complexity): string {
@@ -46,16 +110,15 @@ export function computeStackHealth(stack: UserStack): StackHealth {
   const avgPopularity =
     providers.reduce((sum, p) => sum + (p.popularityScore ?? 50), 0) / providers.length;
   const openSourceCount = providers.filter((p) => p.openSource).length;
-  const freeTierCount = providers.filter((p) => p.freeTier || p.pricingModel === 'free').length;
+  const freeTierCount = providers.filter((p) => isProviderFree(p)).length;
   const openSourceRatio = openSourceCount / providers.length;
   const freeTierRatio = freeTierCount / providers.length;
   const documented = providers.filter((p) => p.documentation || p.website).length / providers.length;
 
-  const estimatedMonthlyCost = entries.reduce((sum, entry) => {
-    if (entry.providers.length === 0) return sum;
-    const cheapest = Math.min(...entry.providers.map((p) => pricingModelMonthlyCost(p.pricingModel)));
-    return sum + cheapest;
-  }, 0);
+  const estimatedMonthlyCost = computeCostBreakdown(stack).reduce(
+    (sum, cat) => sum + cat.countedCost,
+    0,
+  );
 
   const complexityBase = (() => {
     switch (stack.sourceAnalysis?.complexity) {

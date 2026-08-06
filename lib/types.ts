@@ -7,6 +7,11 @@ export type AnalysisProvider = {
   bestUseCases?: string[];
   website?: string;
   documentation?: string;
+  freeTier?: boolean;
+  pricingModel?: string;
+  popularityScore?: number;
+  openSource?: boolean;
+  tags?: string[];
 };
 
 export type AnalysisCategory = {
@@ -23,4 +28,5 @@ export type StackAnalysis = {
   summary: string;
   complexity: Complexity;
   categories: AnalysisCategory[];
+  integrations?: AnalysisCategory[];
 };
