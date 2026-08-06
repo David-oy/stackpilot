@@ -169,7 +169,7 @@ export function StackList() {
                       <DropdownMenuTrigger asChild>
                         <button
                           aria-label="Stack actions"
-                          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity hover:bg-foreground/[0.05] hover:text-foreground group-hover:opacity-100"
+                          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-foreground/5 text-muted-foreground transition-colors hover:border-violet-500/20 hover:text-foreground"
                         >
                           <MoreHorizontal className="h-3.5 w-3.5" />
                         </button>

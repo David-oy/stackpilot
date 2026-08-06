@@ -12,10 +12,11 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { useStack } from '@/lib/stack-context';
-import { computeCostBreakdown, computeStackHealth, complexityDifficulty, formatCurrency } from '@/lib/stacks/health';
+import { computeStackHealth, complexityDifficulty, formatCurrency } from '@/lib/stacks/health';
 import { stackCategoryCount, stackProviderCount } from '@/lib/stacks/health';
 import { Progress } from '@/components/ui/progress';
-import { CostBreakdownHover } from './cost-hover';
+import { CostBreakdownDialog } from './cost-breakdown';
+import { MoreHorizontal } from 'lucide-react';
 
 type Metric = {
   key: string;
@@ -38,7 +39,6 @@ export function StackHealth() {
   const health = activeStack ? computeStackHealth(activeStack) : null;
   if (!activeStack || !health) return null;
 
-  const costBreakdown = computeCostBreakdown(activeStack);
   const difficulty = complexityDifficulty(activeStack.sourceAnalysis?.complexity);
 
   const metrics: Metric[] = [
@@ -118,11 +118,21 @@ export function StackHealth() {
             <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
               <DollarSign className="h-3 w-3" /> Est. Monthly Cost
             </p>
-            <CostBreakdownHover breakdown={costBreakdown}>
-              <p className="mt-1 inline-block cursor-help text-lg font-semibold text-foreground underline decoration-dotted decoration-foreground/30 underline-offset-4">
+            <div className="mt-1 flex items-center justify-between gap-2">
+              <p className="text-lg font-semibold text-foreground">
                 {formatCurrency(health.estimatedMonthlyCost)}
               </p>
-            </CostBreakdownHover>
+              <CostBreakdownDialog stack={activeStack}>
+                <button
+                  type="button"
+                  aria-label="View monthly cost breakdown"
+                  title="View cost breakdown"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-foreground/5 text-muted-foreground transition-colors hover:border-violet-500/20 hover:text-foreground"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </button>
+              </CostBreakdownDialog>
+            </div>
           </div>
         </div>
       </div>

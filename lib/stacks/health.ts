@@ -68,7 +68,10 @@ export function computeCostBreakdown(stack: UserStack): CostCategoryBreakdown[] 
       freeTier: isProviderFree(p),
       paidCost: providerPaidCost(p),
     }));
-    const countedCost = Math.min(...providers.map((p) => (p.freeTier ? 0 : p.paidCost)));
+    const countedCost = providers.reduce(
+      (sum, p) => sum + (p.freeTier ? 0 : p.paidCost),
+      0,
+    );
     breakdown.push({
       categoryId: entry.categoryId,
       categoryName: entry.categoryName,

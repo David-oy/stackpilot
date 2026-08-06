@@ -1,15 +1,18 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ArrowRight, Check, Layers, X } from 'lucide-react';
+import { ArrowRight, Check, Layers, MoreHorizontal, X } from 'lucide-react';
 import Link from 'next/link';
 import { getCategoryMeta } from '@/lib/categories';
 import { useStack } from '@/lib/stack-context';
+import { computeStackHealth, formatCurrency } from '@/lib/stacks/health';
+import { CostBreakdownDialog } from '@/components/workspace/cost-breakdown';
 
 export function CurrentStack() {
   const { activeStack, removeProvider, completedCount, totalCount } = useStack();
   const progress =
     totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+  const health = activeStack ? computeStackHealth(activeStack) : null;
 
   return (
     <div className="sticky top-24">
@@ -44,6 +47,27 @@ export function CurrentStack() {
             />
           </div>
         </div>
+
+        {activeStack && (
+          <div className="mt-4 flex items-center justify-between rounded-lg border border-foreground/5 bg-foreground/[0.02] px-3 py-2.5">
+            <div className="min-w-0">
+              <p className="text-[11px] text-muted-foreground">Est. Monthly Cost</p>
+              <p className="truncate text-sm font-semibold text-foreground">
+                {health ? formatCurrency(health.estimatedMonthlyCost) : '$0'}
+              </p>
+            </div>
+            <CostBreakdownDialog stack={activeStack}>
+              <button
+                type="button"
+                aria-label="View monthly cost breakdown"
+                title="View cost breakdown"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-foreground/5 text-muted-foreground transition-colors hover:border-violet-500/20 hover:text-foreground"
+              >
+                <MoreHorizontal className="h-4 w-4" />
+              </button>
+            </CostBreakdownDialog>
+          </div>
+        )}
 
         {!activeStack ? (
           <div className="mt-5 rounded-xl border border-dashed border-foreground/10 py-6 text-center">
