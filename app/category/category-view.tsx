@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { getCategoryMeta } from '@/lib/categories';
 import { providersByCategory, type Provider } from '@/lib/providers';
 import type { AnalysisProvider } from '@/lib/types';
+import { buildProviderInput } from '@/lib/stacks/provider-fields';
 import { CurrentStack } from '@/components/landing/current-stack';
 import { useStack } from '@/lib/stack-context';
 import { useAnalysisContext } from '@/lib/analysis-context';
@@ -47,9 +48,21 @@ function toProvider(ap: AnalysisProvider, index: number): Provider {
   };
 }
 
-function ProviderCard({ provider, categoryId, index }: { provider: Provider; categoryId: string; index: number }) {
-  const { stack, addToStack, removeFromStack } = useStack();
-  const inStack = stack[categoryId]?.providerId === provider.id;
+function ProviderCard({
+  provider,
+  categoryId,
+  categoryName,
+  index,
+}: {
+  provider: Provider;
+  categoryId: string;
+  categoryName: string;
+  index: number;
+}) {
+  const { activeStack, addProvider, removeProvider } = useStack();
+  const inStack = !!activeStack?.categories
+    .find((c) => c.categoryId === categoryId)
+    ?.providers.some((p) => p.providerId === provider.id);
 
   return (
     <motion.article
@@ -98,7 +111,9 @@ function ProviderCard({ provider, categoryId, index }: { provider: Provider; cat
         </button>
         <button
           onClick={() =>
-            inStack ? removeFromStack(categoryId) : addToStack(categoryId, provider.id, provider.name)
+            inStack
+              ? removeProvider(categoryId, provider.id)
+              : addProvider(categoryId, categoryName, buildProviderInput(provider))
           }
           className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2.5 text-sm font-medium transition-all ${
             inStack
@@ -251,7 +266,13 @@ function CategoryContent({ initialProviders }: { initialProviders?: Provider[] }
             <motion.div layout className="grid gap-5 sm:grid-cols-2">
               <AnimatePresence mode="popLayout">
                 {filtered.map((provider, i) => (
-                  <ProviderCard key={provider.id} provider={provider} categoryId={categoryId} index={i} />
+                  <ProviderCard
+                    key={provider.id}
+                    provider={provider}
+                    categoryId={categoryId}
+                    categoryName={displayName}
+                    index={i}
+                  />
                 ))}
               </AnimatePresence>
             </motion.div>
