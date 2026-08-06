@@ -3,11 +3,20 @@
 import type { StackAnalysis } from './types';
 
 export async function analyzeProject(description: string): Promise<StackAnalysis> {
-  const response = await fetch('/api/analyze', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ description }),
-  });
+  let response: Response;
+  try {
+    response = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ description }),
+      signal: AbortSignal.timeout(70_000),
+    });
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw new Error('Analysis timed out. Please try again.');
+    }
+    throw error;
+  }
 
   let payload: unknown;
   try {

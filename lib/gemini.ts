@@ -3,6 +3,8 @@ import type { AnalysisProvider, Complexity, StackAnalysis } from './types';
 
 const MODEL = process.env.GEMINI_MODEL ?? 'gemini-3.5-flash-lite';
 
+const GEMINI_TIMEOUT_MS = Number(process.env.GEMINI_TIMEOUT_MS ?? 50_000);
+
 export type GeminiCategory = {
   id: string;
   name: string;
@@ -245,7 +247,7 @@ async function callGemini(
       },
     }),
     cache: 'no-store',
-    signal: AbortSignal.timeout(60_000),
+    signal: AbortSignal.timeout(GEMINI_TIMEOUT_MS),
   });
 
   if (!response.ok) {

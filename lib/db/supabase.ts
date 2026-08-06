@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { categoriesSeedData, providersSeedData } from './seed';
+import { fetchWithTimeout } from './supabase-fetch';
 import type {
   CategoryRecord,
   ProviderRecord,
@@ -52,7 +53,11 @@ export class SupabaseProviderStore implements ProviderStore {
   private ensured = false;
 
   constructor(url: string, key: string) {
-    this.client = createClient(url, key, { auth: { persistSession: false } });
+    const timeoutMs = Number(process.env.SUPABASE_TIMEOUT_MS ?? 10_000);
+    this.client = createClient(url, key, {
+      auth: { persistSession: false },
+      global: { fetch: fetchWithTimeout(timeoutMs) },
+    });
     this.tablePrefix = process.env.SUPABASE_TABLE_PREFIX ?? '';
   }
 
@@ -63,7 +68,20 @@ export class SupabaseProviderStore implements ProviderStore {
   async ensureSeeded(): Promise<void> {
     if (this.ensured) return;
     this.ensured = true;
+    const started = Date.now();
     try {
+      const { count } = await this.client
+        .from(this.t('providers'))
+        .select('id', { count: 'exact', head: true });
+      if (count != null && count > 0) {
+        console.log(
+          `[supabase] provider store already seeded (${count} providers) — skipped in ${Date.now() - started}ms`,
+        );
+        return;
+      }
+      console.log(
+        `[supabase] provider store empty (${count ?? 'n/a'} providers) — seeding ${categoriesSeedData.length} categories and ${providersSeedData.length} providers...`,
+      );
       for (const category of categoriesSeedData) {
         await this.client.from(this.t('categories')).upsert(
           {
@@ -119,6 +137,7 @@ export class SupabaseProviderStore implements ProviderStore {
         }
         if (id) await this.syncRelations(id, provider);
       }
+      console.log(`[supabase] provider store seeded in ${Date.now() - started}ms`);
     } catch (error) {
       console.error('[supabase] ensureSeeded failed:', error);
     }
@@ -221,7 +240,8 @@ export class SupabaseProviderStore implements ProviderStore {
 
   private categorySelect = 'id, name, slug, icon, description, aliases, created_at, updated_at';
 
-  private providerSelect = '*, categories(slug)';
+  private providerSelect =
+    '*, categories!providers_category_id_fkey(slug)';
 
   async getAllCategories(): Promise<CategoryRecord[]> {
     const { data } = await this.client
