@@ -2,6 +2,9 @@ import type { Metadata } from 'next';
 import { siteConfig, absoluteUrl } from '@/lib/site';
 import { getCategoryMeta } from '@/lib/categories';
 import { breadcrumbSchema } from '@/lib/jsonld';
+import { providerService } from '@/lib/services/provider-service';
+import { toUiProviders } from '@/lib/services/ui-providers';
+import type { Provider } from '@/lib/providers';
 import { CategoryView } from './category-view';
 
 type PageProps = {
@@ -36,7 +39,9 @@ export function generateMetadata({ searchParams }: PageProps): Metadata {
   };
 }
 
-export default function CategoryPage({ searchParams }: PageProps) {
+export const dynamic = 'force-dynamic';
+
+export default async function CategoryPage({ searchParams }: PageProps) {
   const id = searchParams.id ?? '';
   const meta = getCategoryMeta(id);
   const displayName = searchParams.name || meta.name;
@@ -45,13 +50,21 @@ export default function CategoryPage({ searchParams }: PageProps) {
     { name: displayName, url: `/category?id=${id}` },
   ]);
 
+  let providers: Provider[] = [];
+  try {
+    const dbProviders = await providerService.getProvidersByCategory(id);
+    providers = toUiProviders(dbProviders);
+  } catch (error) {
+    console.error('[category/page] Failed to load providers:', error);
+  }
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <CategoryView />
+      <CategoryView providers={providers} categoryId={id} />
     </>
   );
 }

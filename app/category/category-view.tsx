@@ -123,7 +123,7 @@ function ProviderCard({ provider, categoryId, index }: { provider: Provider; cat
   );
 }
 
-function CategoryContent() {
+function CategoryContent({ initialProviders }: { initialProviders?: Provider[] }) {
   const searchParams = useSearchParams();
   const categoryId = searchParams.get('id') ?? '';
   const categoryName = searchParams.get('name');
@@ -139,7 +139,12 @@ function CategoryContent() {
     () => (aiCategory?.providers ?? []).map((p, i) => toProvider(p, i)),
     [aiCategory],
   );
-  const providers = staticProviders.length > 0 ? staticProviders : aiProviders;
+  const providers =
+    initialProviders && initialProviders.length > 0
+      ? initialProviders
+      : staticProviders.length > 0
+        ? staticProviders
+        : aiProviders;
   const hasProviders = providers.length > 0;
 
   const [search, setSearch] = useState('');
@@ -284,7 +289,13 @@ function CategoryContent() {
   );
 }
 
-export function CategoryView() {
+export function CategoryView({
+  providers,
+  categoryId: _categoryId,
+}: {
+  providers?: Provider[];
+  categoryId?: string;
+}) {
   return (
     <Suspense
       fallback={
@@ -296,7 +307,7 @@ export function CategoryView() {
         </div>
       }
     >
-      <CategoryContent />
+      <CategoryContent initialProviders={providers} />
     </Suspense>
   );
 }

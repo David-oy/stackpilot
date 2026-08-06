@@ -2,12 +2,24 @@ import type { MetadataRoute } from 'next';
 import { absoluteUrl } from '@/lib/site';
 import { categories } from '@/lib/categories';
 import { allDocs } from '@/lib/docs';
+import { providerService } from '@/lib/services/provider-service';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export const dynamic = 'force-dynamic';
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
 
-  const categoryPages: MetadataRoute.Sitemap = categories.map((cat) => ({
-    url: absoluteUrl(`/category?id=${cat.id}`),
+  let categorySlugs: string[];
+  try {
+    const dbCategories = await providerService.getAllCategories();
+    categorySlugs = dbCategories.map((c) => c.slug);
+  } catch (error) {
+    console.error('[sitemap] Falling back to static categories:', error);
+    categorySlugs = categories.map((c) => c.id);
+  }
+
+  const categoryPages: MetadataRoute.Sitemap = categorySlugs.map((id) => ({
+    url: absoluteUrl(`/category?id=${id}`),
     lastModified: now,
     changeFrequency: 'weekly',
     priority: 0.8,
