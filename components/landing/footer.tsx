@@ -1,13 +1,28 @@
 import { Github, Twitter, Linkedin, Sparkles } from 'lucide-react';
 
-const footerLinks = {
-  Product: ['Features', 'Explore', 'Compare', 'Pricing', 'Changelog'],
-  Resources: ['Documentation', 'API Reference', 'Blog', 'Community', 'Status'],
-  Company: ['About', 'Careers', 'Contact', 'Privacy', 'Terms'],
+const footerLinks: Record<string, { label: string; href: string }[]> = {
+  Product: [
+    { label: 'Features', href: '/#features' },
+    { label: 'Explore', href: '/#how-it-works' },
+    { label: 'Compare', href: '/#features' },
+    { label: 'Pricing', href: '/#cta' },
+  ],
+  Resources: [
+    { label: 'Documentation', href: '/docs' },
+    { label: 'FAQ', href: '/faq' },
+    { label: 'API Reference', href: '#' },
+    { label: 'Changelog', href: '#' },
+  ],
+  Company: [
+    { label: 'About', href: '#' },
+    { label: 'Contact', href: '#' },
+    { label: 'Privacy', href: '#' },
+    { label: 'Terms', href: '#' },
+  ],
 };
 
 const socialLinks = [
-  { icon: Github, href: 'https://github.com/David-oy/get.stack', label: 'GitHub' },
+  { icon: Github, href: 'https://github.com/David-oy/stackpilot', label: 'GitHub' },
   { icon: Twitter, href: 'https://x.com/vijayyyyy_7', label: 'Twitter' },
   { icon: Linkedin, href: '#', label: 'LinkedIn' },
 ];
@@ -48,12 +63,12 @@ export function Footer() {
               <h4 className="text-sm font-semibold text-foreground">{heading}</h4>
               <ul className="mt-4 space-y-3">
                 {links.map((link) => (
-                  <li key={link}>
+                  <li key={link.label}>
                     <a
-                      href="#"
+                      href={link.href}
                       className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                     >
-                      {link}
+                      {link.label}
                     </a>
                   </li>
                 ))}

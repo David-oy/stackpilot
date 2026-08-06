@@ -6,10 +6,12 @@ import { Button } from '@/components/ui/button';
 import { ThemeSwitcher } from '@/components/landing/theme-switcher';
 
 const navLinks = [
-  { label: 'Features', href: '#features' },
-  { label: 'Explore', href: '#how-it-works' },
-  { label: 'Compare', href: '#features' },
-  { label: 'Pricing', href: '#cta' },
+  { label: 'Features', href: '/#features' },
+  { label: 'Explore', href: '/#how-it-works' },
+  { label: 'Compare', href: '/#features' },
+  { label: 'Pricing', href: '/#cta' },
+  { label: 'Docs', href: '/docs' },
+  { label: 'FAQ', href: '/faq' },
 ];
 
 export function Navbar() {

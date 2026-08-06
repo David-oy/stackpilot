@@ -1,0 +1,55 @@
+# StackPilot
+
+> AI-powered technology stack discovery for developers.
+
+StackPilot is an AI-powered developer tool that analyzes your project idea and recommends the best technologies, APIs, databases, authentication providers, hosting services, and developer tools. Describe what you want to build and StackPilot returns a complete, ranked tech stack with provider comparisons.
+
+## Purpose
+
+StackPilot helps developers discover every technology, API, and service needed to build a project. Instead of manually researching hundreds of tools, describe your idea in plain English and get a curated, ranked list of recommended providers with reasoning, best use cases, and official links.
+
+## Homepage
+
+-https://get-stack.vercel.app/
+
+## Important URLs
+
+- Homepage: https://get-stack.vercel.app/
+- Results: https://get-stack.vercel.app/results
+- Category providers: https://get-stack.vercel.app/category?id={category}
+- FAQ: https://get-stack.vercel.app/faq
+- Documentation: https://get-stack.vercel.app/docs
+- Sitemap: https://get-stack.vercel.app/sitemap.xml
+- robots.txt: https://get-stack.vercel.app/robots.txt
+
+## Supported features
+
+- AI-powered tech stack recommendations
+- Technology category identification (databases, auth, hosting, storage, CDN, email, notifications, analytics, AI tools, frontend/backend frameworks)
+- Ranked provider lists with "why it is recommended" and best use cases
+- Provider comparison
+- Free tier, open source, and popularity filtering
+- Build and save a personalized tech stack
+- Dark / light theme
+
+## Target audience
+
+- Software developers and engineers
+- Startup founders and indie hackers
+- Full-stack developers planning new projects
+- Technical teams evaluating tooling
+- Students learning modern web development
+
+## Example queries users can ask
+
+- "I want to build a YouTube clone" — what stack should I use?
+- "Which database should I use for a real-time chat app?"
+- "Best authentication provider for a Next.js app?"
+- "What are the best AI tools and LLM providers?"
+- "Recommended hosting platform for a serverless API?"
+- "Best open-source alternative to commercial databases?"
+- "Which frontend framework should I pick for a React project?"
+
+## Contact
+
+- GitHub: https://github.com/David-oy/stackpilot
