@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/lib/theme-provider';
 import { StackProvider } from '@/lib/stack-context';
 import { AnalysisProvider } from '@/lib/analysis-context';
 import { siteConfig } from '@/lib/site';
+import { Analytics } from '@vercel/analytics/next';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -98,6 +99,7 @@ export default function RootLayout({
             <StackProvider>{children}</StackProvider>
           </AnalysisProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
