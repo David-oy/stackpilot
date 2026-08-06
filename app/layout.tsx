@@ -2,6 +2,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/lib/theme-provider';
+import { AuthProvider } from '@/lib/auth/auth-context';
 import { StackProvider } from '@/lib/stack-context';
 import { AnalysisProvider } from '@/lib/analysis-context';
 import { siteConfig } from '@/lib/site';
@@ -95,9 +96,11 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <ThemeProvider>
-          <AnalysisProvider>
-            <StackProvider>{children}</StackProvider>
-          </AnalysisProvider>
+          <AuthProvider>
+            <AnalysisProvider>
+              <StackProvider>{children}</StackProvider>
+            </AnalysisProvider>
+          </AuthProvider>
         </ThemeProvider>
         <Analytics />
       </body>

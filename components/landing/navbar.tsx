@@ -3,9 +3,18 @@
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Menu, X, Sparkles } from 'lucide-react';
+import { Menu, X, Sparkles, UserRound } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeSwitcher } from '@/components/landing/theme-switcher';
+import { useAuth } from '@/lib/auth/auth-context';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 
 type NavLink = {
@@ -32,10 +41,20 @@ function matchesPath(pathname: string, pattern: string): boolean {
 
 export function Navbar() {
   const pathname = usePathname();
+  const { user, loading } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const activeLabel = navLinks.find((link) => matchesPath(pathname, link.pattern))?.label ?? null;
+
+  const displayName =
+    user?.user_metadata?.name ?? user?.email?.split('@')[0] ?? 'Account';
+
+  const avatar = (
+    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-blue-500 text-xs font-bold text-white">
+      {displayName.charAt(0).toUpperCase()}
+    </span>
+  );
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16);
@@ -92,12 +111,45 @@ export function Navbar() {
         </div>
 
         <div className="hidden items-center gap-3 md:flex">
-          <Button variant="ghost" className="text-sm text-muted-foreground hover:text-foreground">
-            Login
-          </Button>
-          <Button className="bg-gradient-to-r from-violet-500 to-blue-500 text-sm text-white shadow-lg shadow-violet-500/20 transition-all hover:from-violet-600 hover:to-blue-600 hover:shadow-violet-500/30">
-            Get Started
-          </Button>
+          {!loading && user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                aria-label="Account menu"
+                className="flex items-center gap-2 rounded-full border border-foreground/5 p-1 pr-2 transition-colors hover:border-violet-500/20"
+              >
+                {avatar}
+                <span className="max-w-[120px] truncate text-sm text-foreground">
+                  {displayName}
+                </span>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuLabel className="truncate">{user.email}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/account" className="gap-2">
+                    <UserRound className="h-4 w-4" /> Account
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/workspace" className="gap-2">
+                    <Sparkles className="h-4 w-4" /> Workspace
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <>
+              <Button asChild variant="ghost" className="text-sm text-muted-foreground hover:text-foreground">
+                <Link href="/login">Login</Link>
+              </Button>
+              <Button
+                asChild
+                className="bg-gradient-to-r from-violet-500 to-blue-500 text-sm text-white shadow-lg shadow-violet-500/20 transition-all hover:from-violet-600 hover:to-blue-600 hover:shadow-violet-500/30"
+              >
+                <Link href="/signup">Get Started</Link>
+              </Button>
+            </>
+          )}
         </div>
 
         <button
@@ -133,12 +185,36 @@ export function Navbar() {
               </Link>
             ))}
             <div className="mt-2 flex flex-col gap-3 border-t border-foreground/5 pt-3">
-              <Button variant="outline" className="border-foreground/10 text-foreground">
-                Login
-              </Button>
-              <Button className="bg-gradient-to-r from-violet-500 to-blue-500 text-white">
-                Get Started
-              </Button>
+              {!loading && user ? (
+                <>
+                  <div className="flex items-center gap-2 px-1">
+                    {avatar}
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-foreground">{displayName}</p>
+                      <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+                    </div>
+                  </div>
+                  <Button asChild variant="outline" className="border-foreground/10 text-foreground">
+                    <Link href="/account">
+                      <UserRound className="h-4 w-4" /> Account
+                    </Link>
+                  </Button>
+                  <Button asChild className="bg-gradient-to-r from-violet-500 to-blue-500 text-white">
+                    <Link href="/workspace">
+                      <Sparkles className="h-4 w-4" /> Workspace
+                    </Link>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button asChild variant="outline" className="border-foreground/10 text-foreground">
+                    <Link href="/login">Login</Link>
+                  </Button>
+                  <Button asChild className="bg-gradient-to-r from-violet-500 to-blue-500 text-white">
+                    <Link href="/signup">Get Started</Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
