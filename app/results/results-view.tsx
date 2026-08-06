@@ -16,6 +16,8 @@ import {
 import Link from 'next/link';
 import { getCategoryMeta } from '@/lib/categories';
 import { RecommendedStack } from '@/components/landing/recommended-stack';
+import { CurrentStack } from '@/components/landing/current-stack';
+import { useStack } from '@/lib/stack-context';
 import { useAnalysis } from '@/hooks/use-analysis';
 import type { Complexity } from '@/lib/types';
 
@@ -73,6 +75,7 @@ function ResultsContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || 'your project';
   const { data: analysis, isLoading, error, retry } = useAnalysis(query);
+  const { activeStack, hydrated } = useStack();
 
   if (isLoading) {
     return <LoadingState />;
@@ -189,8 +192,9 @@ function ResultsContent() {
             </div>
           </div>
 
-          <div>
+          <div className="space-y-8">
             <RecommendedStack analysis={analysis} />
+            {hydrated && activeStack && <CurrentStack />}
           </div>
         </div>
       </div>

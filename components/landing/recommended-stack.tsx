@@ -1,10 +1,14 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Check, Layers } from 'lucide-react';
+import { Check, Layers, Sparkles } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import type { LucideIcon } from 'lucide-react';
 import { categories, getCategoryMeta } from '@/lib/categories';
 import type { StackAnalysis } from '@/lib/types';
+import { useStack } from '@/lib/stack-context';
+import { useAnalysisContext } from '@/lib/analysis-context';
 
 type StackItem = {
   id: string;
@@ -15,6 +19,10 @@ type StackItem = {
 };
 
 export function RecommendedStack({ analysis }: { analysis?: StackAnalysis }) {
+  const router = useRouter();
+  const { createStackFromAnalysis } = useStack();
+  const { query } = useAnalysisContext();
+
   const items: StackItem[] = analysis
     ? analysis.categories.map((cat) => {
         const meta = getCategoryMeta(cat.id);
@@ -33,6 +41,17 @@ export function RecommendedStack({ analysis }: { analysis?: StackAnalysis }) {
         iconColor: cat.iconColor,
         recommended: cat.recommended,
       }));
+
+  const canSave = !!analysis;
+
+  const handleSave = () => {
+    if (!analysis) return;
+    const stack = createStackFromAnalysis(query ?? '', analysis);
+    if (stack) {
+      toast.success(`"${stack.name}" added to your workspace`);
+      router.push('/workspace');
+    }
+  };
 
   return (
     <div className="sticky top-24">
@@ -75,7 +94,12 @@ export function RecommendedStack({ analysis }: { analysis?: StackAnalysis }) {
           ))}
         </div>
 
-        <button className="mt-5 w-full rounded-lg bg-gradient-to-r from-violet-500 to-blue-500 py-2.5 text-xs font-medium text-white transition-opacity hover:opacity-90">
+        <button
+          onClick={handleSave}
+          disabled={!canSave}
+          className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-violet-500 to-blue-500 py-2.5 text-xs font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <Sparkles className="h-3.5 w-3.5" />
           Save This Stack
         </button>
       </motion.div>
