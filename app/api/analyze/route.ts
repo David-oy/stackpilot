@@ -141,7 +141,7 @@ async function handleAnalyze(request: NextRequest) {
       const fallbackProviders = fallback[category.id];
       if (fallbackProviders && fallbackProviders.length > 0) {
         category.providers = fallbackProviders;
-        await providerService.storeFallbackCategoryAndProviders(
+        void providerService.storeFallbackCategoryAndProviders(
           { id: category.id, name: category.name, description: category.description },
           fallbackProviders,
         );

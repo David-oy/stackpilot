@@ -1,6 +1,11 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { categoriesSeedData, providersSeedData } from './seed';
 import { fetchWithTimeout } from './supabase-fetch';
+import {
+  normalizeProviderName,
+  normalizeWebsiteForMatch,
+  sanitizeProviderInput,
+} from './validate';
 import type {
   CategoryRecord,
   ProviderRecord,
@@ -9,6 +14,9 @@ import type {
 import type { CategoryInput, ProviderInput, ProviderStore } from './store';
 
 type Row = Record<string, unknown>;
+
+const PROVIDER_COLUMNS =
+  'id, category_id, name, slug, official_website, short_description, long_description, logo, documentation, github, pricing_model, free_tier, open_source, popularity_score, featured, status';
 
 function mapRowToCategory(row: Row): CategoryRecord {
   return {
@@ -47,10 +55,13 @@ function mapRowToProvider(row: Row): ProviderRecord {
   };
 }
 
+type Relations = Pick<ProviderWithRelations, 'features' | 'tags' | 'alternatives'>;
+
 export class SupabaseProviderStore implements ProviderStore {
   private client: SupabaseClient;
   private tablePrefix: string;
   private ensured = false;
+  private categoryIdCache = new Map<string, string | null>();
 
   constructor(url: string, key: string) {
     const timeoutMs = Number(process.env.SUPABASE_TIMEOUT_MS ?? 10_000);
@@ -82,97 +93,179 @@ export class SupabaseProviderStore implements ProviderStore {
       console.log(
         `[supabase] provider store empty (${count ?? 'n/a'} providers) — seeding ${categoriesSeedData.length} categories and ${providersSeedData.length} providers...`,
       );
-      for (const category of categoriesSeedData) {
-        await this.client.from(this.t('categories')).upsert(
-          {
-            name: category.name,
-            slug: category.slug,
-            icon: category.icon,
-            description: category.description,
-            aliases: category.aliases ?? [],
-          },
+
+      await this.client.from(this.t('categories')).upsert(
+        categoriesSeedData.map((category) => ({
+          name: category.name,
+          slug: category.slug,
+          icon: category.icon,
+          description: category.description,
+          aliases: category.aliases ?? [],
+        })),
+        { onConflict: 'slug' },
+      );
+
+      const { data: categoryRows } = await this.client
+        .from(this.t('categories'))
+        .select('id, slug');
+      const categoryIdBySlug = new Map<string, string>();
+      for (const r of (categoryRows ?? []) as unknown as Row[]) {
+        categoryIdBySlug.set(String(r.slug), String(r.id));
+      }
+
+      const { data: inserted } = await this.client
+        .from(this.t('providers'))
+        .upsert(
+          providersSeedData
+            .filter((provider) => categoryIdBySlug.has(provider.categoryId))
+            .map((provider) => ({
+              category_id: categoryIdBySlug.get(provider.categoryId),
+              name: provider.name,
+              slug: provider.slug,
+              short_description: provider.shortDescription,
+              long_description: provider.longDescription,
+              logo: provider.logo,
+              official_website: provider.officialWebsite || '',
+              documentation: provider.documentation || '',
+              github: provider.github,
+              pricing_model: provider.pricingModel,
+              free_tier: provider.freeTier,
+              open_source: provider.openSource,
+              popularity_score: provider.popularityScore,
+              featured: provider.featured,
+              status: provider.status,
+            })),
           { onConflict: 'slug' },
-        );
+        )
+        .select('id, slug');
+
+      const idBySlug = new Map<string, string>();
+      for (const r of (inserted ?? []) as unknown as Row[]) {
+        idBySlug.set(String(r.slug), String(r.id));
       }
-      for (const provider of providersSeedData) {
-        const { data: category } = await this.client
-          .from(this.t('categories'))
-          .select('id')
-          .eq('slug', provider.categoryId)
-          .maybeSingle();
-        const categoryId = (category as { id?: string } | null)?.id;
-        if (!categoryId) continue;
-        const { data: existing } = await this.client
-          .from(this.t('providers'))
-          .select('id')
-          .eq('slug', provider.slug)
-          .maybeSingle();
-        let id = (existing as { id?: string } | null)?.id ?? null;
-        const payload = {
-          category_id: categoryId,
-          name: provider.name,
-          slug: provider.slug,
-          short_description: provider.shortDescription,
-          long_description: provider.longDescription,
-          logo: provider.logo,
-          official_website: provider.officialWebsite,
-          documentation: provider.documentation,
-          github: provider.github,
-          pricing_model: provider.pricingModel,
-          free_tier: provider.freeTier,
-          open_source: provider.openSource,
-          popularity_score: provider.popularityScore,
-          featured: provider.featured,
-          status: provider.status,
-        };
-        if (id) {
-          await this.client.from(this.t('providers')).update(payload).eq('id', id);
-        } else {
-          const { data: inserted } = await this.client
-            .from(this.t('providers'))
-            .insert(payload)
-            .select('id')
-            .single();
-          id = (inserted as { id?: string } | null)?.id ?? null;
-        }
-        if (id) await this.syncRelations(id, provider);
-      }
+
+      await this.syncRelationsBulk(
+        providersSeedData
+          .filter((provider) => idBySlug.has(provider.slug))
+          .map((provider) => ({
+            providerId: idBySlug.get(provider.slug) ?? '',
+            relations: provider,
+          })),
+      );
+
       console.log(`[supabase] provider store seeded in ${Date.now() - started}ms`);
     } catch (error) {
       console.error('[supabase] ensureSeeded failed:', error);
     }
   }
 
-  private async syncRelations(providerId: string, provider: ProviderInput) {
-    await this.client.from(this.t('provider_features')).delete().eq('provider_id', providerId);
-    await this.client.from(this.t('provider_tags')).delete().eq('provider_id', providerId);
-    await this.client.from(this.t('provider_alternatives')).delete().eq('provider_id', providerId);
-    if (provider.features.length) {
-      await this.client.from(this.t('provider_features')).insert(
-        provider.features.map((feature) => ({ provider_id: providerId, feature })),
-      );
-    }
-    if (provider.tags.length) {
-      await this.client.from(this.t('provider_tags')).insert(
-        provider.tags.map((tag) => ({ provider_id: providerId, tag })),
-      );
-    }
-    for (const slug of provider.alternatives) {
-      const { data: alt } = await this.client
-        .from(this.t('providers'))
-        .select('id')
-        .eq('slug', slug)
-        .maybeSingle();
-      const altId = (alt as { id?: string } | null)?.id;
-      if (altId) {
-        await this.client
-          .from(this.t('provider_alternatives'))
-          .upsert(
-            { provider_id: providerId, alternative_provider_id: altId },
-            { onConflict: 'provider_id,alternative_provider_id' },
-          );
+  private async syncRelationsBulk(
+    entries: Array<{ providerId: string; relations: Relations }>,
+  ): Promise<void> {
+    const withIds = entries.filter((e) => e.providerId);
+    if (!withIds.length) return;
+    const ids = withIds.map((e) => e.providerId);
+    await Promise.all([
+      this.client.from(this.t('provider_features')).delete().in('provider_id', ids),
+      this.client.from(this.t('provider_tags')).delete().in('provider_id', ids),
+      this.client.from(this.t('provider_alternatives')).delete().in('provider_id', ids),
+    ]);
+
+    const featureRows: Array<{ provider_id: string; feature: string }> = [];
+    const tagRows: Array<{ provider_id: string; tag: string }> = [];
+    for (const entry of withIds) {
+      for (const feature of entry.relations.features) {
+        featureRows.push({ provider_id: entry.providerId, feature });
+      }
+      for (const tag of entry.relations.tags) {
+        tagRows.push({ provider_id: entry.providerId, tag });
       }
     }
+    if (featureRows.length) {
+      await this.client.from(this.t('provider_features')).insert(featureRows);
+    }
+    if (tagRows.length) {
+      await this.client.from(this.t('provider_tags')).insert(tagRows);
+    }
+
+    const alternativeRows = await this.resolveAlternativeRows(withIds);
+    if (alternativeRows.length) {
+      await this.client
+        .from(this.t('provider_alternatives'))
+        .upsert(alternativeRows, { onConflict: 'provider_id,alternative_provider_id' });
+    }
+  }
+
+  private async resolveAlternativeRows(
+    entries: Array<{ providerId: string; relations: Relations }>,
+  ): Promise<Array<{ provider_id: string; alternative_provider_id: string }>> {
+    const altSlugs = Array.from(
+      new Set(entries.flatMap((e) => e.relations.alternatives)),
+    );
+    if (!altSlugs.length) return [];
+    const { data: altRows } = await this.client
+      .from(this.t('providers'))
+      .select('id, slug')
+      .in('slug', altSlugs);
+    const idBySlug = new Map<string, string>();
+    for (const r of (altRows ?? []) as unknown as Row[]) {
+      idBySlug.set(String(r.slug), String(r.id));
+    }
+    const rows: Array<{ provider_id: string; alternative_provider_id: string }> = [];
+    for (const entry of entries) {
+      for (const slug of entry.relations.alternatives) {
+        const altId = idBySlug.get(slug);
+        if (altId && altId !== entry.providerId) {
+          rows.push({ provider_id: entry.providerId, alternative_provider_id: altId });
+        }
+      }
+    }
+    return rows;
+  }
+
+  private async mergeRelationsBulk(
+    entries: Array<{ providerId: string; relations: Relations }>,
+  ): Promise<void> {
+    const withIds = entries.filter((e) => e.providerId);
+    if (!withIds.length) return;
+    const featureRows: Array<{ provider_id: string; feature: string }> = [];
+    const tagRows: Array<{ provider_id: string; tag: string }> = [];
+    for (const entry of withIds) {
+      for (const feature of entry.relations.features) {
+        featureRows.push({ provider_id: entry.providerId, feature });
+      }
+      for (const tag of entry.relations.tags) {
+        tagRows.push({ provider_id: entry.providerId, tag });
+      }
+    }
+    if (featureRows.length) {
+      await this.client
+        .from(this.t('provider_features'))
+        .upsert(featureRows, { onConflict: 'provider_id,feature' });
+    }
+    if (tagRows.length) {
+      await this.client
+        .from(this.t('provider_tags'))
+        .upsert(tagRows, { onConflict: 'provider_id,tag' });
+    }
+    const alternativeRows = await this.resolveAlternativeRows(withIds);
+    if (alternativeRows.length) {
+      await this.client
+        .from(this.t('provider_alternatives'))
+        .upsert(alternativeRows, { onConflict: 'provider_id,alternative_provider_id' });
+    }
+  }
+
+  private async categoryIdBySlug(slug: string): Promise<string | null> {
+    if (this.categoryIdCache.has(slug)) return this.categoryIdCache.get(slug) ?? null;
+    const { data } = await this.client
+      .from(this.t('categories'))
+      .select('id')
+      .eq('slug', slug)
+      .maybeSingle();
+    const id = (data as { id?: string } | null)?.id ?? null;
+    this.categoryIdCache.set(slug, id);
+    return id;
   }
 
   private async hydrate(rows: Row[]): Promise<ProviderWithRelations[]> {
@@ -338,61 +431,198 @@ export class SupabaseProviderStore implements ProviderStore {
   }
 
   async saveCategory(category: CategoryInput): Promise<void> {
-    await this.client.from(this.t('categories')).upsert(
-      {
-        name: category.name,
-        slug: category.slug,
-        icon: category.icon,
-        description: category.description,
-        aliases: category.aliases ?? [],
-      },
-      { onConflict: 'slug' },
-    );
+    const { data: existing } = await this.client
+      .from(this.t('categories'))
+      .select('id, description, aliases')
+      .eq('slug', category.slug)
+      .maybeSingle();
+    if (existing) {
+      const patch: Record<string, unknown> = {};
+      const existingRow = existing as Row;
+      if (!String(existingRow.description ?? '') && category.description) {
+        patch.description = category.description;
+      }
+      const aliases = new Set<string>([
+        ...((existingRow.aliases as string[]) ?? []),
+        ...(category.aliases ?? []),
+      ]);
+      if (aliases.size !== ((existingRow.aliases as string[]) ?? []).length) {
+        patch.aliases = Array.from(aliases);
+      }
+      if (Object.keys(patch).length) {
+        await this.client.from(this.t('categories')).update(patch).eq('slug', category.slug);
+      }
+      return;
+    }
+    await this.client.from(this.t('categories')).insert({
+      name: category.name,
+      slug: category.slug,
+      icon: category.icon,
+      description: category.description ?? '',
+      aliases: category.aliases ?? [],
+    });
   }
 
   async saveProviders(categorySlug: string, providers: ProviderInput[]): Promise<void> {
-    const { data: category } = await this.client
-      .from(this.t('categories'))
-      .select('id')
-      .eq('slug', categorySlug)
-      .maybeSingle();
-    const categoryId = (category as { id?: string } | null)?.id;
+    if (!providers.length) return;
+    const started = Date.now();
+    const categoryId = await this.categoryIdBySlug(categorySlug);
     if (!categoryId) return;
-    for (const provider of providers) {
-      const existing = await this.client
-        .from(this.t('providers'))
-        .select('id')
-        .eq('slug', provider.slug)
-        .maybeSingle();
-      let id: string | null = (existing as { id?: string } | null)?.id ?? null;
-      const payload = {
-        category_id: categoryId,
-        name: provider.name,
-        slug: provider.slug,
-        short_description: provider.shortDescription,
-        long_description: provider.longDescription,
-        logo: provider.logo,
-        official_website: provider.officialWebsite,
-        documentation: provider.documentation,
-        github: provider.github,
-        pricing_model: provider.pricingModel,
-        free_tier: provider.freeTier,
-        open_source: provider.openSource,
-        popularity_score: provider.popularityScore,
-        featured: provider.featured,
-        status: provider.status,
-      };
-      if (id) {
-        await this.client.from(this.t('providers')).update(payload).eq('id', id);
-      } else {
-        const { data: inserted } = await this.client
-          .from(this.t('providers'))
-          .insert(payload)
-          .select('id')
-          .single();
-        id = (inserted as { id?: string } | null)?.id ?? null;
-      }
-      if (id) await this.syncRelations(id, provider);
+
+    const sanitized = providers.map(sanitizeProviderInput);
+
+    const seenKeys = new Set<string>();
+    const uniqueProviders: ProviderInput[] = [];
+    for (const provider of sanitized) {
+      const key =
+        provider.slug || normalizeProviderName(provider.name) || provider.officialWebsite;
+      if (seenKeys.has(key)) continue;
+      seenKeys.add(key);
+      uniqueProviders.push(provider);
     }
+
+    const { data: existingRows } = await this.client
+      .from(this.t('providers'))
+      .select(PROVIDER_COLUMNS);
+    const existing = (existingRows ?? []) as Row[];
+
+    const bySlug = new Map<string, Row>();
+    const byName = new Map<string, Row>();
+    const byWebsite = new Map<string, Row>();
+    for (const row of existing) {
+      bySlug.set(String(row.slug), row);
+      const nameKey = normalizeProviderName(String(row.name));
+      if (nameKey && !byName.has(nameKey)) byName.set(nameKey, row);
+      const websiteKey = row.official_website
+        ? normalizeWebsiteForMatch(String(row.official_website))
+        : '';
+      if (websiteKey && !byWebsite.has(websiteKey)) byWebsite.set(websiteKey, row);
+    }
+
+    const toInsert: ProviderInput[] = [];
+    const toUpdate: Array<{ row: Row; input: ProviderInput }> = [];
+    for (const input of uniqueProviders) {
+      const nameKey = normalizeProviderName(input.name);
+      const websiteKey = input.officialWebsite
+        ? normalizeWebsiteForMatch(input.officialWebsite)
+        : '';
+      const match =
+        bySlug.get(input.slug) ??
+        byName.get(nameKey) ??
+        (websiteKey ? byWebsite.get(websiteKey) : undefined);
+      if (match) {
+        toUpdate.push({ row: match, input });
+      } else {
+        toInsert.push(input);
+      }
+    }
+
+    const newIds = new Map<string, string>();
+    if (toInsert.length) {
+      const { data: inserted, error: insertError } = await this.client
+        .from(this.t('providers'))
+        .insert(
+          toInsert.map((provider) => ({
+            category_id: categoryId,
+            name: provider.name,
+            slug: provider.slug,
+            short_description: provider.shortDescription,
+            long_description: provider.longDescription,
+            logo: provider.logo,
+            official_website: provider.officialWebsite || '',
+            documentation: provider.documentation || '',
+            github: provider.github,
+            pricing_model: provider.pricingModel,
+            free_tier: provider.freeTier,
+            open_source: provider.openSource,
+            popularity_score: provider.popularityScore,
+            featured: provider.featured,
+            status: provider.status,
+          })),
+        )
+        .select('id, slug');
+      if (insertError) {
+        console.error(`[supabase] saveProviders insert failed: ${insertError.message}`);
+      }
+      for (const r of (inserted ?? []) as unknown as Row[]) {
+        newIds.set(String(r.slug), String(r.id));
+      }
+    }
+
+    for (const { row, input } of toUpdate) {
+      const patch = this.mergeProviderPatch(row, input);
+      if (Object.keys(patch).length) {
+        await this.client.from(this.t('providers')).update(patch).eq('id', row.id);
+      }
+    }
+
+    const linkRows: Array<{ provider_id: string; category_id: string }> = [];
+    for (const provider of toInsert) {
+      const id = newIds.get(provider.slug);
+      if (id) linkRows.push({ provider_id: id, category_id: categoryId });
+    }
+    for (const { row } of toUpdate) {
+      if (String(row.category_id) !== categoryId) {
+        linkRows.push({ provider_id: String(row.id), category_id: categoryId });
+      }
+    }
+    if (linkRows.length) {
+      await this.client
+        .from(this.t('provider_categories'))
+        .upsert(linkRows, { onConflict: 'provider_id,category_id' });
+    }
+
+    await this.syncRelationsBulk(
+      toInsert.map((provider) => ({
+        providerId: newIds.get(provider.slug) ?? '',
+        relations: provider,
+      })),
+    );
+    await this.mergeRelationsBulk(
+      toUpdate.map(({ row, input }) => ({
+        providerId: String(row.id),
+        relations: input,
+      })),
+    );
+
+    console.log(
+      `[supabase] saveProviders for ${categorySlug}: ${toInsert.length} inserted, ${toUpdate.length} merged (${Date.now() - started}ms)`,
+    );
+  }
+
+  private mergeProviderPatch(row: Row, input: ProviderInput): Record<string, unknown> {
+    const fill = (existing: unknown, incoming: unknown): unknown => {
+      const existingValue = existing == null ? '' : String(existing);
+      const incomingValue = incoming == null ? '' : String(incoming);
+      return existingValue || incomingValue;
+    };
+    const merged: Record<string, unknown> = {
+      name: fill(row.name, input.name) || input.name,
+      slug: String(row.slug),
+      category_id: String(row.category_id),
+      short_description: fill(row.short_description, input.shortDescription),
+      long_description: fill(row.long_description, input.longDescription),
+      logo: row.logo ?? input.logo ?? null,
+      official_website: fill(row.official_website, input.officialWebsite),
+      documentation: fill(row.documentation, input.documentation),
+      github: row.github ?? input.github ?? null,
+      pricing_model: fill(row.pricing_model, input.pricingModel) || 'freemium',
+      free_tier: (row.free_tier as boolean) ?? input.freeTier ?? false,
+      open_source: (row.open_source as boolean) ?? input.openSource ?? false,
+      popularity_score: (row.popularity_score as number) ?? input.popularityScore ?? 50,
+      featured: (row.featured as boolean) ?? input.featured ?? false,
+      status: fill(row.status, input.status) || 'active',
+    };
+
+    const patch: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(merged)) {
+      const current = row[key];
+      const isEmpty = (x: unknown) => x == null || x === '';
+      if (isEmpty(value)) continue;
+      if (isEmpty(current) && String(current) !== String(value)) {
+        patch[key] = value;
+      }
+    }
+    return patch;
   }
 }

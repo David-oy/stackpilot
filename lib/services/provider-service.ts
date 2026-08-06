@@ -111,22 +111,26 @@ export const providerService = {
     category: { id: string; name: string; description: string },
     providers: AnalysisProvider[],
   ): Promise<void> {
-    const s = await store();
-    const existing = await this.getCategoryBySlug(category.id);
-    if (!existing) {
-      await s.saveCategory({
-        name: category.name,
-        slug: category.id,
-        icon: 'layers',
-        description: category.description,
-        aliases: [],
-      });
-      categoryCache.delete('all-categories');
+    try {
+      const s = await store();
+      const existing = await this.getCategoryBySlug(category.id);
+      if (!existing) {
+        await s.saveCategory({
+          name: category.name,
+          slug: category.id,
+          icon: 'layers',
+          description: category.description,
+          aliases: [],
+        });
+        categoryCache.delete('all-categories');
+      }
+      const records: ProviderInput[] = providers.map((p) => fromAnalysisProvider(category.id, p));
+      await s.saveProviders(category.id, records);
+      providerCache.delete(`providers:category:${category.id}`);
+      searchCache.clear();
+    } catch (error) {
+      console.warn('[provider-service] storeFallbackCategoryAndProviders failed:', error);
     }
-    const records: ProviderInput[] = providers.map((p) => fromAnalysisProvider(category.id, p));
-    await s.saveProviders(category.id, records);
-    providerCache.delete(`providers:category:${category.id}`);
-    searchCache.clear();
   },
 
   async getAnalysis(cacheKey: string): Promise<unknown | null> {

@@ -2,6 +2,7 @@ import type { AnalysisProvider } from '@/lib/types';
 import { slugify } from './seed/helpers';
 import type { PricingModel, ProviderWithRelations } from './schema';
 import type { ProviderInput } from './store';
+import { sanitizeProviderInput } from './validate';
 
 const REASON_TEMPLATES = [
   'Top pick — the most popular and production-ready option for this category.',
@@ -53,7 +54,7 @@ export function fromAnalysisProvider(
     'per-seat',
     'open-source',
   ];
-  return {
+  return sanitizeProviderInput({
     id: slug,
     categoryId,
     name: provider.name,
@@ -78,5 +79,5 @@ export function fromAnalysisProvider(
     features: provider.bestUseCases ?? [],
     tags: provider.tags ?? [],
     alternatives: [],
-  };
+  });
 }
