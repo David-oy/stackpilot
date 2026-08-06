@@ -1,30 +1,31 @@
-import { Github, Twitter, Linkedin, Sparkles } from 'lucide-react';
+import { Github, Twitter, Sparkles } from 'lucide-react';
 
 const footerLinks: Record<string, { label: string; href: string }[]> = {
   Product: [
-    { label: 'Features', href: '/#features' },
-    { label: 'Explore', href: '/#how-it-works' },
-    { label: 'Compare', href: '/#features' },
-    { label: 'Pricing', href: '/#cta' },
+    { label: 'Features', href: '/features' },
+    { label: 'Explore', href: '/explore' },
+    { label: 'Compare', href: '/compare' },
+    { label: 'Pricing', href: '/pricing' },
+    { label: 'Changelog', href: '/changelog' },
   ],
   Resources: [
     { label: 'Documentation', href: '/docs' },
-    { label: 'FAQ', href: '/faq' },
-    { label: 'API Reference', href: '#' },
-    { label: 'Changelog', href: '#' },
+    { label: 'API Reference', href: '/api-reference' },
+    { label: 'Blog', href: '/blog' },
+    { label: 'Community', href: '/community' },
+    { label: 'Status', href: '/status' },
   ],
   Company: [
-    { label: 'About', href: '#' },
-    { label: 'Contact', href: '#' },
-    { label: 'Privacy', href: '#' },
-    { label: 'Terms', href: '#' },
+    { label: 'About', href: '/about' },
+    { label: 'Contact', href: '/contact' },
+    { label: 'Privacy Policy', href: '/privacy' },
+    { label: 'Terms of Service', href: '/terms' },
   ],
 };
 
 const socialLinks = [
-  { icon: Github, href: 'https://github.com/David-oy/stackpilot', label: 'GitHub' },
+  { icon: Github, href: 'https://github.com/David-oy/get.stack', label: 'GitHub' },
   { icon: Twitter, href: 'https://x.com/vijayyyyy_7', label: 'Twitter' },
-  { icon: Linkedin, href: '#', label: 'LinkedIn' },
 ];
 
 export function Footer() {

@@ -2,7 +2,9 @@ import type { Metadata } from 'next';
 import { Navbar } from '@/components/landing/navbar';
 import { Hero } from '@/components/landing/hero';
 import { HowItWorks } from '@/components/landing/how-it-works';
+import { FloatingBadges } from '@/components/landing/floating-badges';
 import { Features } from '@/components/landing/features';
+import { FaqSection } from '@/components/landing/faq-section';
 import { CTA } from '@/components/landing/cta';
 import { Footer } from '@/components/landing/footer';
 import { siteConfig, absoluteUrl } from '@/lib/site';
@@ -56,7 +58,9 @@ export default function Home() {
       <Navbar />
       <Hero />
       <HowItWorks />
+      <FloatingBadges />
       <Features />
+      <FaqSection />
       <CTA />
       <Footer />
     </main>

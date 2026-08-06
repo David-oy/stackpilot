@@ -149,4 +149,35 @@
     0%, 100% { opacity: 0.4; }
     50% { opacity: 0.8; }
   }
+  .animate-float-badge {
+    animation: badgeFloat var(--float-duration, 6s) ease-in-out infinite;
+    animation-delay: var(--float-delay, 0s);
+  }
+  @keyframes badgeFloat {
+    0%, 100% { transform: translateY(0) rotate(var(--tilt, 0deg)); }
+    50% { transform: translateY(-8px) rotate(var(--tilt, 0deg)); }
+  }
+  .tk-keyword { color: #c792ea; }
+  .tk-string { color: #addb67; }
+  .tk-comment { color: #7a8a99; font-style: italic; }
+  .tk-number { color: #f78c6c; }
+  html.light .tk-keyword { color: #7c3aed; }
+  html.light .tk-string { color: #15803d; }
+  html.light .tk-comment { color: #64748b; }
+  html.light .tk-number { color: #ea580c; }
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5.5rem;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+  [id] {
+    scroll-margin-top: 5.5rem;
+  }
 }
