@@ -161,6 +161,8 @@ create table if not exists public.stack_items (
   stack_id uuid not null references public.stacks (id) on delete cascade,
   category_id text not null,
   category_name text not null,
+  category_position integer not null default 0,
+  collapsed boolean not null default false,
   provider_id uuid references public.providers (id) on delete set null,
   provider_snapshot jsonb not null default '{}'::jsonb,
   position integer not null default 0,
@@ -168,7 +170,7 @@ create table if not exists public.stack_items (
 );
 
 create index if not exists stack_items_stack_idx
-  on public.stack_items (stack_id);
+  on public.stack_items (stack_id, category_position, position);
 
 alter table public.stack_items enable row level security;
 

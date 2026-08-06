@@ -15,6 +15,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { useStack } from '@/lib/stack-context';
 import { useAnalysisContext } from '@/lib/analysis-context';
+import { useAuth } from '@/lib/auth/auth-context';
 import { StackList } from './stack-list';
 import { StackEditor } from './stack-editor';
 import { StackHealth } from './stack-health';
@@ -83,7 +84,8 @@ function EmptyState() {
 }
 
 function WorkspaceContent() {
-  const { activeStack, hydrated, renameStack, resetStack, clearStack } = useStack();
+  const { activeStack, hydrated, renameStack, resetStack, clearStack, cloudSynced } = useStack();
+  const { user } = useAuth();
   const [editingName, setEditingName] = useState(false);
   const [draftName, setDraftName] = useState('');
   const [shareUrl, setShareUrl] = useState<string | null>(null);
@@ -220,9 +222,15 @@ function WorkspaceContent() {
                 <RefreshCw className="h-4 w-4 text-emerald-300" />
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-foreground">Auto-saved</h3>
+                <h3 className="text-sm font-semibold text-foreground">
+                  {user && cloudSynced ? 'Synced to cloud' : 'Auto-saved'}
+                </h3>
                 <p className="text-[11px] text-muted-foreground">
-                  Changes are stored locally on this device
+                  {user
+                    ? cloudSynced
+                      ? 'Changes sync to your StackPilot account'
+                      : 'Syncing your stacks...'
+                    : 'Changes are stored locally on this device'}
                 </p>
               </div>
             </div>

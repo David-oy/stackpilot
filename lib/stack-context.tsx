@@ -3,8 +3,18 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useAnalysisContext } from './analysis-context';
+import { useAuth } from '@/lib/auth/auth-context';
+import { MergeStacksDialog } from '@/components/auth/merge-stacks-dialog';
 import type { StackAnalysis } from './types';
 import { LocalStorageStackRepository, type StackRepository } from './stacks/repository';
+import {
+  deleteCloudStack,
+  listCloudStacks,
+  localOnlyStacks,
+  mergeStacks,
+  pushStacksToCloud,
+  upsertCloudStack,
+} from './stacks/cloud';
 import type {
   StackCategory,
   StackProviderInput,
@@ -18,6 +28,7 @@ type StackContextValue = {
   activeStack: UserStack | null;
   activeStackId: string | null;
   hydrated: boolean;
+  cloudSynced: boolean;
   addProvider: (
     categoryId: string,
     categoryName: string,
@@ -121,6 +132,7 @@ export function StackProvider({
   repository?: StackRepository;
 }) {
   const { analysis, query } = useAnalysisContext();
+  const { user } = useAuth();
   const repoRef = useRef<StackRepository | null>(null);
   if (!repoRef.current) {
     repoRef.current = repository ?? new LocalStorageStackRepository();
@@ -130,6 +142,10 @@ export function StackProvider({
   const [stacks, setStacks] = useState<UserStack[]>([]);
   const [activeStack, setActiveStack] = useState<UserStack | null>(null);
   const [hydrated, setHydrated] = useState(false);
+  const [cloudSynced, setCloudSynced] = useState(false);
+  const [mergeOpen, setMergeOpen] = useState(false);
+  const [mergeCount, setMergeCount] = useState(0);
+  const cloudUserRef = useRef<string | null>(null);
 
   useEffect(() => {
     try {
@@ -154,6 +170,67 @@ export function StackProvider({
     }
     setStacks(repo.list());
   }, [activeStack, hydrated, repo]);
+
+  useEffect(() => {
+    if (!user) {
+      cloudUserRef.current = null;
+      setCloudSynced(false);
+      setMergeOpen(false);
+      return;
+    }
+    if (cloudUserRef.current === user.id) return;
+    cloudUserRef.current = user.id;
+    setCloudSynced(false);
+    setMergeOpen(false);
+
+    let cancelled = false;
+    void (async () => {
+      try {
+        const cloud = await listCloudStacks(user.id);
+        if (cancelled) return;
+        const local = repo.list();
+        const merged = mergeStacks(local, cloud);
+        for (const stack of merged) repo.save(stack);
+        setStacks(merged);
+        setActiveStack((prev) => {
+          if (prev && merged.some((s) => s.id === prev.id)) return prev;
+          const activeId = repo.getActiveId();
+          return merged.find((s) => s.id === activeId) ?? merged[0] ?? null;
+        });
+        const localOnly = localOnlyStacks(local, cloud);
+        if (localOnly.length > 0) {
+          setMergeCount(localOnly.length);
+          setMergeOpen(true);
+        }
+      } catch {
+        // Cloud unavailable — stay in local mode.
+      } finally {
+        if (!cancelled) setCloudSynced(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user, repo]);
+
+  useEffect(() => {
+    if (!user || !cloudSynced || !hydrated || !activeStack) return;
+    const handle = setTimeout(() => {
+      void upsertCloudStack(user.id, activeStack).catch(() => {
+        // ignore sync failures
+      });
+    }, 800);
+    return () => clearTimeout(handle);
+  }, [user, cloudSynced, hydrated, activeStack]);
+
+  const handleMerge = useCallback(() => {
+    setMergeOpen(false);
+    if (!user) return;
+    const local = repo.list();
+    void pushStacksToCloud(user.id, local).catch(() => {
+      // ignore sync failures
+    });
+  }, [repo, user]);
 
   const updateActive = useCallback((updater: (stack: UserStack) => UserStack) => {
     setActiveStack((prev) => {
@@ -324,10 +401,20 @@ export function StackProvider({
       if (activeStack && activeStack.id === id) {
         updateActive((stack) => ({ ...stack, name: clean }));
       } else {
-        setStacks((prev) => prev.map((s) => (s.id === id ? { ...s, name: clean, updatedAt: now() } : s)));
+        setStacks((prev) =>
+          prev.map((s) => (s.id === id ? { ...s, name: clean, updatedAt: now() } : s)),
+        );
+        const source = stacks.find((s) => s.id === id);
+        if (user && source) {
+          void upsertCloudStack(user.id, { ...source, name: clean, updatedAt: now() }).catch(
+            () => {
+              // ignore sync failures
+            },
+          );
+        }
       }
     },
-    [activeStack, updateActive],
+    [activeStack, stacks, updateActive, user],
   );
 
   const duplicateStack = useCallback(
@@ -362,8 +449,13 @@ export function StackProvider({
         const remaining = repo.list();
         return remaining[0] ?? null;
       });
+      if (user) {
+        void deleteCloudStack(user.id, id).catch(() => {
+          // ignore sync failures
+        });
+      }
     },
-    [repo],
+    [repo, user],
   );
 
   const setActiveStackId = useCallback(
@@ -418,6 +510,7 @@ export function StackProvider({
     activeStack,
     activeStackId: activeStack?.id ?? null,
     hydrated,
+    cloudSynced,
     addProvider,
     removeProvider,
     moveProvider,
@@ -437,7 +530,18 @@ export function StackProvider({
     totalCount,
   };
 
-  return <StackContext.Provider value={value}>{children}</StackContext.Provider>;
+  return (
+    <StackContext.Provider value={value}>
+      {children}
+      <MergeStacksDialog
+        open={mergeOpen}
+        onOpenChange={setMergeOpen}
+        onMerge={handleMerge}
+        count={mergeCount}
+        email={user?.email ?? ''}
+      />
+    </StackContext.Provider>
+  );
 }
 
 export function useStack() {
