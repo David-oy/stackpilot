@@ -22,6 +22,7 @@ import {
   toJsonExport,
   toMarkdown,
 } from '@/lib/stacks/export';
+import { downloadPdf } from '@/lib/stacks/export-pdf';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -86,8 +87,9 @@ export function ExportMenu({
     toast.success('Stack exported as Markdown');
   };
 
-  const print = () => {
-    printStackHtml(stack, health);
+  const downloadPdfFile = () => {
+    downloadPdf(stack, health, `${slugifyFileName(stack.name)}.pdf`);
+    toast.success('Stack exported as PDF');
   };
 
   return (
@@ -117,11 +119,11 @@ export function ExportMenu({
         <DropdownMenuItem onSelect={(e) => e.preventDefault()} onClick={downloadMarkdown}>
           <FileText className="mr-2 h-4 w-4" /> Download Markdown
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={(e) => e.preventDefault()} onClick={print}>
-          <Download className="mr-2 h-4 w-4" /> Export PDF (via print)
+        <DropdownMenuItem onSelect={(e) => e.preventDefault()} onClick={downloadPdfFile}>
+          <Download className="mr-2 h-4 w-4" /> Download PDF
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={(e) => e.preventDefault()} onClick={print}>
+        <DropdownMenuItem onSelect={(e) => e.preventDefault()} onClick={() => printStackHtml(stack, health)}>
           <Printer className="mr-2 h-4 w-4" /> Print
         </DropdownMenuItem>
       </DropdownMenuContent>

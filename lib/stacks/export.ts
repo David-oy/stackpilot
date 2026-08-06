@@ -135,8 +135,16 @@ const ESCAPE_HTML = (value: string): string =>
 
 function providerToHtml(provider: StackProviderItem, categoryName: string): string {
   const links: string[] = [];
-  if (provider.website) links.push(`<a href="${provider.website}" target="_blank" rel="noopener">Website</a>`);
-  if (provider.documentation) links.push(`<a href="${provider.documentation}" target="_blank" rel="noopener">Documentation</a>`);
+  if (provider.website) {
+    links.push(
+      `<a href="${ESCAPE_HTML(provider.website)}" target="_blank" rel="noopener">Website: ${ESCAPE_HTML(provider.website)}</a>`,
+    );
+  }
+  if (provider.documentation) {
+    links.push(
+      `<a href="${ESCAPE_HTML(provider.documentation)}" target="_blank" rel="noopener">Documentation: ${ESCAPE_HTML(provider.documentation)}</a>`,
+    );
+  }
   return `
     <section class="provider">
       <h3>${ESCAPE_HTML(provider.name)} <small>· ${ESCAPE_HTML(categoryName)}</small></h3>
@@ -199,13 +207,40 @@ export function printStackHtml(stack: UserStack, health: StackHealth): void {
   </div>
   ${categoriesHtml}
   <p class="footer">Built with StackPilot — AI-powered tech stack discovery.</p>
-  <script>window.onload = function(){ window.print(); };</script>
+  <script>window.onload = function(){ window.focus(); window.print(); };</script>
 </body>
 </html>`;
 
-  const win = window.open('', '_blank', 'noopener');
-  if (!win) return;
-  win.document.open();
-  win.document.write(html);
-  win.document.close();
+  const win = window.open('', '_blank');
+  if (win) {
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
+    return;
+  }
+
+  const iframe = document.createElement('iframe');
+  iframe.setAttribute('aria-hidden', 'true');
+  iframe.style.position = 'fixed';
+  iframe.style.right = '0';
+  iframe.style.bottom = '0';
+  iframe.style.width = '0';
+  iframe.style.height = '0';
+  iframe.style.border = '0';
+  document.body.appendChild(iframe);
+  const doc = iframe.contentDocument;
+  if (!doc) {
+    iframe.remove();
+    return;
+  }
+  doc.open();
+  doc.write(html.replace(/<script[\s\S]*?<\/script>/g, ''));
+  doc.close();
+  iframe.contentWindow?.addEventListener('afterprint', () => {
+    setTimeout(() => iframe.remove(), 1000);
+  });
+  setTimeout(() => {
+    iframe.contentWindow?.focus();
+    iframe.contentWindow?.print();
+  }, 250);
 }

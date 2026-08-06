@@ -79,6 +79,8 @@ export function buildProviderInput(provider: ProviderLike): StackProviderInput {
     name: ui.name,
     description: ui.description,
     reason: buildProviderReason(ui),
+    website: ui.website,
+    documentation: ui.documentation,
     tags: ui.tags,
     freeTier: ui.freeTier,
     openSource: ui.openSource,

@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useStack } from '@/lib/stack-context';
+import { importStackFromPdf } from '@/lib/stacks/import-pdf';
 import { parseStackImport } from '@/lib/stacks/export';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -60,8 +61,10 @@ export function StackList() {
 
   const handleImportFile = async (file: File) => {
     try {
-      const text = await file.text();
-      const stack = parseStackImport(text);
+      const stack =
+        file.name.toLowerCase().endsWith('.pdf')
+          ? await importStackFromPdf(file)
+          : parseStackImport(await file.text());
       if (!stack) throw new Error('Could not read that file as a StackPilot stack.');
       importStack(stack);
       toast.success(`Imported "${stack.name}"`);
@@ -102,7 +105,7 @@ export function StackList() {
           <input
             ref={fileInputRef}
             type="file"
-            accept=".json,application/json,.md,text/markdown,.txt"
+            accept=".json,application/json,.md,text/markdown,.txt,.pdf,application/pdf"
             className="hidden"
             onChange={(e) => {
               const file = e.target.files?.[0];
