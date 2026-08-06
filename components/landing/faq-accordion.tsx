@@ -2,38 +2,31 @@
 
 import { useMemo, useState } from 'react';
 import * as AccordionPrimitive from '@radix-ui/react-accordion';
-import { Search, Plus, Minus, MessageCircleQuestion } from 'lucide-react';
+import { Plus, Minus, MessageCircleQuestion } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { faqCategories, type FaqItem } from '@/lib/faq';
 
 export function FaqAccordion({
   items,
-  showSearch = true,
   showFilters = true,
   defaultOpenIndex = 0,
 }: {
   items: FaqItem[];
-  showSearch?: boolean;
   showFilters?: boolean;
   defaultOpenIndex?: number;
 }) {
-  const [query, setQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const [openItem, setOpenItem] = useState<string>(
     items[defaultOpenIndex]?.question ?? '',
   );
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return items.filter((item) => {
-      const matchesCategory = activeCategory === 'All' || item.category === activeCategory;
-      const matchesQuery =
-        q.length === 0 ||
-        item.question.toLowerCase().includes(q) ||
-        item.answer.toLowerCase().includes(q);
-      return matchesCategory && matchesQuery;
-    });
-  }, [items, query, activeCategory]);
+  const filtered = useMemo(
+    () =>
+      items.filter(
+        (item) => activeCategory === 'All' || item.category === activeCategory,
+      ),
+    [items, activeCategory],
+  );
 
   const categories = useMemo(
     () => ['All', ...faqCategories.filter((c) => items.some((i) => i.category === c))],
@@ -42,22 +35,6 @@ export function FaqAccordion({
 
   return (
     <div className="w-full">
-      {showSearch && (
-        <div className="mx-auto mb-6 max-w-md">
-          <div className="group relative">
-            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search questions..."
-              aria-label="Search questions"
-              className="w-full rounded-xl glass py-3 pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/40"
-            />
-          </div>
-        </div>
-      )}
-
       {showFilters && (
         <div className="mb-8 flex flex-wrap items-center justify-center gap-2">
           {categories.map((category) => (
@@ -81,7 +58,7 @@ export function FaqAccordion({
         <div className="glass mx-auto max-w-md rounded-2xl p-10 text-center">
           <MessageCircleQuestion className="mx-auto h-8 w-8 text-muted-foreground/50" />
           <p className="mt-3 text-sm text-muted-foreground">
-            No questions match your search. Try a different keyword.
+            No questions in this category yet.
           </p>
         </div>
       ) : (

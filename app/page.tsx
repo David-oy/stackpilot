@@ -5,6 +5,7 @@ import { HowItWorks } from '@/components/landing/how-it-works';
 import { FloatingBadges } from '@/components/landing/floating-badges';
 import { Features } from '@/components/landing/features';
 import { FaqSection } from '@/components/landing/faq-section';
+import { DocsSection } from '@/components/landing/docs-section';
 import { CTA } from '@/components/landing/cta';
 import { Footer } from '@/components/landing/footer';
 import { siteConfig, absoluteUrl } from '@/lib/site';
@@ -61,6 +62,7 @@ export default function Home() {
       <FloatingBadges />
       <Features />
       <FaqSection />
+      <DocsSection />
       <CTA />
       <Footer />
     </main>

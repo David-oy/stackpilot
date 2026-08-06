@@ -11,34 +11,31 @@ import { cn } from '@/lib/utils';
 type NavLink = {
   label: string;
   href: string;
-  section?: string;
+  /** Pattern used to determine the active state. A trailing "/*" matches the base path and all nested routes. */
+  pattern: string;
 };
 
 const navLinks: NavLink[] = [
-  { label: 'Home', href: '/', section: 'hero' },
-  { label: 'Explore', href: '/#how-it-works', section: 'how-it-works' },
-  { label: 'Compare', href: '/#features', section: 'features' },
-  { label: 'Pricing', href: '/#cta', section: 'cta' },
-  { label: 'Docs', href: '/docs' },
-  { label: 'FAQ', href: '/faq' },
+  { label: 'Home', href: '/', pattern: '/' },
+  { label: 'Explore', href: '/explore', pattern: '/explore' },
+  { label: 'Compare', href: '/compare', pattern: '/compare' },
+  { label: 'Pricing', href: '/pricing', pattern: '/pricing' },
 ];
 
-const HOME_SECTIONS = ['how-it-works', 'features', 'cta'];
-
-function smoothScrollTo(id: string) {
-  const el = document.getElementById(id);
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  } else {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+function matchesPath(pathname: string, pattern: string): boolean {
+  if (pattern.endsWith('/*')) {
+    const base = pattern.slice(0, -1);
+    return pathname === base || pathname.startsWith(base + '/');
   }
+  return pathname === pattern;
 }
 
 export function Navbar() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<string | null>(null);
+
+  const activeLabel = navLinks.find((link) => matchesPath(pathname, link.pattern))?.label ?? null;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16);
@@ -47,64 +44,7 @@ export function Navbar() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  useEffect(() => {
-    if (pathname !== '/') {
-      setActiveSection(null);
-      return;
-    }
-    const sections = HOME_SECTIONS.map((id) => document.getElementById(id)).filter(
-      (el): el is HTMLElement => el !== null,
-    );
-    if (sections.length === 0) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
-          }
-        }
-      },
-      { rootMargin: '-40% 0px -55% 0px', threshold: 0 },
-    );
-    sections.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, [pathname]);
-
-  const isActive = (link: NavLink): boolean => {
-    if (link.label === 'Home') {
-      return pathname === '/';
-    }
-    if (link.href === '/docs') {
-      return pathname === '/docs' || pathname.startsWith('/docs/');
-    }
-    if (link.href === '/faq') {
-      return pathname === '/faq';
-    }
-    if (link.section && pathname === '/') {
-      return activeSection === link.section;
-    }
-    return false;
-  };
-
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, link: NavLink) => {
-    setMobileOpen(false);
-    if (link.section) {
-      if (pathname === '/') {
-        e.preventDefault();
-        smoothScrollTo(link.section);
-      }
-      return;
-    }
-    if (link.href === '/') {
-      e.preventDefault();
-      if (pathname === '/') {
-        smoothScrollTo('hero');
-      } else {
-        window.scrollTo({ top: 0, behavior: 'auto' });
-        window.location.href = '/';
-      }
-    }
-  };
+  const isActive = (link: NavLink): boolean => activeLabel === link.label;
 
   return (
     <header
@@ -132,10 +72,9 @@ export function Navbar() {
 
         <div className="hidden items-center gap-1 md:flex">
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.label}
               href={link.href}
-              onClick={(e) => handleNavClick(e, link)}
               aria-current={isActive(link) ? 'page' : undefined}
               className={cn(
                 'relative rounded-lg px-3 py-2 text-sm transition-colors',
@@ -148,7 +87,7 @@ export function Navbar() {
                 <span className="absolute inset-0 rounded-lg bg-foreground/5" aria-hidden="true" />
               )}
               <span className="relative">{link.label}</span>
-            </a>
+            </Link>
           ))}
         </div>
 
@@ -178,10 +117,10 @@ export function Navbar() {
               <ThemeSwitcher />
             </div>
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.label}
                 href={link.href}
-                onClick={(e) => handleNavClick(e, link)}
+                onClick={() => setMobileOpen(false)}
                 aria-current={isActive(link) ? 'page' : undefined}
                 className={cn(
                   'rounded-lg px-3 py-2.5 text-sm transition-colors',
@@ -191,7 +130,7 @@ export function Navbar() {
                 )}
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
             <div className="mt-2 flex flex-col gap-3 border-t border-foreground/5 pt-3">
               <Button variant="outline" className="border-foreground/10 text-foreground">

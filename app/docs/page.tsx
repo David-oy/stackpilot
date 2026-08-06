@@ -4,7 +4,6 @@ import {
   ArrowRight,
   BookOpen,
   GitCompare,
-  Search as SearchIcon,
   Sparkles,
   Terminal,
   ListChecks,
@@ -13,11 +12,10 @@ import {
   FileText,
   HelpCircle,
 } from 'lucide-react';
-import { DocsSearch } from '@/components/docs/docs-search';
 import { CodeBlock } from '@/components/docs/code-block';
 import { siteConfig } from '@/lib/site';
 import { docGroups } from '@/lib/docs';
-import { categories, getCategoryMeta } from '@/lib/categories';
+import { categories } from '@/lib/categories';
 import { breadcrumbSchema } from '@/lib/jsonld';
 
 export const metadata: Metadata = {
@@ -74,10 +72,6 @@ export default function DocsPage() {
             Everything you need to discover, compare, and assemble the perfect technology stack.
           </p>
         </header>
-
-        <div className="mt-10">
-          <DocsSearch />
-        </div>
 
         <section className="mt-16">
           <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
