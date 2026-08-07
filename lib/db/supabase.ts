@@ -552,7 +552,17 @@ export class SupabaseProviderStore implements ProviderStore {
   }
 
   async searchProviders(query: string): Promise<ProviderWithRelations[]> {
-    const needle = `%${query.toLowerCase().trim()}%`;
+    // Strip PostgREST filter metacharacters so user input can never alter the
+    // WHERE clause or produce a malformed filter (500). Substring search only
+    // needs the plain text; commas, parens, wildcards are not searchable.
+    const needle = `%${query
+      .toLowerCase()
+      .trim()
+      .replace(/[%,()]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 120)}%`;
+    if (needle === '%%') return [];
     const { data } = await this.client
       .from(this.t('providers'))
       .select(this.providerSelect)

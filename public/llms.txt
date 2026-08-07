@@ -1,12 +1,12 @@
-# StackPilot
+# Stack2Set
 
 > AI-powered technology stack discovery for developers.
 
-StackPilot is an AI-powered developer tool that analyzes your project idea and recommends the best technologies, APIs, databases, authentication providers, hosting services, and developer tools. Describe what you want to build and StackPilot returns a complete, ranked tech stack with provider comparisons.
+Stack2Set is an AI-powered developer tool that analyzes your project idea and recommends the best technologies, APIs, databases, authentication providers, hosting services, and developer tools. Describe what you want to build and Stack2Set returns a complete, ranked tech stack with provider comparisons.
 
 ## Purpose
 
-StackPilot helps developers discover every technology, API, and service needed to build a project. Instead of manually researching hundreds of tools, describe your idea in plain English and get a curated, ranked list of recommended providers with reasoning, best use cases, and official links.
+Stack2Set helps developers discover every technology, API, and service needed to build a project. Instead of manually researching hundreds of tools, describe your idea in plain English and get a curated, ranked list of recommended providers with reasoning, best use cases, and official links.
 
 ## Homepage
 
@@ -52,4 +52,4 @@ StackPilot helps developers discover every technology, API, and service needed t
 
 ## Contact
 
-- GitHub: https://github.com/David-oy/stackpilot
+- GitHub: https://github.com/David-oy/get.stack

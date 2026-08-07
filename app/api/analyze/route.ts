@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { providerService } from '@/lib/services/provider-service';
 import { normalizeCacheKey } from '@/lib/db/cache';
 import { getRouteSession } from '@/lib/supabase/route-user';
+import { checkRateLimit } from '@/lib/rate-limit';
 import type { AnalysisProvider } from '@/lib/types';
 import type { StackAnalysis } from '@/lib/types';
 import {
@@ -79,6 +80,20 @@ async function handleAnalyze(request: NextRequest) {
   if (cached) {
     trace('cache response serialized');
     return NextResponse.json(cached as StackAnalysis);
+  }
+
+  // Only the uncached (Gemini-billed) path is rate limited so repeat requests
+  // that hit the cache are never throttled.
+  const rate = checkRateLimit(session.user.id);
+  if (!rate.allowed) {
+    trace(`rate limited (retry in ${rate.retryAfterSec}s)`);
+    return NextResponse.json(
+      { error: `Too many requests. Please try again in ${rate.retryAfterSec}s.` },
+      {
+        status: 429,
+        headers: { 'Retry-After': String(rate.retryAfterSec) },
+      },
+    );
   }
 
   const categoriesStart = Date.now();

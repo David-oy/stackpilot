@@ -4,9 +4,11 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { ReactNode } from 'react';
 import { useAnalysisContext } from './analysis-context';
 import { useAuth } from '@/lib/auth/auth-context';
+import { useWorkspaces } from '@/lib/workspaces/context';
+import { LOCAL_WORKSPACE_ID } from '@/lib/workspaces/types';
 import { MergeStacksDialog } from '@/components/auth/merge-stacks-dialog';
 import type { StackAnalysis } from './types';
-import { LocalStorageStackRepository, type StackRepository } from './stacks/repository';
+import { ScopedStackRepository, type StackRepository } from './stacks/repository';
 import {
   deleteCloudStack,
   listCloudStacks,
@@ -129,11 +131,17 @@ export function StackProvider({
 }) {
   const { analysis, query } = useAnalysisContext();
   const { user } = useAuth();
-  const repoRef = useRef<StackRepository | null>(null);
-  if (!repoRef.current) {
-    repoRef.current = repository ?? new LocalStorageStackRepository();
-  }
-  const repo = repoRef.current;
+  const { currentWorkspace } = useWorkspaces();
+  const workspaceId = currentWorkspace?.id ?? null;
+
+  /**
+   * Every workspace gets its own localStorage scope. When the workspace
+   * changes, the repo is swapped and all stack state is reloaded for it.
+   */
+  const repo = useMemo<StackRepository | null>(
+    () => (workspaceId ? repository ?? new ScopedStackRepository(workspaceId) : null),
+    [workspaceId, repository],
+  );
 
   const [stacks, setStacks] = useState<UserStack[]>([]);
   const [activeStack, setActiveStack] = useState<UserStack | null>(null);
@@ -141,51 +149,80 @@ export function StackProvider({
   const [cloudSynced, setCloudSynced] = useState(false);
   const [mergeOpen, setMergeOpen] = useState(false);
   const [mergeCount, setMergeCount] = useState(0);
-  const cloudUserRef = useRef<string | null>(null);
+  const syncRef = useRef<string | null>(null);
 
   useEffect(() => {
+    if (!repo) {
+      setStacks([]);
+      setActiveStack(null);
+      setHydrated(false);
+      return;
+    }
+    setStacks([]);
+    setActiveStack(null);
+    setSaveStatus('idle');
+    setHydrated(false);
+    let all: UserStack[] = [];
     try {
-      const all = repo.list();
-      setStacks(all);
-      const activeId = repo.getActiveId();
-      const active = activeId ? all.find((s) => s.id === activeId) ?? null : null;
-      setActiveStack(active ?? all[0] ?? null);
+      all = repo.list();
     } catch {
       // ignore
     }
+    setStacks(all);
+    const activeId = repo.getActiveId();
+    const active = activeId ? all.find((s) => s.id === activeId) ?? all[0] ?? null : all[0] ?? null;
+    setActiveStack(active);
     setHydrated(true);
   }, [repo]);
 
+  /**
+   * Cloud sync is scoped to the current workspace. On a user's first sign-in
+   * the signed-out local workspace's stacks are folded into the account's
+   * default workspace so on-device data isn't lost.
+   */
   useEffect(() => {
-    if (!hydrated) return;
-    if (activeStack) {
-      repo.save(activeStack);
-      repo.setActiveId(activeStack.id);
-    } else {
-      repo.setActiveId(null);
-    }
-    setStacks(repo.list());
-  }, [activeStack, hydrated, repo]);
-
-  useEffect(() => {
-    if (!user) {
-      cloudUserRef.current = null;
-      setCloudSynced(false);
-      setMergeOpen(false);
-      return;
-    }
-    if (cloudUserRef.current === user.id) return;
-    cloudUserRef.current = user.id;
+    if (!user || !repo || !workspaceId) return;
+    const syncKey = `${user.id}:${workspaceId}`;
+    if (syncRef.current === syncKey) return;
+    syncRef.current = syncKey;
     setCloudSynced(false);
     setMergeOpen(false);
 
     let cancelled = false;
     void (async () => {
       try {
-        const cloud = await listCloudStacks(user.id);
+        const cloud = await listCloudStacks(user.id, workspaceId);
         if (cancelled) return;
+
         const local = repo.list();
-        const merged = mergeStacks(local, cloud);
+        let source = local;
+        const localFlag = `stack2set:local-imported:${user.id}`;
+        let localImported = false;
+        try {
+          localImported = window.localStorage.getItem(localFlag) === '1';
+        } catch {
+          // ignore
+        }
+        if (!localImported) {
+          const legacy = new ScopedStackRepository(LOCAL_WORKSPACE_ID).list();
+          if (legacy.length > 0) {
+            source = mergeStacks(local, legacy);
+            const added = legacy.filter((s) => !cloud.some((c) => c.id === s.id));
+            for (const stack of source) repo.save(stack);
+            for (const stack of added) {
+              await upsertCloudStack(user.id, stack, workspaceId).catch(() => {
+                // ignore sync failures
+              });
+            }
+          }
+          try {
+            window.localStorage.setItem(localFlag, '1');
+          } catch {
+            // ignore
+          }
+        }
+
+        const merged = mergeStacks(source, cloud);
         for (const stack of merged) repo.save(stack);
         setStacks(merged);
         setActiveStack((prev) => {
@@ -193,7 +230,7 @@ export function StackProvider({
           const activeId = repo.getActiveId();
           return merged.find((s) => s.id === activeId) ?? merged[0] ?? null;
         });
-        const localOnly = localOnlyStacks(local, cloud);
+        const localOnly = localOnlyStacks(source, cloud);
         if (localOnly.length > 0) {
           setMergeCount(localOnly.length);
           setMergeOpen(true);
@@ -207,17 +244,29 @@ export function StackProvider({
     return () => {
       cancelled = true;
     };
-  }, [user, repo]);
+  }, [user, repo, workspaceId]);
+
+  // Persist the active stack + active id to the workspace's local scope.
+  useEffect(() => {
+    if (!hydrated || !repo) return;
+    if (activeStack) {
+      repo.save(activeStack);
+      repo.setActiveId(activeStack.id);
+    } else {
+      repo.setActiveId(null);
+    }
+    setStacks(repo.list());
+  }, [activeStack, hydrated, repo]);
 
   useEffect(() => {
-    if (!user || !cloudSynced || !hydrated || !activeStack) return;
+    if (!user || !cloudSynced || !hydrated || !activeStack || !workspaceId) return;
     const handle = setTimeout(() => {
-      void upsertCloudStack(user.id, activeStack).catch(() => {
+      void upsertCloudStack(user.id, activeStack, workspaceId).catch(() => {
         // ignore sync failures
       });
     }, 800);
     return () => clearTimeout(handle);
-  }, [user, cloudSynced, hydrated, activeStack]);
+  }, [user, cloudSynced, hydrated, activeStack, workspaceId]);
 
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const userRef = useRef(user);
@@ -247,7 +296,7 @@ export function StackProvider({
   const saveStackNow = useCallback(async (): Promise<boolean> => {
     const currentUser = userRef.current;
     const current = activeStackRef.current;
-    if (!currentUser || !current) return false;
+    if (!currentUser || !current || !workspaceId) return false;
     const fingerprint = stackFingerprint(current);
     if (fingerprint === lastSavedFingerprintRef.current) {
       setSaveStatus('saved');
@@ -258,7 +307,7 @@ export function StackProvider({
       const stackWithHealth = current.health
         ? current
         : { ...current, health: computeStackHealth(current) };
-      await upsertCloudStack(currentUser.id, stackWithHealth);
+      await upsertCloudStack(currentUser.id, stackWithHealth, workspaceId);
       const latest = activeStackRef.current;
       if (latest && stackFingerprint(latest) === fingerprint) {
         lastSavedFingerprintRef.current = fingerprint;
@@ -271,7 +320,7 @@ export function StackProvider({
       setSaveStatus('idle');
       return false;
     }
-  }, [stackFingerprint]);
+  }, [stackFingerprint, workspaceId]);
 
   /**
    * Manual save only: the stack persists to the account when the user clicks
@@ -288,12 +337,12 @@ export function StackProvider({
 
   const handleMerge = useCallback(() => {
     setMergeOpen(false);
-    if (!user) return;
+    if (!user || !repo || !workspaceId) return;
     const local = repo.list();
-    void pushStacksToCloud(user.id, local).catch(() => {
+    void pushStacksToCloud(user.id, local, workspaceId).catch(() => {
       // ignore sync failures
     });
-  }, [repo, user]);
+  }, [repo, user, workspaceId]);
 
   const updateActive = useCallback((updater: (stack: UserStack) => UserStack) => {
     setActiveStack((prev) => {
@@ -306,6 +355,7 @@ export function StackProvider({
   const activate = useCallback(
     (stack: UserStack | null) => {
       setActiveStack(stack);
+      if (!repo) return;
       if (stack) repo.setActiveId(stack.id);
       else repo.setActiveId(null);
     },
@@ -475,8 +525,8 @@ export function StackProvider({
           prev.map((s) => (s.id === id ? { ...s, name: clean, updatedAt: now() } : s)),
         );
         const source = stacks.find((s) => s.id === id);
-        if (user && source) {
-          void upsertCloudStack(user.id, { ...source, name: clean, updatedAt: now() }).catch(
+        if (user && source && workspaceId) {
+          void upsertCloudStack(user.id, { ...source, name: clean, updatedAt: now() }, workspaceId).catch(
             () => {
               // ignore sync failures
             },
@@ -484,7 +534,7 @@ export function StackProvider({
         }
       }
     },
-    [activeStack, stacks, updateActive, user],
+    [activeStack, stacks, updateActive, user, workspaceId],
   );
 
   const duplicateStack = useCallback(
@@ -512,11 +562,11 @@ export function StackProvider({
 
   const deleteStack = useCallback(
     (id: string) => {
-      repo.delete(id);
+      repo?.delete(id);
       setStacks((prev) => prev.filter((s) => s.id !== id));
       setActiveStack((prev) => {
         if (!prev || prev.id !== id) return prev;
-        const remaining = repo.list();
+        const remaining = repo?.list() ?? [];
         return remaining[0] ?? null;
       });
       if (user) {
@@ -532,13 +582,14 @@ export function StackProvider({
     (id: string) => {
       const stack = stacks.find((s) => s.id === id) ?? null;
       setActiveStack(stack);
-      if (stack) repo.setActiveId(stack.id);
+      if (stack) repo?.setActiveId(stack.id);
     },
     [repo, stacks],
   );
 
   const importStack = useCallback(
     (stack: UserStack) => {
+      if (!repo) return null;
       const imported: UserStack = {
         ...stack,
         id: stack.id || generateId(),

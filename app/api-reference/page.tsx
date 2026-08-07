@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Navbar } from '@/components/landing/navbar';
 import { Footer } from '@/components/landing/footer';
 import { CodeBlock } from '@/components/docs/code-block';
-import { breadcrumbSchema } from '@/lib/jsonld';
+import { breadcrumbSchema, serializeJsonLd } from '@/lib/jsonld';
 
 export const metadata: Metadata = {
   title: 'API Reference',
@@ -46,7 +46,7 @@ export default function ApiReferencePage() {
     <main className="relative min-h-screen overflow-x-hidden">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
       <Navbar />
       <div className="relative overflow-hidden px-4 pb-24 pt-32 sm:px-6 sm:pt-36">

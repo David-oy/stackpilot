@@ -3,7 +3,7 @@ import { Footer } from '@/components/landing/footer';
 import { Navbar } from '@/components/landing/navbar';
 import { FaqAccordion } from '@/components/landing/faq-accordion';
 import { siteConfig } from '@/lib/site';
-import { faqSchema } from '@/lib/jsonld';
+import { faqSchema, serializeJsonLd } from '@/lib/jsonld';
 import { faqItems } from '@/lib/faq';
 
 export const metadata: Metadata = {
@@ -28,7 +28,7 @@ export default function FAQPage() {
     <main className="relative min-h-screen overflow-x-hidden">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
       <Navbar />
 

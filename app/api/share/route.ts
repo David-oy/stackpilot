@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     const stack = parsed.data.stack as unknown as UserStack;
     const health = computeStackHealth(stack);
 
-    const payload = getShareRepository().create({
+    const payload = await getShareRepository().create({
       name: stack.name,
       prompt: stack.prompt,
       projectType: stack.sourceAnalysis?.projectType,

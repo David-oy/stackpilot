@@ -19,25 +19,34 @@ export function useAnalysis(query: string, enabled = true) {
       : { data: null, isLoading: query.trim().length > 0 && enabled, error: null },
   );
   const startedForRef = useRef<string | null>(null);
+  const controllerRef = useRef<AbortController | null>(null);
 
-  const load = useCallback(async () => {
-    if (!query.trim()) {
-      setState({ data: null, isLoading: false, error: null });
-      return;
-    }
-    setState({ data: null, isLoading: true, error: null });
-    try {
-      const data = await analyzeProject(query);
-      saveAnalysis(query, data);
-      setState({ data, isLoading: false, error: null });
-    } catch (error) {
-      setState({
-        data: null,
-        isLoading: false,
-        error: error instanceof Error ? error.message : 'Something went wrong. Please try again.',
-      });
-    }
-  }, [query, saveAnalysis]);
+  const load = useCallback(
+    async (q = query) => {
+      if (!q.trim()) {
+        setState({ data: null, isLoading: false, error: null });
+        return;
+      }
+      controllerRef.current?.abort();
+      const controller = new AbortController();
+      controllerRef.current = controller;
+      setState({ data: null, isLoading: true, error: null });
+      try {
+        const data = await analyzeProject(q, controller.signal);
+        if (controllerRef.current !== controller) return;
+        saveAnalysis(q, data);
+        setState({ data, isLoading: false, error: null });
+      } catch (error) {
+        if (controllerRef.current !== controller || controller.signal.aborted) return;
+        setState({
+          data: null,
+          isLoading: false,
+          error: error instanceof Error ? error.message : 'Something went wrong. Please try again.',
+        });
+      }
+    },
+    [query, saveAnalysis],
+  );
 
   useEffect(() => {
     if (!hydrated || !enabled) return;
@@ -52,8 +61,15 @@ export function useAnalysis(query: string, enabled = true) {
       setState({ data: cached, isLoading: false, error: null });
       return;
     }
-    load();
+    load(query);
   }, [hydrated, cached, cachedQuery, query, load, enabled]);
+
+  useEffect(() => {
+    return () => {
+      controllerRef.current?.abort();
+      controllerRef.current = null;
+    };
+  }, []);
 
   return { ...state, retry: load };
 }

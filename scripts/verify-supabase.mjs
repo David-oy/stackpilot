@@ -172,6 +172,133 @@ async function main() {
     report('anon CANNOT INSERT stacks (RLS enforced)', status >= 400, `HTTP ${status}`);
   }
 
+  console.log('\n[7] Migration 0006 — workspaces');
+  {
+    const workspaces = await probeColumns('workspaces', [
+      'id',
+      'user_id',
+      'name',
+      'description',
+      'icon',
+      'color',
+      'created_at',
+      'updated_at',
+      'last_opened_at',
+      'archived_at',
+    ]);
+    report(
+      'workspaces table + columns present',
+      workspaces.ok,
+      workspaces.ok ? 'all columns readable' : `HTTP ${workspaces.status}`,
+    );
+  }
+  {
+    const stacks = await probeColumns('stacks', ['workspace_id']);
+    report('stacks.workspace_id column present', stacks.ok, stacks.ok ? 'readable' : `HTTP ${stacks.status}`);
+  }
+  {
+    const favorites = await probeColumns('favorites', ['workspace_id']);
+    report('favorites.workspace_id column present', favorites.ok, favorites.ok ? 'readable' : `HTTP ${favorites.status}`);
+  }
+  {
+    const prompts = await probeColumns('saved_prompts', ['workspace_id']);
+    report('saved_prompts.workspace_id column present', prompts.ok, prompts.ok ? 'readable' : `HTTP ${prompts.status}`);
+  }
+  {
+    const viewed = await probeColumns('recently_viewed', ['workspace_id']);
+    report('recently_viewed.workspace_id column present', viewed.ok, viewed.ok ? 'readable' : `HTTP ${viewed.status}`);
+  }
+  {
+    const { status, body } = await rest('workspaces?select=count', serviceKey);
+    const total = status === 200 && Array.isArray(body) ? Number(body[0]?.count ?? 0) : null;
+    report('default workspaces backfilled', total !== null && total > 0, total === null ? `HTTP ${status}` : `${total} workspaces`);
+  }
+  {
+    const { status, body } = await rest('stacks?select=count&workspace_id=is.null', serviceKey);
+    const orphaned = status === 200 && Array.isArray(body) ? Number(body[0]?.count ?? 0) : null;
+    report(
+      'all stacks assigned to a workspace',
+      orphaned === 0,
+      orphaned === null ? `HTTP ${status}` : `${orphaned} unassigned`,
+    );
+  }
+  {
+    const { status } = await rest(
+      'workspaces',
+      anonKey,
+      {
+        method: 'POST',
+        body: JSON.stringify({ user_id: '00000000-0000-0000-0000-000000000000', name: 'should fail' }),
+      },
+    );
+    report('anon CANNOT INSERT workspaces (RLS enforced)', status >= 400, `HTTP ${status}`);
+  }
+
+  console.log('\n[8] Migration 0007 — audit hardening (shares + analysis_cache RLS)');
+  {
+    const shares = await probeColumns('shares', ['id', 'payload', 'created_at', 'expires_at']);
+    report(
+      'shares table + columns present',
+      shares.ok,
+      shares.ok ? 'all columns readable' : `HTTP ${shares.status}`,
+    );
+  }
+  {
+    const { status } = await rest(
+      'shares',
+      anonKey,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          id: 'rls-check',
+          payload: { name: 'should fail' },
+          expires_at: '2030-01-01T00:00:00Z',
+        }),
+      },
+    );
+    report('anon CANNOT INSERT shares (RLS enforced)', status >= 400, `HTTP ${status}`);
+  }
+  {
+    // Round-trip a share through the service role, then clean it up.
+    const id = `verify-${Date.now()}`;
+    const { status: insertStatus } = await rest(
+      'shares',
+      serviceKey,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          id,
+          payload: { name: 'verify probe' },
+          expires_at: new Date(Date.now() + 60_000).toISOString(),
+        }),
+      },
+    );
+    const created = insertStatus === 201 || insertStatus === 200;
+    let readBack = false;
+    if (created) {
+      const { status, body } = await rest(`shares?select=payload&id=eq.${id}`, serviceKey);
+      readBack = status === 200 && Array.isArray(body) && body.length === 1;
+    }
+    report('service-role share create + read round-trip', created && readBack,
+      created && readBack ? 'ok' : `HTTP ${insertStatus}`);
+    await rest(`shares?id=eq.${id}`, serviceKey, { method: 'DELETE' });
+  }
+  {
+    // With the anon read policy dropped, an anon SELECT on analysis_cache must
+    // return zero rows even when the row exists. Skipped if cache is empty.
+    const { status, body } = await rest('analysis_cache?select=cache_key&limit=1', serviceKey);
+    const key = status === 200 && Array.isArray(body) && body[0]?.cache_key
+      ? body[0].cache_key
+      : null;
+    if (key) {
+      const anon = await rest(`analysis_cache?cache_key=eq.${encodeURIComponent(key)}`, anonKey);
+      const empty = anon.status === 200 && Array.isArray(anon.body) && anon.body.length === 0;
+      report('anon CANNOT read analysis_cache (RLS enforced)', empty, `HTTP ${anon.status}`);
+    } else {
+      report('anon CANNOT read analysis_cache (RLS enforced)', true, 'cache empty — skipped');
+    }
+  }
+
   console.log(`\n${pass} passed, ${fail} failed`);
   process.exit(fail > 0 ? 1 : 0);
 }

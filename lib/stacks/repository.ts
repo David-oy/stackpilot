@@ -5,6 +5,8 @@ import { STACK_EXPORT_TYPE, STACK_EXPORT_VERSION } from './types';
 export const STACKS_KEY = 'stack2set:stacks';
 export const ACTIVE_STACK_KEY = 'stack2set:active-stack';
 export const MAX_RECENT_STACKS = 20;
+/** Guards the one-time move of the legacy global storage into a workspace scope. */
+export const LEGACY_MIGRATION_FLAG = 'stack2set:stacks-migrated';
 
 /**
  * Storage abstraction — swap for Supabase/Postgres in a later phase without
@@ -80,15 +82,65 @@ function sortByUpdatedAt(stacks: UserStack[]): UserStack[] {
   return [...stacks].sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
 }
 
-export class LocalStorageStackRepository implements StackRepository {
-  private storage: StorageLike;
+function getDefaultStorage(): StorageLike {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    return window.localStorage;
+  }
+  return {
+    getItem: () => null,
+    setItem: () => undefined,
+    removeItem: () => undefined,
+  };
+}
 
-  constructor(storage: StorageLike = getDefaultStorage()) {
+function workspaceStorageKey(base: string, workspaceId: string): string {
+  return `${base}:${workspaceId}`;
+}
+
+/**
+ * Per-workspace localStorage repository. Each workspace keeps its own stacks
+ * list + active stack under `stack2set:stacks:{workspaceId}`. On first use it
+ * migrates the legacy global `stack2set:stacks` blob (pre-workspaces data)
+ * into the current workspace so existing on-device stacks keep working.
+ */
+export class ScopedStackRepository implements StackRepository {
+  private storage: StorageLike;
+  private workspaceId: string;
+
+  constructor(workspaceId: string, storage: StorageLike = getDefaultStorage()) {
+    this.workspaceId = workspaceId;
     this.storage = storage;
+    this.migrateLegacy();
+  }
+
+  private stacksKey(): string {
+    return workspaceStorageKey(STACKS_KEY, this.workspaceId);
+  }
+
+  private activeKey(): string {
+    return workspaceStorageKey(ACTIVE_STACK_KEY, this.workspaceId);
+  }
+
+  private migrateLegacy(): void {
+    try {
+      if (this.storage.getItem(LEGACY_MIGRATION_FLAG)) return;
+      const legacy = this.storage.getItem(STACKS_KEY);
+      if (legacy !== null && this.storage.getItem(this.stacksKey()) === null) {
+        this.storage.setItem(this.stacksKey(), legacy);
+        const legacyActive = this.storage.getItem(ACTIVE_STACK_KEY);
+        if (legacyActive !== null) this.storage.setItem(this.activeKey(), legacyActive);
+      }
+      this.storage.setItem(LEGACY_MIGRATION_FLAG, '1');
+    } catch {
+      // ignore
+    }
   }
 
   list(): UserStack[] {
-    const stacks = safeParse<UserStack[]>(this.storage.getItem(STACKS_KEY), z.array(userStackSchema));
+    const stacks = safeParse<UserStack[]>(
+      this.storage.getItem(this.stacksKey()),
+      z.array(userStackSchema),
+    );
     return sortByUpdatedAt(stacks ?? []).slice(0, MAX_RECENT_STACKS);
   }
 
@@ -106,13 +158,13 @@ export class LocalStorageStackRepository implements StackRepository {
       stacks.push(stack);
     }
     const trimmed = sortByUpdatedAt(stacks).slice(0, MAX_RECENT_STACKS);
-    this.write(stacks, trimmed);
+    this.write(trimmed);
   }
 
   delete(id: string): void {
     const stacks = this.list();
     const next = stacks.filter((s) => s.id !== id);
-    this.write(stacks, next);
+    this.write(next);
     if (this.getActiveId() === id) {
       this.setActiveId(null);
     }
@@ -120,7 +172,7 @@ export class LocalStorageStackRepository implements StackRepository {
 
   clear(): void {
     try {
-      this.storage.removeItem(STACKS_KEY);
+      this.storage.removeItem(this.stacksKey());
     } catch {
       // ignore
     }
@@ -128,7 +180,7 @@ export class LocalStorageStackRepository implements StackRepository {
 
   getActiveId(): string | null {
     try {
-      return this.storage.getItem(ACTIVE_STACK_KEY);
+      return this.storage.getItem(this.activeKey());
     } catch {
       return null;
     }
@@ -136,29 +188,18 @@ export class LocalStorageStackRepository implements StackRepository {
 
   setActiveId(id: string | null): void {
     try {
-      if (id) this.storage.setItem(ACTIVE_STACK_KEY, id);
-      else this.storage.removeItem(ACTIVE_STACK_KEY);
+      if (id) this.storage.setItem(this.activeKey(), id);
+      else this.storage.removeItem(this.activeKey());
     } catch {
       // ignore
     }
   }
 
-  private write(_previous: UserStack[], next: UserStack[]): void {
+  private write(next: UserStack[]): void {
     try {
-      this.storage.setItem(STACKS_KEY, JSON.stringify(next));
+      this.storage.setItem(this.stacksKey(), JSON.stringify(next));
     } catch {
       // ignore quota / privacy mode errors
     }
   }
-}
-
-function getDefaultStorage(): StorageLike {
-  if (typeof window !== 'undefined' && window.localStorage) {
-    return window.localStorage;
-  }
-  return {
-    getItem: () => null,
-    setItem: () => undefined,
-    removeItem: () => undefined,
-  };
 }

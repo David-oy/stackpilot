@@ -14,7 +14,7 @@ export async function GET(_request: NextRequest, { params }: RouteContext) {
     return NextResponse.json({ error: 'Share id is required.' }, { status: 400 });
   }
 
-  const payload = getShareRepository().get(id);
+  const payload = await getShareRepository().get(id);
   if (!payload) {
     return NextResponse.json({ error: 'Share not found.' }, { status: 404 });
   }

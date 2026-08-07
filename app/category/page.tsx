@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { siteConfig, absoluteUrl } from '@/lib/site';
 import { getCategoryMeta } from '@/lib/categories';
-import { breadcrumbSchema } from '@/lib/jsonld';
+import { breadcrumbSchema, serializeJsonLd } from '@/lib/jsonld';
 import { providerService } from '@/lib/services/provider-service';
 import { toUiProviders } from '@/lib/services/ui-providers';
 import type { Provider } from '@/lib/providers';
@@ -62,7 +62,7 @@ export default async function CategoryPage({ searchParams }: PageProps) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
       <CategoryView providers={providers} categoryId={id} />
     </>

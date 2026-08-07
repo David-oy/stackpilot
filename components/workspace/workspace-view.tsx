@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { useStack } from '@/lib/stack-context';
 import { useAnalysisContext } from '@/lib/analysis-context';
 import { useAuth } from '@/lib/auth/auth-context';
+import { useWorkspaces } from '@/lib/workspaces/context';
 import { SavedStacks } from './saved-stacks';
 import { StackEditor } from './stack-editor';
 import { StackHealth } from './stack-health';
@@ -98,10 +99,13 @@ function WorkspaceContent() {
     saveStack,
   } = useStack();
   const { user } = useAuth();
+  const { switching } = useWorkspaces();
   const [editingName, setEditingName] = useState(false);
   const [draftName, setDraftName] = useState('');
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [compareOpen, setCompareOpen] = useState(false);
+
+  if (switching) return <LoadingLayout />;
 
   if (!hydrated) return <LoadingLayout />;
 

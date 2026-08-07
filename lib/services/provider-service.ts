@@ -71,6 +71,15 @@ export const providerService = {
     return provider;
   },
 
+  async getAllProviders(): Promise<ProviderWithRelations[]> {
+    const key = 'providers:all';
+    const cached = providerCache.get(key);
+    if (cached) return cached as ProviderWithRelations[];
+    const providers = await (await store()).getAllProviders();
+    providerCache.set(key, providers);
+    return providers;
+  },
+
   async searchProviders(query: string): Promise<ProviderWithRelations[]> {
     const normalized = normalizeCacheKey(query);
     const key = `providers:search:${normalized}`;

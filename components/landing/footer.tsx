@@ -1,4 +1,5 @@
-import { Github, Twitter, Sparkles } from 'lucide-react';
+import { Github, Mail, Twitter, Sparkles } from 'lucide-react';
+import { siteConfig } from '@/lib/site';
 
 const footerLinks: Record<string, { label: string; href: string }[]> = {
   Product: [
@@ -26,6 +27,7 @@ const footerLinks: Record<string, { label: string; href: string }[]> = {
 const socialLinks = [
   { icon: Github, href: 'https://github.com/David-oy/get.stack', label: 'GitHub' },
   { icon: Twitter, href: 'https://x.com/vijayyyyy_7', label: 'Twitter' },
+  { icon: Mail, href: 'mailto:vijay.peddenti434@gmail.com', label: 'Email' },
 ];
 
 export function Footer() {
@@ -57,6 +59,9 @@ export function Footer() {
                 </a>
               ))}
             </div>
+            <p className="mt-3 text-[11px] font-medium tracking-wide text-muted-foreground/60">
+              v{siteConfig.version}
+            </p>
           </div>
 
           {Object.entries(footerLinks).map(([heading, links]) => (

@@ -2,14 +2,17 @@
 
 import type { StackAnalysis } from './types';
 
-export async function analyzeProject(description: string): Promise<StackAnalysis> {
+export async function analyzeProject(
+  description: string,
+  signal?: AbortSignal,
+): Promise<StackAnalysis> {
   let response: Response;
   try {
     response = await fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ description }),
-      signal: AbortSignal.timeout(70_000),
+      signal: signal ?? AbortSignal.timeout(70_000),
     });
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') {

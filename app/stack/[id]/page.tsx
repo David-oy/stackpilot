@@ -3,14 +3,15 @@ import { notFound } from 'next/navigation';
 import type { SharePayload } from '@/lib/stacks/types';
 import { getShareRepository } from '@/lib/stacks/share';
 import { siteConfig, absoluteUrl } from '@/lib/site';
+import { serializeJsonLd } from '@/lib/jsonld';
 import { ShareView } from './view';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-function fetchShare(id: string): SharePayload | null {
+async function fetchShare(id: string): Promise<SharePayload | null> {
   try {
-    return getShareRepository().get(id);
+    return await getShareRepository().get(id);
   } catch {
     return null;
   }
@@ -21,7 +22,7 @@ export async function generateMetadata({
 }: {
   params: { id: string };
 }): Promise<Metadata> {
-  const share = fetchShare(params.id);
+  const share = await fetchShare(params.id);
   if (!share) return { title: 'Stack not found' };
 
   const url = absoluteUrl(`/stack/${params.id}`);
@@ -58,7 +59,7 @@ export async function generateMetadata({
 }
 
 export default async function SharePage({ params }: { params: { id: string } }) {
-  const share = fetchShare(params.id);
+  const share = await fetchShare(params.id);
   if (!share) notFound();
 
   const jsonLd = {
@@ -74,7 +75,7 @@ export default async function SharePage({ params }: { params: { id: string } }) 
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
       <ShareView share={share} id={params.id} />
     </>

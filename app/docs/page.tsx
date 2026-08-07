@@ -16,7 +16,7 @@ import { CodeBlock } from '@/components/docs/code-block';
 import { siteConfig } from '@/lib/site';
 import { docGroups } from '@/lib/docs';
 import { categories } from '@/lib/categories';
-import { breadcrumbSchema } from '@/lib/jsonld';
+import { breadcrumbSchema, serializeJsonLd } from '@/lib/jsonld';
 
 export const metadata: Metadata = {
   title: 'Documentation',
@@ -60,7 +60,7 @@ export default function DocsPage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
       <div className="mx-auto max-w-3xl">
         <header className="text-center">

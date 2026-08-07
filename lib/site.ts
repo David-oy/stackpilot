@@ -1,6 +1,7 @@
 export type SiteConfig = {
   name: string;
   shortName: string;
+  version: string;
   url: string;
   title: string;
   description: string;
@@ -18,6 +19,7 @@ export type SiteConfig = {
 export const siteConfig: SiteConfig = {
   name: 'Stack2Set',
   shortName: 'Stack2Set',
+  version: '4.1.2',
   url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://get-stack.vercel.app',
   title: 'Stack2Set — Discover every technology to build your BIG THING!',
   description:

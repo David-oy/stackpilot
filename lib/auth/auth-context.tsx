@@ -28,6 +28,7 @@ type AuthContextValue = {
   signInWithOAuth: (provider: OAuthProvider, next?: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPasswordForEmail: (email: string) => Promise<{ error: string | null }>;
+  updatePassword: (password: string) => Promise<{ error: string | null }>;
 };
 
 /**
@@ -129,9 +130,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const resetPasswordForEmail = useCallback(
     async (email: string) => {
       if (!client) return { error: 'Authentication is not configured.' };
+      // Route recovery through /auth/callback (a bare, allowlist-friendly URL)
+      // so the PKCE code is exchanged server-side. The post-recovery landing
+      // spot (/account) travels in the auth-next cookie instead of the URL.
+      setAuthNextCookie('/account');
       const { error } = await client.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/account`,
+        redirectTo: `${window.location.origin}/auth/callback`,
       });
+      return { error: error ? error.message : null };
+    },
+    [client],
+  );
+
+  const updatePassword = useCallback(
+    async (password: string) => {
+      if (!client) return { error: 'Authentication is not configured.' };
+      const { error } = await client.auth.updateUser({ password });
       return { error: error ? error.message : null };
     },
     [client],
@@ -148,6 +162,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signInWithOAuth,
       signOut,
       resetPasswordForEmail,
+      updatePassword,
     }),
     [
       user,
@@ -158,6 +173,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signInWithOAuth,
       signOut,
       resetPasswordForEmail,
+      updatePassword,
     ],
   );
 

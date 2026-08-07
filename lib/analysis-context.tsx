@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { StackAnalysis } from './types';
+import { useWorkspaces } from '@/lib/workspaces/context';
 
 const STORAGE_KEY = 'stack2set:analysis';
 const HISTORY_KEY = 'stack2set:search-history';
@@ -26,20 +27,31 @@ type AnalysisContextValue = {
 const AnalysisContext = createContext<AnalysisContextValue | null>(null);
 
 export function AnalysisProvider({ children }: { children: ReactNode }) {
+  const { currentWorkspace } = useWorkspaces();
+  const workspaceId = currentWorkspace?.id ?? null;
+
+  // Workspace-scoped keys; fall back to the legacy global keys when there is
+  // no workspace (pre-workspaces data / not yet hydrated).
+  const analysisKey = workspaceId ? `${STORAGE_KEY}:${workspaceId}` : STORAGE_KEY;
+  const historyKey = workspaceId ? `${HISTORY_KEY}:${workspaceId}` : HISTORY_KEY;
+
   const [stored, setStored] = useState<StoredAnalysis | null>(null);
   const [hydrated, setHydrated] = useState(false);
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
 
   useEffect(() => {
+    setStored(null);
+    setSearchHistory([]);
+    setHydrated(false);
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = localStorage.getItem(analysisKey);
       if (raw) {
         const parsed = JSON.parse(raw) as StoredAnalysis;
         if (parsed && parsed.query && parsed.data) {
           setStored(parsed);
         }
       }
-      const historyRaw = localStorage.getItem(HISTORY_KEY);
+      const historyRaw = localStorage.getItem(historyKey);
       if (historyRaw) {
         const parsed = JSON.parse(historyRaw) as unknown;
         if (Array.isArray(parsed)) {
@@ -52,35 +64,38 @@ export function AnalysisProvider({ children }: { children: ReactNode }) {
       // ignore corrupted storage
     }
     setHydrated(true);
-  }, []);
+  }, [analysisKey, historyKey]);
 
-  const saveAnalysis = useCallback((query: string, data: StackAnalysis) => {
-    const next: StoredAnalysis = { query, data, savedAt: Date.now() };
-    setStored(next);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    } catch {
-      // ignore quota / privacy mode errors
-    }
-    setSearchHistory((prev) => {
-      const updated = [query, ...prev.filter((item) => item !== query)].slice(0, MAX_HISTORY);
+  const saveAnalysis = useCallback(
+    (query: string, data: StackAnalysis) => {
+      const next: StoredAnalysis = { query, data, savedAt: Date.now() };
+      setStored(next);
       try {
-        localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+        localStorage.setItem(analysisKey, JSON.stringify(next));
       } catch {
         // ignore quota / privacy mode errors
       }
-      return updated;
-    });
-  }, []);
+      setSearchHistory((prev) => {
+        const updated = [query, ...prev.filter((item) => item !== query)].slice(0, MAX_HISTORY);
+        try {
+          localStorage.setItem(historyKey, JSON.stringify(updated));
+        } catch {
+          // ignore quota / privacy mode errors
+        }
+        return updated;
+      });
+    },
+    [analysisKey, historyKey],
+  );
 
   const clearHistory = useCallback(() => {
     setSearchHistory([]);
     try {
-      localStorage.removeItem(HISTORY_KEY);
+      localStorage.removeItem(historyKey);
     } catch {
       // ignore
     }
-  }, []);
+  }, [historyKey]);
 
   return (
     <AnalysisContext.Provider

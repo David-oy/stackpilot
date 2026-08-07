@@ -4,6 +4,7 @@ import type { StackCategory, UserStack } from './types';
 type StackRow = {
   id: string;
   client_id: string;
+  workspace_id: string | null;
   name: string;
   prompt: string;
   source_analysis: UserStack['sourceAnalysis'];
@@ -39,9 +40,10 @@ export function localOnlyStacks(local: UserStack[], cloud: UserStack[]): UserSta
   return local.filter((s) => !cloudIds.has(s.id));
 }
 
-function toRow(stack: UserStack, userId: string): Omit<StackRow, 'id'> {
+function toRow(stack: UserStack, userId: string, workspaceId: string): Omit<StackRow, 'id'> {
   return {
     client_id: stack.id,
+    workspace_id: workspaceId,
     name: stack.name,
     prompt: stack.prompt ?? '',
     source_analysis: stack.sourceAnalysis ?? null,
@@ -102,13 +104,17 @@ function fromRow(stack: StackRow, items: StackItemRow[]): UserStack {
   };
 }
 
-export async function listCloudStacks(userId: string): Promise<UserStack[]> {
-  if (!isSupabaseConfigured) return [];
+export async function listCloudStacks(
+  userId: string,
+  workspaceId: string,
+): Promise<UserStack[]> {
+  if (!isSupabaseConfigured || !workspaceId) return [];
   const client = createClient();
   const { data: stackRows, error: stackError } = await client
     .from('stacks')
     .select('*')
     .eq('user_id', userId)
+    .eq('workspace_id', workspaceId)
     .order('updated_at', { ascending: false });
   if (stackError) throw stackError;
   if (!stackRows || stackRows.length === 0) return [];
@@ -132,12 +138,19 @@ export async function listCloudStacks(userId: string): Promise<UserStack[]> {
   );
 }
 
-export async function upsertCloudStack(userId: string, stack: UserStack): Promise<void> {
-  if (!isSupabaseConfigured) return;
+export async function upsertCloudStack(
+  userId: string,
+  stack: UserStack,
+  workspaceId: string,
+): Promise<void> {
+  if (!isSupabaseConfigured || !workspaceId) return;
   const client = createClient();
   const { data, error } = await client
     .from('stacks')
-    .upsert({ user_id: userId, ...toRow(stack, userId) }, { onConflict: 'user_id,client_id' })
+    .upsert(
+      { user_id: userId, ...toRow(stack, userId, workspaceId) },
+      { onConflict: 'user_id,client_id' },
+    )
     .select('id')
     .single();
   if (error) throw error;
@@ -157,10 +170,14 @@ export async function upsertCloudStack(userId: string, stack: UserStack): Promis
   }
 }
 
-export async function pushStacksToCloud(userId: string, stacks: UserStack[]): Promise<void> {
-  if (!isSupabaseConfigured) return;
+export async function pushStacksToCloud(
+  userId: string,
+  stacks: UserStack[],
+  workspaceId: string,
+): Promise<void> {
+  if (!isSupabaseConfigured || !workspaceId) return;
   for (const stack of stacks) {
-    await upsertCloudStack(userId, stack);
+    await upsertCloudStack(userId, stack, workspaceId);
   }
 }
 

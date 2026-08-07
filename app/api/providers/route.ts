@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const category = searchParams.get('category');
-    const q = searchParams.get('q');
+    const q = searchParams.get('q')?.trim().slice(0, 120);
 
     let providers;
     if (category) {
@@ -16,10 +16,7 @@ export async function GET(request: NextRequest) {
     } else if (q) {
       providers = await providerService.searchProviders(q);
     } else {
-      const all = await providerService.getAllCategories();
-      providers = (
-        await Promise.all(all.map((c) => providerService.getProvidersByCategory(c.slug)))
-      ).flat();
+      providers = await providerService.getAllProviders();
     }
 
     return NextResponse.json({ providers });

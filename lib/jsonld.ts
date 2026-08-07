@@ -2,6 +2,16 @@ import { siteConfig, absoluteUrl } from './site';
 
 type JsonLd = Record<string, unknown>;
 
+/**
+ * Serialize JSON-LD safely for embedding in a <script> tag. JSON.stringify
+ * does not escape `<`, so user-controlled strings could otherwise break out of
+ * the script element (reflected XSS). Escaping `<` as `\u003c` is safe for
+ * both the parser and the JSON content.
+ */
+export function serializeJsonLd(data: unknown): string {
+  return JSON.stringify(data).replace(/</g, '\\u003c');
+}
+
 export function organizationSchema(): JsonLd {
   return {
     '@context': 'https://schema.org',

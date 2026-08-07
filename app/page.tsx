@@ -14,6 +14,7 @@ import {
   websiteSchema,
   webApplicationSchema,
   softwareApplicationSchema,
+  serializeJsonLd,
 } from '@/lib/jsonld';
 
 export const metadata: Metadata = {
@@ -53,7 +54,7 @@ export default function Home() {
         <script
           key={index}
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(schema) }}
         />
       ))}
       <Navbar />
