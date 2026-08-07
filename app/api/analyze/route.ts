@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { providerService } from '@/lib/services/provider-service';
 import { normalizeCacheKey } from '@/lib/db/cache';
+import { getRouteSession } from '@/lib/supabase/route-user';
 import type { AnalysisProvider } from '@/lib/types';
 import type { StackAnalysis } from '@/lib/types';
 import {
@@ -11,6 +12,7 @@ import {
 } from '@/lib/gemini';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
 const HANDLER_TIMEOUT_MS = Number(process.env.ANALYZE_TIMEOUT_MS ?? 58_000);
@@ -42,6 +44,13 @@ async function handleAnalyze(request: NextRequest) {
     console.log(`[api/analyze] ${step}${detail ? ` ${detail}` : ''} (+${Date.now() - started}ms)`);
 
   trace('start');
+
+  const session = await getRouteSession();
+  if (!session?.user) {
+    trace('unauthorized — no session');
+    return NextResponse.json({ error: 'Not authenticated.' }, { status: 401 });
+  }
+  trace('session verified');
 
   let body: unknown;
   try {

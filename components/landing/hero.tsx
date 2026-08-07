@@ -1,11 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Search, ArrowRight, Sparkles } from 'lucide-react';
-import { LoadingScreen } from '@/components/landing/loading-screen';
-import { analyzeProject } from '@/lib/api';
-import { useAnalysisContext } from '@/lib/analysis-context';
+import { Sparkles } from 'lucide-react';
+import { SearchBar } from '@/components/search/search-bar';
+import { AuthModal } from '@/components/auth/auth-modal';
+import { useProjectSearch } from '@/hooks/use-project-search';
 
 const popularSearches = [
   'YouTube',
@@ -18,34 +16,7 @@ const popularSearches = [
 ];
 
 export function Hero() {
-  const router = useRouter();
-  const { saveAnalysis } = useAnalysisContext();
-  const [query, setQuery] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [loadingQuery, setLoadingQuery] = useState('');
-  const [error, setError] = useState<string | null>(null);
-
-  const handleSearch = async (q: string) => {
-    const clean = q.trim();
-    if (!clean) return;
-
-    setLoadingQuery(clean);
-    setLoading(true);
-    setError(null);
-
-    try {
-      const analysis = await analyzeProject(clean);
-      saveAnalysis(clean, analysis);
-      router.push(`/results?q=${encodeURIComponent(clean)}`);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return <LoadingScreen query={loadingQuery} autoNavigate={false} />;
-  }
+  const { handleSearch, authOpen, setAuthOpen, attemptedQuery } = useProjectSearch();
 
   return (
     <section id="hero" className="relative overflow-hidden pb-20 pt-32 sm:pb-28 sm:pt-40">
@@ -75,39 +46,7 @@ export function Hero() {
         </p>
 
         <div className="mx-auto mt-10 max-w-2xl animate-fade-up" style={{ animationDelay: '0.15s' }}>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSearch(query);
-            }}
-            className="group relative"
-          >
-            <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-r from-violet-500/30 to-blue-500/30 opacity-0 blur transition-opacity duration-300 group-focus-within:opacity-100" />
-            <div className="relative flex items-center gap-2 rounded-2xl glass px-5 py-4 shadow-lg shadow-black/5 transition-shadow focus-within:shadow-xl focus-within:shadow-violet-500/10">
-              <Search className="h-5 w-5 shrink-0 text-muted-foreground" />
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="I want to build YouTube..."
-                aria-label="Describe your project"
-                className="w-full bg-transparent text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
-              />
-              <button
-                type="submit"
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-blue-500 text-white shadow-md shadow-violet-500/25 transition-transform hover:scale-105 active:scale-95"
-                aria-label="Search"
-              >
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            </div>
-          </form>
-
-          {error && (
-            <p role="alert" className="mt-4 rounded-xl glass px-4 py-3 text-sm text-destructive">
-              {error}
-            </p>
-          )}
+          <SearchBar onSearch={handleSearch} />
 
           <div className="mt-7 flex flex-wrap items-center justify-center gap-2">
             <span className="text-xs text-muted-foreground">Popular:</span>
@@ -115,11 +54,7 @@ export function Hero() {
               <button
                 key={item}
                 type="button"
-                onClick={() => {
-                  const searchQuery = `I want to build ${item}`;
-                  setQuery(searchQuery);
-                  handleSearch(searchQuery);
-                }}
+                onClick={() => handleSearch(`I want to build ${item}`)}
                 className="rounded-full glass glass-hover px-3 py-1.5 text-xs text-muted-foreground transition-all hover:text-foreground"
               >
                 {item}
@@ -128,6 +63,8 @@ export function Hero() {
           </div>
         </div>
       </div>
+
+      <AuthModal open={authOpen} onOpenChange={setAuthOpen} query={attemptedQuery} />
     </section>
   );
 }

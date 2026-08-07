@@ -5,6 +5,8 @@ import type { ReactNode } from 'react';
 import type { StackAnalysis } from './types';
 
 const STORAGE_KEY = 'stackpilot:analysis';
+const HISTORY_KEY = 'stackpilot:search-history';
+const MAX_HISTORY = 8;
 
 type StoredAnalysis = {
   query: string;
@@ -17,6 +19,8 @@ type AnalysisContextValue = {
   query: string | null;
   hydrated: boolean;
   saveAnalysis: (query: string, data: StackAnalysis) => void;
+  searchHistory: string[];
+  clearHistory: () => void;
 };
 
 const AnalysisContext = createContext<AnalysisContextValue | null>(null);
@@ -24,6 +28,7 @@ const AnalysisContext = createContext<AnalysisContextValue | null>(null);
 export function AnalysisProvider({ children }: { children: ReactNode }) {
   const [stored, setStored] = useState<StoredAnalysis | null>(null);
   const [hydrated, setHydrated] = useState(false);
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
 
   useEffect(() => {
     try {
@@ -32,6 +37,15 @@ export function AnalysisProvider({ children }: { children: ReactNode }) {
         const parsed = JSON.parse(raw) as StoredAnalysis;
         if (parsed && parsed.query && parsed.data) {
           setStored(parsed);
+        }
+      }
+      const historyRaw = localStorage.getItem(HISTORY_KEY);
+      if (historyRaw) {
+        const parsed = JSON.parse(historyRaw) as unknown;
+        if (Array.isArray(parsed)) {
+          setSearchHistory(
+            parsed.filter((item): item is string => typeof item === 'string').slice(0, MAX_HISTORY),
+          );
         }
       }
     } catch {
@@ -48,6 +62,24 @@ export function AnalysisProvider({ children }: { children: ReactNode }) {
     } catch {
       // ignore quota / privacy mode errors
     }
+    setSearchHistory((prev) => {
+      const updated = [query, ...prev.filter((item) => item !== query)].slice(0, MAX_HISTORY);
+      try {
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+      } catch {
+        // ignore quota / privacy mode errors
+      }
+      return updated;
+    });
+  }, []);
+
+  const clearHistory = useCallback(() => {
+    setSearchHistory([]);
+    try {
+      localStorage.removeItem(HISTORY_KEY);
+    } catch {
+      // ignore
+    }
   }, []);
 
   return (
@@ -57,6 +89,8 @@ export function AnalysisProvider({ children }: { children: ReactNode }) {
         query: stored?.query ?? null,
         hydrated,
         saveAnalysis,
+        searchHistory,
+        clearHistory,
       }}
     >
       {children}

@@ -11,7 +11,9 @@ export const metadata: Metadata = {
   alternates: { canonical: '/api-reference' },
 };
 
-const curlExample = `curl -X POST https://get-stack.vercel.app/api/analyze \\
+const curlExample = `# Requires an authenticated session (sign in to StackPilot first,
+# then run this from the same browser, or include your session cookie).
+curl -X POST https://get-stack.vercel.app/api/analyze \\
   -H "Content-Type: application/json" \\
   -d '{"description": "I want to build a YouTube clone"}';`;
 
@@ -76,6 +78,7 @@ Content-Type: application/json`}
             <h2 className="mt-8 text-lg font-semibold text-foreground">Errors</h2>
             <ul className="mt-3 space-y-2">
               {[
+                ['401', 'You are not signed in. Sign in to use this endpoint.'],
                 ['400', 'The description is empty or too short.'],
                 ['502', 'The AI provider could not be reached. Try again shortly.'],
                 ['500', 'An unexpected server error occurred.'],

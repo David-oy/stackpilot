@@ -9,9 +9,11 @@ import { loadingSteps } from '@/lib/categories';
 export function LoadingScreen({
   query,
   autoNavigate = true,
+  loop = false,
 }: {
   query: string;
   autoNavigate?: boolean;
+  loop?: boolean;
 }) {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
@@ -19,33 +21,52 @@ export function LoadingScreen({
 
   useEffect(() => {
     const stepDuration = 700;
+    let cancelled = false;
     const timers: ReturnType<typeof setTimeout>[] = [];
 
-    loadingSteps.forEach((_, i) => {
+    const runCycle = () => {
+      setCurrentStep(0);
+      setCompletedSteps([]);
+
+      loadingSteps.forEach((_, i) => {
+        timers.push(
+          setTimeout(() => {
+            if (cancelled) return;
+            setCompletedSteps((prev) => [...prev, i - 1]);
+            setCurrentStep(i);
+          }, i * stepDuration),
+        );
+      });
+
       timers.push(
         setTimeout(() => {
-          setCompletedSteps((prev) => [...prev, i - 1]);
-          setCurrentStep(i);
-        }, i * stepDuration),
+          if (cancelled) return;
+          setCompletedSteps((prev) => [...prev, loadingSteps.length - 1]);
+        }, loadingSteps.length * stepDuration),
       );
-    });
 
-    timers.push(
-      setTimeout(() => {
-        setCompletedSteps((prev) => [...prev, loadingSteps.length - 1]);
-      }, loadingSteps.length * stepDuration),
-    );
+      if (loop) {
+        timers.push(
+          setTimeout(() => {
+            if (!cancelled) runCycle();
+          }, loadingSteps.length * stepDuration + 500),
+        );
+      } else if (autoNavigate) {
+        timers.push(
+          setTimeout(() => {
+            if (!cancelled) router.push(`/results?q=${encodeURIComponent(query)}`);
+          }, loadingSteps.length * stepDuration + 600),
+        );
+      }
+    };
 
-    timers.push(
-      setTimeout(() => {
-        if (autoNavigate) {
-          router.push(`/results?q=${encodeURIComponent(query)}`);
-        }
-      }, loadingSteps.length * stepDuration + 600),
-    );
+    runCycle();
 
-    return () => timers.forEach(clearTimeout);
-  }, [query, router, autoNavigate]);
+    return () => {
+      cancelled = true;
+      timers.forEach(clearTimeout);
+    };
+  }, [query, router, autoNavigate, loop]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">

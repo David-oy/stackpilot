@@ -11,16 +11,20 @@ type AnalysisState = {
   error: string | null;
 };
 
-export function useAnalysis(query: string) {
+export function useAnalysis(query: string, enabled = true) {
   const { analysis: cached, query: cachedQuery, hydrated, saveAnalysis } = useAnalysisContext();
   const [state, setState] = useState<AnalysisState>(() =>
     cached && cachedQuery === query
       ? { data: cached, isLoading: false, error: null }
-      : { data: null, isLoading: true, error: null },
+      : { data: null, isLoading: query.trim().length > 0 && enabled, error: null },
   );
-  const startedRef = useRef(false);
+  const startedForRef = useRef<string | null>(null);
 
   const load = useCallback(async () => {
+    if (!query.trim()) {
+      setState({ data: null, isLoading: false, error: null });
+      return;
+    }
     setState({ data: null, isLoading: true, error: null });
     try {
       const data = await analyzeProject(query);
@@ -36,15 +40,20 @@ export function useAnalysis(query: string) {
   }, [query, saveAnalysis]);
 
   useEffect(() => {
-    if (!hydrated || startedRef.current) return;
-    startedRef.current = true;
+    if (!hydrated || !enabled) return;
+    if (startedForRef.current === query) return;
+    startedForRef.current = query;
 
+    if (!query.trim()) {
+      setState({ data: null, isLoading: false, error: null });
+      return;
+    }
     if (cached && cachedQuery === query) {
       setState({ data: cached, isLoading: false, error: null });
       return;
     }
     load();
-  }, [hydrated, cached, cachedQuery, query, load]);
+  }, [hydrated, cached, cachedQuery, query, load, enabled]);
 
   return { ...state, retry: load };
 }

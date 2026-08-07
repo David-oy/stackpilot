@@ -1,7 +1,7 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
-import { Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft,
@@ -9,8 +9,8 @@ import {
   Sparkles,
   ArrowRight,
   AlertTriangle,
-  Loader2,
   RefreshCw,
+  Loader2,
   Type,
   Plug,
   Plus,
@@ -22,8 +22,16 @@ import { toast } from 'sonner';
 import { getCategoryMeta } from '@/lib/categories';
 import { RecommendedStack } from '@/components/landing/recommended-stack';
 import { CurrentStack } from '@/components/landing/current-stack';
+import { LoadingScreen } from '@/components/landing/loading-screen';
+import { SearchBar } from '@/components/search/search-bar';
+import { ResultFilters, type ProviderFilter } from '@/components/search/result-filters';
+import { RecentSearches } from '@/components/search/recent-searches';
+import { AuthModal } from '@/components/auth/auth-modal';
+import { useAuth } from '@/lib/auth/auth-context';
 import { useStack } from '@/lib/stack-context';
 import { useAnalysis } from '@/hooks/use-analysis';
+import { useProjectSearch } from '@/hooks/use-project-search';
+import { clearPendingQuery, getPendingQuery } from '@/lib/auth/pending-query';
 import { buildProviderInput } from '@/lib/stacks/provider-fields';
 import type { AnalysisProvider, Complexity } from '@/lib/types';
 
@@ -32,23 +40,6 @@ const complexityStyles: Record<Complexity, string> = {
   Medium: 'bg-amber-500/15 text-amber-300 ring-1 ring-amber-500/20',
   High: 'bg-rose-500/15 text-rose-300 ring-1 ring-rose-500/20',
 };
-
-function LoadingState() {
-  return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-6">
-      <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[400px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-600/10 blur-[120px]" />
-      <div className="flex flex-col items-center text-center">
-        <div className="relative mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-blue-500">
-          <Loader2 className="h-7 w-7 animate-spin text-white" />
-        </div>
-        <h2 className="text-xl font-semibold text-foreground">Analyzing your project</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Contacting the AI to identify your technology stack...
-        </p>
-      </div>
-    </main>
-  );
-}
 
 function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
@@ -77,14 +68,134 @@ function ErrorState({ message, onRetry }: { message: string; onRetry: () => void
   );
 }
 
+function EmptyState({ onSearch }: { onSearch: (query: string) => void }) {
+  return (
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-6">
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[400px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-600/10 blur-[120px]" />
+      <div className="w-full max-w-2xl text-center">
+        <div className="mb-6 inline-flex items-center gap-2 rounded-full glass px-4 py-1.5 text-xs text-muted-foreground">
+          <Sparkles className="h-3.5 w-3.5 text-violet-400" />
+          <span>AI-powered tech stack discovery</span>
+        </div>
+        <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+          What do you want to <span className="gradient-text">build?</span>
+        </h1>
+        <p className="mt-3 text-sm text-muted-foreground">
+          Search for a project to see its recommended technology stack.
+        </p>
+        <div className="mt-8">
+          <SearchBar onSearch={onSearch} autoFocus />
+        </div>
+        <Link href="/" className="mt-8 inline-block text-sm text-violet-400 transition-colors hover:text-violet-300">
+          ← Back to home
+        </Link>
+      </div>
+    </main>
+  );
+}
+
+function SignInPrompt({
+  query,
+  onOpenAuth,
+}: {
+  query: string;
+  onOpenAuth: () => void;
+}) {
+  return (
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-6">
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[400px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-600/10 blur-[120px]" />
+      <div className="glass w-full max-w-lg rounded-2xl p-8 text-center sm:p-10">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-violet-500/15 ring-1 ring-violet-500/20">
+          <Sparkles className="h-6 w-6 text-violet-400" />
+        </div>
+        <h2 className="mt-4 text-lg font-semibold text-foreground sm:text-xl">
+          Sign in to generate your personalized results
+        </h2>
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+          We saved <span className="font-medium text-foreground">&ldquo;{query}&rdquo;</span>. Create
+          a free account and we&apos;ll continue right where you left off — no need to search again.
+        </p>
+        <button
+          onClick={onOpenAuth}
+          className="mt-6 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-blue-500 px-6 text-sm font-medium text-white shadow-lg shadow-violet-500/25 transition-all hover:from-violet-600 hover:to-blue-600"
+        >
+          <Sparkles className="h-4 w-4" />
+          Create a free account to continue your search
+        </button>
+      </div>
+    </main>
+  );
+}
+
 function ResultsContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const query = searchParams.get('q') || 'your project';
-  const { data: analysis, isLoading, error, retry } = useAnalysis(query);
+  const urlQuery = (searchParams.get('q') ?? '').trim();
+  const { handleSearch, authOpen, setAuthOpen, attemptedQuery } = useProjectSearch();
+  const { user, loading: authLoading } = useAuth();
+
+  const [query, setQuery] = useState(urlQuery);
+  const [pendingResolved, setPendingResolved] = useState(false);
+  const [filter, setFilter] = useState<ProviderFilter>('all');
+
+  useEffect(() => {
+    if (urlQuery) {
+      clearPendingQuery();
+      setQuery(urlQuery);
+      setPendingResolved(true);
+      return;
+    }
+    if (!pendingResolved) {
+      const pending = getPendingQuery();
+      if (pending) {
+        clearPendingQuery();
+        setQuery(pending);
+        router.replace(`/results?q=${encodeURIComponent(pending)}`);
+      }
+      setPendingResolved(true);
+    }
+  }, [urlQuery, pendingResolved, router]);
+
+  const { data: analysis, isLoading, error, retry } = useAnalysis(query, !!user);
   const { activeStack, hydrated, addProvider } = useStack();
 
+  const authModal = (
+    <AuthModal
+      open={authOpen}
+      onOpenChange={setAuthOpen}
+      query={attemptedQuery || query}
+      next={query ? `/results?q=${encodeURIComponent(query)}` : '/workspace'}
+    />
+  );
+
+  if (authLoading) {
+    return (
+      <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-6">
+        <Loader2 className="h-6 w-6 animate-spin text-violet-400" />
+      </main>
+    );
+  }
+
+  if (!query) {
+    return (
+      <>
+        <EmptyState onSearch={handleSearch} />
+        {authModal}
+      </>
+    );
+  }
+
+  if (!user) {
+    return (
+      <>
+        <SignInPrompt query={query} onOpenAuth={() => setAuthOpen(true)} />
+        {authModal}
+      </>
+    );
+  }
+
   if (isLoading) {
-    return <LoadingState />;
+    return <LoadingScreen query={query} autoNavigate={false} loop />;
   }
 
   if (error || !analysis) {
@@ -92,6 +203,22 @@ function ResultsContent() {
   }
 
   const integrations = analysis.integrations ?? [];
+
+  const applyFilter = (providers: AnalysisProvider[]) =>
+    filter === 'all'
+      ? providers
+      : providers.filter((p) => (filter === 'freeTier' ? p.freeTier : p.openSource));
+
+  const filteredCategories = analysis.categories.map((cat) => ({
+    ...cat,
+    providers: applyFilter(cat.providers),
+  }));
+  const filteredIntegrations = integrations.map((cat) => ({
+    ...cat,
+    providers: applyFilter(cat.providers),
+  }));
+
+  const visibleProviderCount = filteredCategories.reduce((sum, cat) => sum + cat.providers.length, 0);
 
   const handleAddIntegration = (provider: AnalysisProvider, categoryId: string, categoryName: string) => {
     addProvider(`integration-${categoryId}`, categoryName, buildProviderInput(provider), query);
@@ -109,6 +236,10 @@ function ResultsContent() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
+            <div className="mb-6 max-w-2xl">
+              <SearchBar initialQuery={query} onSearch={handleSearch} size="md" />
+            </div>
+
             <nav aria-label="Breadcrumb">
               <Link
                 href="/"
@@ -151,13 +282,30 @@ function ResultsContent() {
                 </p>
               </div>
             </div>
+
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-foreground/5 pt-5">
+              <ResultFilters value={filter} onChange={setFilter} />
+              {filter !== 'all' && (
+                <span className="text-xs text-muted-foreground">
+                  {visibleProviderCount} {visibleProviderCount === 1 ? 'provider' : 'providers'} match
+                  this filter
+                </span>
+              )}
+            </div>
           </motion.div>
         </header>
 
         <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
           <div>
+            {filter !== 'all' && visibleProviderCount === 0 && (
+              <div className="glass rounded-2xl p-8 text-center">
+                <p className="text-sm text-muted-foreground">
+                  No providers match this filter. Try another filter or clear it.
+                </p>
+              </div>
+            )}
             <div className="grid gap-5 sm:grid-cols-2">
-              {analysis.categories.map((cat, i) => {
+              {filteredCategories.map((cat, i) => {
                 const meta = getCategoryMeta(cat.id);
                 const categoryHref = `/category?id=${cat.id}&name=${encodeURIComponent(cat.name)}`;
                 return (
@@ -185,15 +333,21 @@ function ResultsContent() {
                     </p>
 
                     <div className="mt-4 flex flex-wrap gap-1.5">
-                      {cat.providers.map((provider) => (
-                        <span
-                          key={provider.id}
-                          title={provider.reason}
-                          className="rounded-md border border-foreground/5 bg-foreground/[0.03] px-2 py-1 text-[11px] text-muted-foreground"
-                        >
-                          {provider.name}
+                      {cat.providers.length > 0 ? (
+                        cat.providers.map((provider) => (
+                          <span
+                            key={provider.id}
+                            title={provider.reason}
+                            className="rounded-md border border-foreground/5 bg-foreground/[0.03] px-2 py-1 text-[11px] text-muted-foreground"
+                          >
+                            {provider.name}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="rounded-md border border-dashed border-foreground/10 px-2 py-1 text-[11px] text-muted-foreground/60">
+                          No providers match this filter
                         </span>
-                      ))}
+                      )}
                     </div>
 
                     <a
@@ -208,7 +362,7 @@ function ResultsContent() {
               })}
             </div>
 
-            {integrations.length > 0 && (
+            {filteredIntegrations.length > 0 && (
               <section className="mt-10">
                 <div className="mb-5">
                   <h2 className="flex items-center gap-2 text-xl font-semibold text-foreground">
@@ -222,7 +376,7 @@ function ResultsContent() {
                 </div>
 
                 <div className="grid gap-5 lg:grid-cols-2">
-                  {integrations.map((cat, i) => (
+                  {filteredIntegrations.map((cat, i) => (
                     <motion.article
                       key={cat.id}
                       initial={{ opacity: 0, y: 20 }}
@@ -241,6 +395,11 @@ function ResultsContent() {
                       </p>
 
                       <div className="mt-4 space-y-2">
+                        {cat.providers.length === 0 && (
+                          <p className="rounded-lg border border-dashed border-foreground/10 px-3 py-2 text-xs text-muted-foreground/60">
+                            No providers match this filter.
+                          </p>
+                        )}
                         {cat.providers.map((provider) => {
                           const inStack = activeStack?.categories
                             .find((c) => c.categoryId === `integration-${cat.id}`)
@@ -337,9 +496,12 @@ function ResultsContent() {
           <div className="space-y-8">
             <RecommendedStack analysis={analysis} />
             {hydrated && activeStack && <CurrentStack />}
+            <RecentSearches />
           </div>
         </div>
       </div>
+
+      {authModal}
     </main>
   );
 }

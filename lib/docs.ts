@@ -24,7 +24,9 @@ export type DocGroup = {
   items: { slug: string; title: string; description: string }[];
 };
 
-const curlAnalyze = `curl -X POST https://get-stack.vercel.app/api/analyze \\
+const curlAnalyze = `# Requires an authenticated session (sign in to StackPilot first, then run
+# this from the same browser, or include your session cookie).
+curl -X POST https://get-stack.vercel.app/api/analyze \\
   -H "Content-Type: application/json" \\
   -d '{"description": "I want to build a YouTube clone"}';`;
 
@@ -47,7 +49,9 @@ const analyzeResponse = `{
   ]
 }`;
 
-const frontendExample = `// Example: query the API from your frontend
+const frontendExample = `// Example: query the API from your frontend.
+// The request must be made with an authenticated session — the browser sends
+// the session cookie automatically for same-origin requests like this one.
 const response = await fetch('/api/analyze', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
@@ -572,6 +576,7 @@ Content-Type: application/json`,
       {
         type: 'ul',
         items: [
+          '401 — you are not signed in. Sign in to StackPilot before calling this endpoint.',
           '400 — the description is empty or too short.',
           '502 — the AI provider could not be reached. Try again shortly.',
           '500 — an unexpected server error occurred.',

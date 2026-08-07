@@ -4,8 +4,15 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
+import { setAuthNextCookie } from '@/lib/auth/pending-query';
 
 type OAuthProvider = 'google' | 'github';
+
+type SignUpOptions = {
+  name?: string;
+  /** Where to send the user after email confirmation (e.g. /results?q=...). */
+  next?: string;
+};
 
 type AuthContextValue = {
   user: User | null;
@@ -16,11 +23,22 @@ type AuthContextValue = {
   signUp: (
     email: string,
     password: string,
+    options?: SignUpOptions,
   ) => Promise<{ error: string | null; needsConfirmation: boolean }>;
-  signInWithOAuth: (provider: OAuthProvider) => Promise<void>;
+  signInWithOAuth: (provider: OAuthProvider, next?: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPasswordForEmail: (email: string) => Promise<{ error: string | null }>;
 };
+
+/**
+ * The auth callback URL is intentionally kept free of query params: Supabase's
+ * redirect-URL allowlist matches the full URL (query string included), so a
+ * bare /auth/callback matches the common dashboard entry without wildcards.
+ * The post-auth destination is carried in a cookie instead (setAuthNextCookie).
+ */
+function buildAuthCallbackUrl(): string {
+  return `${window.location.origin}/auth/callback`;
+}
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
@@ -74,12 +92,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const signUp = useCallback(
-    async (email: string, password: string) => {
+    async (email: string, password: string, options?: SignUpOptions) => {
       if (!client) return { error: 'Authentication is not configured.', needsConfirmation: false };
+      if (options?.next) setAuthNextCookie(options.next);
       const { data, error } = await client.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+        options: {
+          data: options?.name ? { name: options.name } : undefined,
+          emailRedirectTo: buildAuthCallbackUrl(),
+        },
       });
       if (error) return { error: error.message, needsConfirmation: false };
       return { error: null, needsConfirmation: !data.session };
@@ -88,11 +110,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const signInWithOAuth = useCallback(
-    async (provider: OAuthProvider) => {
+    async (provider: OAuthProvider, next?: string) => {
       if (!client) return;
+      if (next) setAuthNextCookie(next);
       await client.auth.signInWithOAuth({
         provider,
-        options: { redirectTo: `${window.location.origin}/auth/callback` },
+        options: { redirectTo: buildAuthCallbackUrl() },
       });
     },
     [client],

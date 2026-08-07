@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth/auth-context';
+import { getPostAuthTarget } from '@/lib/auth/pending-query';
 import { Button } from '@/components/ui/button';
 
 function GoogleIcon() {
@@ -36,14 +37,15 @@ function GithubIcon() {
   );
 }
 
-export function OAuthButtons() {
+export function OAuthButtons({ next = '/workspace' }: { next?: string }) {
   const { signInWithOAuth } = useAuth();
   const [pending, setPending] = useState<'google' | 'github' | null>(null);
 
   const start = async (provider: 'google' | 'github') => {
     setPending(provider);
     try {
-      await signInWithOAuth(provider);
+      const { path } = getPostAuthTarget(next);
+      await signInWithOAuth(provider, path);
     } finally {
       setPending(null);
     }
