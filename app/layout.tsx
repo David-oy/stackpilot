@@ -6,6 +6,7 @@ import { AuthProvider } from '@/lib/auth/auth-context';
 import { WorkspaceProvider } from '@/lib/workspaces/context';
 import { StackProvider } from '@/lib/stack-context';
 import { AnalysisProvider } from '@/lib/analysis-context';
+import { FavoritesProvider } from '@/lib/favorites-context';
 import { siteConfig } from '@/lib/site';
 import { Analytics } from '@vercel/analytics/next';
 
@@ -99,9 +100,11 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <WorkspaceProvider>
-              <AnalysisProvider>
-                <StackProvider>{children}</StackProvider>
-              </AnalysisProvider>
+              <FavoritesProvider>
+                <AnalysisProvider>
+                  <StackProvider>{children}</StackProvider>
+                </AnalysisProvider>
+              </FavoritesProvider>
             </WorkspaceProvider>
           </AuthProvider>
         </ThemeProvider>

@@ -19,6 +19,7 @@ import { isProviderFree, providerCostLabel } from '@/lib/stacks/health';
 import { categoryIcon } from '@/lib/browse/category-icons';
 import { WorkspaceShell } from '@/components/workspace/workspace-shell';
 import { compareBadge, badgeIcon } from '@/components/browse/provider-compare';
+import { FavoriteButton } from '@/components/browse/favorite-button';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -199,6 +200,7 @@ export default async function ProviderDetailPage({
               </p>
 
               <div className="mt-4 flex flex-wrap gap-2">
+                <FavoriteButton slug={slug} categoryId={provider.categoryId} showLabel />
                 {provider.officialWebsite && (
                   <a
                     href={provider.officialWebsite}

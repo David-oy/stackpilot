@@ -19,6 +19,7 @@ import { useBrowseData } from '@/hooks/use-browse-data';
 import { providerCostLabel } from '@/lib/stacks/health';
 import { WorkspaceShell } from '@/components/workspace/workspace-shell';
 import { ProviderCompare } from '@/components/browse/provider-compare';
+import { FavoriteButton } from '@/components/browse/favorite-button';
 
 type SortKey = 'popularity' | 'rating' | 'cost-asc' | 'cost-desc' | 'name';
 
@@ -70,19 +71,22 @@ function ProviderCard({
             <p className="truncate text-[11px] text-muted-foreground">{categoryName}</p>
           )}
         </div>
-        <button
-          type="button"
-          onClick={onToggleSelect}
-          aria-pressed={selected}
-          title={selected ? 'Remove from comparison' : 'Add to comparison'}
-          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border text-xs transition-colors ${
-            selected
-              ? 'border-violet-500/40 bg-violet-500/15 text-violet-300'
-              : 'border-foreground/5 text-muted-foreground hover:border-violet-500/20 hover:text-foreground'
-          }`}
-        >
-          <Scale className="h-3.5 w-3.5" />
-        </button>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <FavoriteButton slug={provider.slug} categoryId={provider.categoryId} />
+          <button
+            type="button"
+            onClick={onToggleSelect}
+            aria-pressed={selected}
+            title={selected ? 'Remove from comparison' : 'Add to comparison'}
+            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border text-xs transition-colors ${
+              selected
+                ? 'border-violet-500/40 bg-violet-500/15 text-violet-300'
+                : 'border-foreground/5 text-muted-foreground hover:border-violet-500/20 hover:text-foreground'
+            }`}
+          >
+            <Scale className="h-3.5 w-3.5" />
+          </button>
+        </div>
       </div>
 
       <p className="mt-3 line-clamp-2 min-h-[36px] text-xs leading-relaxed text-muted-foreground">

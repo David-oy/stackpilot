@@ -20,6 +20,7 @@ import { useAnalysisContext } from '@/lib/analysis-context';
 import { useAuth } from '@/lib/auth/auth-context';
 import { useWorkspaces } from '@/lib/workspaces/context';
 import { SavedStacks } from './saved-stacks';
+import { FavoritesSection } from './favorites-section';
 import { StackEditor } from './stack-editor';
 import { StackHealth } from './stack-health';
 import { ExportMenu } from './export-menu';
@@ -303,6 +304,7 @@ function WorkspaceContent() {
             </div>
           </div>
           <SavedStacks />
+          <FavoritesSection />
         </div>
       </div>
 
