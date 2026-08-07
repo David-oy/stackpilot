@@ -27,7 +27,7 @@ import { ComparisonModal } from './comparison-modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { WorkspaceShell, WorkspaceNavBar } from './workspace-shell';
+import { WorkspaceShell } from './workspace-shell';
 
 function LoadingLayout() {
   return (
@@ -108,7 +108,6 @@ function WorkspaceContent() {
   if (!activeStack) {
     return (
       <div className="space-y-6">
-        <WorkspaceNavBar />
         <EmptyState />
       </div>
     );
@@ -119,7 +118,6 @@ function WorkspaceContent() {
 
   return (
     <div className="space-y-6">
-      <WorkspaceNavBar />
       <motion.header
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -283,27 +281,26 @@ function WorkspaceContent() {
                       : saveStatus === 'saved'
                         ? 'Saved ✓'
                         : cloudSynced
-                          ? 'Synced to cloud'
+                          ? 'Not saved yet'
                           : 'Syncing...'}
                 </h3>
                 <p className="text-[11px] text-muted-foreground">
                   {!user
                     ? 'Changes are stored locally on this device'
                     : saveStatus === 'saving'
-                      ? 'Writing your latest changes'
+                      ? 'Writing to your Stack2Set account'
                       : saveStatus === 'saved'
                         ? 'Changes are saved to your Stack2Set account'
                         : cloudSynced
-                          ? 'Changes save automatically'
+                          ? 'Click Save Stack to store it in your account'
                           : 'Syncing your stacks...'}
                 </p>
               </div>
             </div>
           </div>
+          <SavedStacks />
         </div>
       </div>
-
-      <SavedStacks />
 
       <ShareModal
         open={shareUrl !== null}

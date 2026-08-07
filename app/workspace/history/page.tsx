@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { WorkspaceHistory } from '@/components/workspace/history';
+import { WorkspaceShell } from '@/components/workspace/workspace-shell';
 
 export const metadata: Metadata = {
   title: 'History',
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function HistoryPage() {
-  return <WorkspaceHistory />;
+  return (
+    <WorkspaceShell>
+      <WorkspaceHistory />
+    </WorkspaceShell>
+  );
 }

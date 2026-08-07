@@ -223,7 +223,6 @@ export function StackProvider({
   const userRef = useRef(user);
   const activeStackRef = useRef<UserStack | null>(activeStack);
   const lastSavedFingerprintRef = useRef<string | null>(null);
-  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     userRef.current = user;
   }, [user]);
@@ -233,7 +232,7 @@ export function StackProvider({
 
   /**
    * Content fingerprint used to skip redundant writes. Does not include
-   * updatedAt so toggling unrelated things doesn't spam the database.
+   * updatedAt so toggling unrelated things doesn't trigger spurious saves.
    */
   const stackFingerprint = useCallback((stack: UserStack) => {
     return JSON.stringify({
@@ -255,14 +254,18 @@ export function StackProvider({
       return true;
     }
     setSaveStatus('saving');
-    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     try {
       const stackWithHealth = current.health
         ? current
         : { ...current, health: computeStackHealth(current) };
       await upsertCloudStack(currentUser.id, stackWithHealth);
-      lastSavedFingerprintRef.current = fingerprint;
-      setSaveStatus('saved');
+      const latest = activeStackRef.current;
+      if (latest && stackFingerprint(latest) === fingerprint) {
+        lastSavedFingerprintRef.current = fingerprint;
+        setSaveStatus('saved');
+      } else {
+        setSaveStatus('idle');
+      }
       return true;
     } catch {
       setSaveStatus('idle');
@@ -271,21 +274,17 @@ export function StackProvider({
   }, [stackFingerprint]);
 
   /**
-   * Debounced auto-save: every provider add/remove/move/replace, category
-   * toggle/clear, rename or reset on the active stack schedules one write ~1.2s
-   * after the last change. Fingerprint dedupe prevents no-op writes.
+   * Manual save only: the stack persists to the account when the user clicks
+   * "Save Stack". Any change to the active stack flips the status back to idle
+   * so the Save button reappears. (Local on-device persistence still happens
+   * automatically via the repository.)
    */
   useEffect(() => {
-    if (!user || !cloudSynced || !hydrated || !activeStack) return;
-    setSaveStatus((prev) => (prev === 'saved' ? 'saving' : prev));
-    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-    saveTimerRef.current = setTimeout(() => {
-      void saveStackNow();
-    }, 1200);
-    return () => {
-      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-    };
-  }, [user, cloudSynced, hydrated, activeStack, saveStackNow]);
+    if (!hydrated || !activeStack) return;
+    if (stackFingerprint(activeStack) !== lastSavedFingerprintRef.current) {
+      setSaveStatus('idle');
+    }
+  }, [hydrated, activeStack, stackFingerprint]);
 
   const handleMerge = useCallback(() => {
     setMergeOpen(false);

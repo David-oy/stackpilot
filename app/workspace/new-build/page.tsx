@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { NewBuild } from '@/components/workspace/new-build';
+import { WorkspaceShell } from '@/components/workspace/workspace-shell';
 
 export const metadata: Metadata = {
   title: 'New Build',
@@ -8,5 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default function NewBuildPage() {
-  return <NewBuild />;
+  return (
+    <WorkspaceShell>
+      <NewBuild />
+    </WorkspaceShell>
+  );
 }

@@ -298,7 +298,7 @@ export function SavedStacks() {
           </Link>
         </div>
       ) : (
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-4 grid gap-3">
           {stacks.map((stack, i) => (
             <StackCard key={stack.id} stack={stack} index={i} onOpen={openStack} />
           ))}

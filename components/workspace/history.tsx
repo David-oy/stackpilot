@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { History, Search, Layers } from 'lucide-react';
 import { useAnalysisContext } from '@/lib/analysis-context';
 import { useStack } from '@/lib/stack-context';
-import { WorkspaceNavBar } from './workspace-shell';
 
 function timeAgo(iso: string): string {
   const seconds = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
@@ -30,8 +29,6 @@ export function WorkspaceHistory() {
 
   return (
     <div className="space-y-6">
-      <WorkspaceNavBar />
-
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="rounded-2xl glass p-6">
           <div className="flex items-center justify-between">

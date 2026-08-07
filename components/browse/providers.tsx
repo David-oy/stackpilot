@@ -17,7 +17,7 @@ import Link from 'next/link';
 import type { ProviderWithRelations } from '@/lib/db/schema';
 import { useBrowseData } from '@/hooks/use-browse-data';
 import { providerCostLabel } from '@/lib/stacks/health';
-import { WorkspaceShell, WorkspaceNavBar } from '@/components/workspace/workspace-shell';
+import { WorkspaceShell } from '@/components/workspace/workspace-shell';
 import { ProviderCompare } from '@/components/browse/provider-compare';
 
 type SortKey = 'popularity' | 'rating' | 'cost-asc' | 'cost-desc' | 'name';
@@ -277,8 +277,6 @@ function ProvidersContent() {
   return (
     <WorkspaceShell>
       <div className="space-y-6">
-        <WorkspaceNavBar />
-
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}

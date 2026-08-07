@@ -7,7 +7,7 @@ import { Search, LayoutGrid, ArrowRight, Loader2, Boxes } from 'lucide-react';
 import type { CategoryRecord, ProviderWithRelations } from '@/lib/db/schema';
 import { useBrowseData } from '@/hooks/use-browse-data';
 import { categoryIcon, categoryVisual } from '@/lib/browse/category-icons';
-import { WorkspaceShell, WorkspaceNavBar } from '@/components/workspace/workspace-shell';
+import { WorkspaceShell } from '@/components/workspace/workspace-shell';
 
 type SortKey = 'name' | 'providers' | 'popularity' | 'updated';
 
@@ -90,8 +90,6 @@ export function BrowseCategories() {
   return (
     <WorkspaceShell>
       <div className="space-y-6">
-        <WorkspaceNavBar />
-
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}

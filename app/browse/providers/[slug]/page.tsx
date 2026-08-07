@@ -17,7 +17,7 @@ import { providerService } from '@/lib/services/provider-service';
 import type { ProviderWithRelations } from '@/lib/db/schema';
 import { isProviderFree, providerCostLabel } from '@/lib/stacks/health';
 import { categoryIcon } from '@/lib/browse/category-icons';
-import { WorkspaceShell, WorkspaceNavBar } from '@/components/workspace/workspace-shell';
+import { WorkspaceShell } from '@/components/workspace/workspace-shell';
 import { compareBadge, badgeIcon } from '@/components/browse/provider-compare';
 
 export const runtime = 'nodejs';
@@ -162,8 +162,6 @@ export default async function ProviderDetailPage({
   return (
     <WorkspaceShell>
       <div className="space-y-6">
-        <WorkspaceNavBar />
-
         <Link
           href="/browse/providers"
           className="inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"

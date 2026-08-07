@@ -6,7 +6,6 @@ import { SearchBar } from '@/components/search/search-bar';
 import { RecentSearches } from '@/components/search/recent-searches';
 import { AuthModal } from '@/components/auth/auth-modal';
 import { useProjectSearch } from '@/hooks/use-project-search';
-import { WorkspaceNavBar } from './workspace-shell';
 
 const SUGGESTIONS = [
   'I want to build a video streaming platform like Netflix',
@@ -21,8 +20,6 @@ export function NewBuild() {
 
   return (
     <div className="space-y-6">
-      <WorkspaceNavBar />
-
       <div className="rounded-2xl glass p-6 sm:p-10">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
