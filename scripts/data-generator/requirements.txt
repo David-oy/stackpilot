@@ -1,0 +1,8 @@
+google-genai
+python-dotenv
+requests
+pandas
+beautifulsoup4
+lxml
+supabase
+tqdm

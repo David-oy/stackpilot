@@ -54,10 +54,11 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
   const loadKeyRef = useRef<string | null>(null);
 
-  // Signed-in favorites live in the account (cloud); signed-out favorites are
-  // stored per-workspace on the device so each workspace keeps its own list.
+  // Signed-in favorites live in the account (cloud) scoped per workspace;
+  // signed-out favorites are stored per-workspace on the device so each
+  // workspace keeps its own list.
   useEffect(() => {
-    const key = user ? `cloud:${user.id}` : `local:${workspaceId}`;
+    const key = user ? `cloud:${user.id}:${workspaceId}` : `local:${workspaceId}`;
     if (loadKeyRef.current === key) return;
     loadKeyRef.current = key;
     setFavorites([]);
@@ -67,7 +68,9 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     if (user) {
       void (async () => {
         try {
-          const res = await fetch('/api/favorites');
+          const res = await fetch(
+            `/api/favorites?workspaceId=${encodeURIComponent(workspaceId)}`,
+          );
           const data = (await res.json()) as {
             favorites?: Array<{
               providerSlug: string;
@@ -124,13 +127,20 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       if (user) {
         try {
           const res = wasFavorite
-            ? await fetch(`/api/favorites?slug=${encodeURIComponent(slug)}`, {
-                method: 'DELETE',
-              })
+            ? await fetch(
+                `/api/favorites?slug=${encodeURIComponent(slug)}&workspaceId=${encodeURIComponent(workspaceId)}`,
+                {
+                  method: 'DELETE',
+                },
+              )
             : await fetch('/api/favorites', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ slug, categoryId: categoryId ?? null }),
+                body: JSON.stringify({
+                  slug,
+                  categoryId: categoryId ?? null,
+                  workspaceId,
+                }),
               });
           if (!res.ok) throw new Error('Favorite request failed.');
         } catch (error) {

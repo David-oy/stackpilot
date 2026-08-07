@@ -97,7 +97,7 @@ function ProviderCard({
       </div>
 
       <div className="mt-4 flex flex-wrap gap-1.5">
-        {provider.tags.map((tag) => (
+        {(provider.tags ?? []).map((tag) => (
           <span key={tag} className="rounded-md border border-foreground/5 bg-foreground/[0.03] px-2 py-1 text-[11px] text-muted-foreground">
             {tag}
           </span>
@@ -180,7 +180,7 @@ function CategoryContent({ initialProviders }: { initialProviders?: Provider[] }
         !search ||
         p.name.toLowerCase().includes(search.toLowerCase()) ||
         p.description.toLowerCase().includes(search.toLowerCase()) ||
-        p.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()));
+        p.tags?.some((t) => t.toLowerCase().includes(search.toLowerCase()));
       const matchesFilters =
         activeFilters.size === 0 || Array.from(activeFilters).every((f) => p[f]);
       return matchesSearch && matchesFilters;

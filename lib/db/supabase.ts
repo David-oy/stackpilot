@@ -434,47 +434,56 @@ export class SupabaseProviderStore implements ProviderStore {
   private async hydrate(rows: Row[]): Promise<ProviderWithRelations[]> {
     if (!rows.length) return [];
     const ids = rows.map((r) => r.id).filter((v): v is string => typeof v === 'string');
-    const [features, tags, alternatives] = await Promise.all([
-      this.client
-        .from(this.t('provider_features'))
-        .select('provider_id, feature')
-        .in('provider_id', ids),
-      this.client
-        .from(this.t('provider_tags'))
-        .select('provider_id, tag')
-        .in('provider_id', ids),
-      this.client
-        .from(this.t('provider_alternatives'))
-        .select('provider_id, alternative_provider_id')
-        .in('provider_id', ids),
-    ]);
 
     const featuresByProvider = new Map<string, string[]>();
     const tagsByProvider = new Map<string, string[]>();
     const altIdsByProvider = new Map<string, string[]>();
-    for (const f of (features.data ?? []) as unknown as Row[]) {
-      const list = featuresByProvider.get(String(f.provider_id)) ?? [];
-      list.push(String(f.feature));
-      featuresByProvider.set(String(f.provider_id), list);
-    }
-    for (const t of (tags.data ?? []) as unknown as Row[]) {
-      const list = tagsByProvider.get(String(t.provider_id)) ?? [];
-      list.push(String(t.tag));
-      tagsByProvider.set(String(t.provider_id), list);
-    }
-    for (const a of (alternatives.data ?? []) as unknown as Row[]) {
-      const list = altIdsByProvider.get(String(a.provider_id)) ?? [];
-      list.push(String(a.alternative_provider_id));
-      altIdsByProvider.set(String(a.provider_id), list);
+
+    // PostgREST rejects oversized `in` filters (long URLs return HTTP 400), so
+    // fetch relations in chunks of 200 ids.
+    const CHUNK = 200;
+    for (let i = 0; i < ids.length; i += CHUNK) {
+      const batch = ids.slice(i, i + CHUNK);
+      const [features, tags, alternatives] = await Promise.all([
+        this.client
+          .from(this.t('provider_features'))
+          .select('provider_id, feature')
+          .in('provider_id', batch),
+        this.client
+          .from(this.t('provider_tags'))
+          .select('provider_id, tag')
+          .in('provider_id', batch),
+        this.client
+          .from(this.t('provider_alternatives'))
+          .select('provider_id, alternative_provider_id')
+          .in('provider_id', batch),
+      ]);
+
+      for (const f of (features.data ?? []) as unknown as Row[]) {
+        const list = featuresByProvider.get(String(f.provider_id)) ?? [];
+        list.push(String(f.feature));
+        featuresByProvider.set(String(f.provider_id), list);
+      }
+      for (const t of (tags.data ?? []) as unknown as Row[]) {
+        const list = tagsByProvider.get(String(t.provider_id)) ?? [];
+        list.push(String(t.tag));
+        tagsByProvider.set(String(t.provider_id), list);
+      }
+      for (const a of (alternatives.data ?? []) as unknown as Row[]) {
+        const list = altIdsByProvider.get(String(a.provider_id)) ?? [];
+        list.push(String(a.alternative_provider_id));
+        altIdsByProvider.set(String(a.provider_id), list);
+      }
     }
 
     const allAltIds = Array.from(new Set(Array.from(altIdsByProvider.values()).flat()));
     const slugById = new Map<string, string>();
-    if (allAltIds.length) {
+    for (let i = 0; i < allAltIds.length; i += CHUNK) {
+      const batch = allAltIds.slice(i, i + CHUNK);
       const { data: altRows } = await this.client
         .from(this.t('providers'))
         .select('id, slug')
-        .in('id', allAltIds);
+        .in('id', batch);
       for (const a of (altRows ?? []) as unknown as Row[]) {
         slugById.set(String(a.id), String(a.slug));
       }
@@ -517,11 +526,22 @@ export class SupabaseProviderStore implements ProviderStore {
   }
 
   async getAllProviders(): Promise<ProviderWithRelations[]> {
-    const { data } = await this.client
-      .from(this.t('providers'))
-      .select(this.providerSelect)
-      .order('popularity_score', { ascending: false });
-    return this.hydrate((data ?? []) as unknown as Row[]);
+    // PostgREST caps a single response at 1000 rows by default. The catalog can
+    // exceed that, so page through with `range` and concatenate.
+    const rows: Row[] = [];
+    const PAGE = 1000;
+    for (let offset = 0; ; offset += PAGE) {
+      const { data, error } = await this.client
+        .from(this.t('providers'))
+        .select(this.providerSelect)
+        .order('popularity_score', { ascending: false })
+        .range(offset, offset + PAGE - 1);
+      if (error) throw error;
+      const chunk = (data ?? []) as unknown as Row[];
+      rows.push(...chunk);
+      if (chunk.length < PAGE) break;
+    }
+    return this.hydrate(rows);
   }
 
   async getProvidersByCategory(categorySlug: string): Promise<ProviderWithRelations[]> {

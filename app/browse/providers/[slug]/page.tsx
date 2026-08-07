@@ -69,12 +69,15 @@ function CriterionGrid({
   title,
   icon,
   values,
+  emptyText,
 }: {
   title: string;
   icon: React.ReactNode;
   values: string[];
+  emptyText?: string;
 }) {
-  if (values.length === 0) return null;
+  const safeValues = values ?? [];
+  if (safeValues.length === 0 && !emptyText) return null;
   return (
     <div className="rounded-2xl glass p-5">
       <p className="flex items-center gap-1.5 text-sm font-medium text-foreground">
@@ -82,14 +85,18 @@ function CriterionGrid({
         {title}
       </p>
       <div className="mt-3 flex flex-wrap gap-1.5">
-        {values.map((value) => (
-          <span
-            key={value}
-            className="rounded-md border border-foreground/5 bg-foreground/[0.03] px-2 py-1 text-[11px] text-muted-foreground"
-          >
-            {value}
-          </span>
-        ))}
+        {safeValues.length === 0 ? (
+          <span className="text-xs text-muted-foreground/50">{emptyText ?? '—'}</span>
+        ) : (
+          safeValues.map((value) => (
+            <span
+              key={value}
+              className="rounded-md border border-foreground/5 bg-foreground/[0.03] px-2 py-1 text-[11px] text-muted-foreground"
+            >
+              {value}
+            </span>
+          ))
+        )}
       </div>
     </div>
   );
@@ -272,6 +279,7 @@ export default async function ProviderDetailPage({
             title="Features"
             icon={<Sparkles className="h-3.5 w-3.5 text-violet-400" />}
             values={provider.features ?? []}
+            emptyText="Features coming soon"
           />
           <CriterionGrid
             title="Integrations"
@@ -314,13 +322,12 @@ export default async function ProviderDetailPage({
               values={provider.compliance}
             />
           )}
-          {provider.tags && provider.tags.length > 0 && (
-            <CriterionGrid
-              title="Tags"
-              icon={<Tag className="h-3.5 w-3.5 text-violet-400" />}
-              values={provider.tags}
-            />
-          )}
+          <CriterionGrid
+            title="Tags"
+            icon={<Tag className="h-3.5 w-3.5 text-violet-400" />}
+            values={provider.tags ?? []}
+            emptyText="Tags coming soon"
+          />
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">

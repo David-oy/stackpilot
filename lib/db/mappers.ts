@@ -17,9 +17,11 @@ export function providerToAnalysis(
   provider: ProviderWithRelations,
   index: number,
 ): AnalysisProvider {
-  const bestUseCases = provider.features.slice(0, 3);
+  const bestUseCases = (provider.features ?? []).slice(0, 3);
   const reasonBase = REASON_TEMPLATES[Math.min(index, REASON_TEMPLATES.length - 1)];
-  const focus = provider.tags[0] ? ` Particularly strong for ${provider.tags[0].toLowerCase()}.` : '';
+  const focus = (provider.tags ?? [])[0]
+    ? ` Particularly strong for ${(provider.tags ?? [])[0].toLowerCase()}.`
+    : '';
   return {
     id: provider.slug,
     rank: index + 1,
@@ -33,7 +35,7 @@ export function providerToAnalysis(
     pricingModel: provider.pricingModel || undefined,
     popularityScore: provider.popularityScore || undefined,
     openSource: provider.openSource || undefined,
-    tags: provider.tags.length ? provider.tags : undefined,
+    tags: (provider.tags ?? []).length ? provider.tags : undefined,
   };
 }
 

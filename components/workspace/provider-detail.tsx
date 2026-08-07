@@ -77,11 +77,11 @@ export function ProviderDetail({
             </div>
           </div>
 
-          {provider.features && provider.features.length > 0 && (
-            <div>
-              <p className="flex items-center gap-1.5 text-xs font-medium text-foreground">
-                <Sparkles className="h-3.5 w-3.5 text-violet-400" /> Features
-              </p>
+          <div>
+            <p className="flex items-center gap-1.5 text-xs font-medium text-foreground">
+              <Sparkles className="h-3.5 w-3.5 text-violet-400" /> Features
+            </p>
+            {provider.features && provider.features.length > 0 ? (
               <ul className="mt-2 grid gap-1.5 sm:grid-cols-2">
                 {provider.features.map((feature) => (
                   <li key={feature} className="flex items-start gap-1.5 text-xs text-muted-foreground">
@@ -90,14 +90,16 @@ export function ProviderDetail({
                   </li>
                 ))}
               </ul>
-            </div>
-          )}
+            ) : (
+              <p className="mt-2 text-xs text-muted-foreground/50">Features coming soon</p>
+            )}
+          </div>
 
-          {provider.tags && provider.tags.length > 0 && (
-            <div>
-              <p className="flex items-center gap-1.5 text-xs font-medium text-foreground">
-                <Tag className="h-3.5 w-3.5 text-violet-400" /> Tags
-              </p>
+          <div>
+            <p className="flex items-center gap-1.5 text-xs font-medium text-foreground">
+              <Tag className="h-3.5 w-3.5 text-violet-400" /> Tags
+            </p>
+            {provider.tags && provider.tags.length > 0 ? (
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {provider.tags.map((tag) => (
                   <span
@@ -108,8 +110,10 @@ export function ProviderDetail({
                   </span>
                 ))}
               </div>
-            </div>
-          )}
+            ) : (
+              <p className="mt-2 text-xs text-muted-foreground/50">Tags coming soon</p>
+            )}
+          </div>
 
           <div className="flex flex-wrap gap-2">
             {provider.website && (

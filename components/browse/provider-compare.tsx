@@ -137,6 +137,7 @@ export function ProviderCompare({
       },
       { label: 'Compliance', values: providers.map((p) => fmt(p.compliance)) },
       { label: 'Features', values: providers.map((p) => fmt(p.features?.slice(0, 6))) },
+      { label: 'Tags', values: providers.map((p) => fmt(p.tags?.slice(0, 6))) },
       { label: 'Integrations', values: providers.map((p) => fmt(p.integrations?.slice(0, 6))) },
       { label: 'APIs', values: providers.map((p) => fmt(p.apis?.slice(0, 5))) },
       { label: 'SDKs', values: providers.map((p) => fmt(p.sdks?.slice(0, 5))) },

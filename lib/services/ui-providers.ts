@@ -22,9 +22,9 @@ function hashString(value: string): number {
 const BEGINNER_HINTS = /beginner|easy|quick to start|low barrier|starter/i;
 
 export function toUiProvider(provider: ProviderWithRelations): Provider {
-  const tags = [...provider.tags];
+  const tags = [...(provider.tags ?? [])];
   const beginnerFriendly =
-    BEGINNER_HINTS.test(provider.features.join(' ')) || provider.popularityScore >= 80;
+    BEGINNER_HINTS.test((provider.features ?? []).join(' ')) || provider.popularityScore >= 80;
 
   return {
     id: provider.slug,

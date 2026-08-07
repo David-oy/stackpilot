@@ -292,8 +292,11 @@ async function main() {
       : null;
     if (key) {
       const anon = await rest(`analysis_cache?cache_key=eq.${encodeURIComponent(key)}`, anonKey);
-      const empty = anon.status === 200 && Array.isArray(anon.body) && anon.body.length === 0;
-      report('anon CANNOT read analysis_cache (RLS enforced)', empty, `HTTP ${anon.status}`);
+      const blocked =
+        (anon.status === 200 && Array.isArray(anon.body) && anon.body.length === 0) ||
+        anon.status === 401 ||
+        anon.status === 403;
+      report('anon CANNOT read analysis_cache (RLS enforced)', blocked, `HTTP ${anon.status}`);
     } else {
       report('anon CANNOT read analysis_cache (RLS enforced)', true, 'cache empty — skipped');
     }

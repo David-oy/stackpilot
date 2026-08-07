@@ -4,6 +4,7 @@ export function fetchWithTimeout(timeoutMs: number): typeof fetch {
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     const cleanup = () => clearTimeout(timer);
     const existing = init?.signal;
+    const noStore: RequestInit = { ...init, cache: 'no-store', signal: controller.signal };
 
     if (existing) {
       if (existing.aborted) {
@@ -12,13 +13,13 @@ export function fetchWithTimeout(timeoutMs: number): typeof fetch {
       } else {
         const onAbort = () => controller.abort();
         existing.addEventListener('abort', onAbort);
-        return fetch(input, { ...init, signal: controller.signal }).finally(() => {
+        return fetch(input, noStore).finally(() => {
           clearTimeout(timer);
           existing.removeEventListener('abort', onAbort);
         });
       }
     }
 
-    return fetch(input, { ...init, signal: controller.signal }).finally(cleanup);
+    return fetch(input, noStore).finally(cleanup);
   };
 }

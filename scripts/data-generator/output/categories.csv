@@ -1,0 +1,61 @@
+id,name,slug
+1,AI Models,ai-models
+2,LLM APIs,llm-apis
+3,Vector Databases,vector-databases
+4,Databases,databases
+5,Backend,backend
+6,Frontend,frontend
+7,Hosting,hosting
+8,Authentication,authentication
+9,Payments,payments
+10,Storage,storage
+11,Email,email
+12,Analytics,analytics
+13,Monitoring,monitoring
+14,Logging,logging
+15,Search,search
+16,CMS,cms
+17,Automation,automation
+18,Cloud,cloud
+19,Containers,containers
+20,CI/CD,ci-cd
+21,Mobile,mobile
+22,DevOps,devops
+23,Security,security
+24,Testing,testing
+25,UI Libraries,ui-libraries
+26,CSS,css
+27,Icons,icons
+28,Charts,charts
+29,Maps,maps
+30,Video,video
+31,Audio,audio
+32,OCR,ocr
+33,Translation,translation
+34,Image Generation,image-generation
+35,Speech,speech
+36,Robotics,robotics
+37,Game Engines,game-engines
+38,IoT,iot
+39,Blockchain,blockchain
+40,Web3,web3
+41,CRM,crm
+42,ERP,erp
+43,Marketing,marketing
+44,SEO,seo
+45,Ads,ads
+46,Forms,forms
+47,Scheduling,scheduling
+48,Notifications,notifications
+49,Productivity,productivity
+50,Customer Support,customer-support
+51,AI Agents,ai-agents
+52,Code Editors,code-editors
+53,Package Managers,package-managers
+54,API Testing,api-testing
+55,Documentation,documentation
+56,Machine Learning,machine-learning
+57,MLOps,mlops
+58,Data Engineering,data-engineering
+59,Web Scraping,web-scraping
+60,Developer Tools,developer-tools

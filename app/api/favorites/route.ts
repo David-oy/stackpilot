@@ -5,18 +5,25 @@ import { getProviderIdBySlug, getProviderSlugsByIds } from '@/lib/supabase/provi
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const session = await getRouteSession();
   if (!session?.user) {
     return NextResponse.json({ error: 'Not authenticated.' }, { status: 401 });
   }
   const { supabase, user } = session;
 
-  const { data, error } = await supabase
+  const workspaceId = request.nextUrl.searchParams.get('workspaceId')?.trim() || null;
+
+  let query = supabase
     .from('favorites')
     .select('provider_id, category_id, created_at')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
+  if (workspaceId) {
+    query = query.eq('workspace_id', workspaceId);
+  }
+
+  const { data, error } = await query;
   if (error) {
     console.error('[api/favorites] Error:', error);
     return NextResponse.json({ favorites: [] });
@@ -55,10 +62,14 @@ export async function POST(request: NextRequest) {
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body.' }, { status: 400 });
   }
-  const payload = body as { slug?: string; categoryId?: string };
+  const payload = body as { slug?: string; categoryId?: string; workspaceId?: string };
   const slug = typeof payload.slug === 'string' ? payload.slug.trim() : '';
   if (!slug) {
     return NextResponse.json({ error: 'Provider slug is required.' }, { status: 400 });
+  }
+  const workspaceId = typeof payload.workspaceId === 'string' ? payload.workspaceId.trim() : '';
+  if (!workspaceId) {
+    return NextResponse.json({ error: 'Workspace is required.' }, { status: 400 });
   }
 
   const providerId = await getProviderIdBySlug(supabase, slug);
@@ -68,8 +79,13 @@ export async function POST(request: NextRequest) {
 
   const categoryId = typeof payload.categoryId === 'string' ? payload.categoryId : null;
   const { error } = await supabase.from('favorites').upsert(
-    { user_id: user.id, provider_id: providerId, category_id: categoryId },
-    { onConflict: 'user_id,provider_id' },
+    {
+      user_id: user.id,
+      provider_id: providerId,
+      category_id: categoryId,
+      workspace_id: workspaceId,
+    },
+    { onConflict: 'user_id,workspace_id,provider_id' },
   );
   if (error) {
     console.error('[api/favorites] Error:', error);
@@ -87,8 +103,12 @@ export async function DELETE(request: NextRequest) {
   const { supabase, user } = session;
 
   const slug = request.nextUrl.searchParams.get('slug')?.trim() ?? '';
-  if (!slug) {
-    return NextResponse.json({ error: 'Provider slug is required.' }, { status: 400 });
+  const workspaceId = request.nextUrl.searchParams.get('workspaceId')?.trim() ?? '';
+  if (!slug || !workspaceId) {
+    return NextResponse.json(
+      { error: 'Provider slug and workspace are required.' },
+      { status: 400 },
+    );
   }
 
   const providerId = await getProviderIdBySlug(supabase, slug);
@@ -100,6 +120,7 @@ export async function DELETE(request: NextRequest) {
     .from('favorites')
     .delete()
     .eq('user_id', user.id)
+    .eq('workspace_id', workspaceId)
     .eq('provider_id', providerId);
   if (error) {
     console.error('[api/favorites] Error:', error);

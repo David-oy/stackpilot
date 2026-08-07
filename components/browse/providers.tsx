@@ -218,8 +218,8 @@ function ProvidersContent() {
           provider.slug,
           provider.shortDescription,
           provider.longDescription,
-          ...provider.tags,
-          ...provider.features,
+          ...(provider.tags ?? []),
+          ...(provider.features ?? []),
         ]
           .join(' ')
           .toLowerCase();

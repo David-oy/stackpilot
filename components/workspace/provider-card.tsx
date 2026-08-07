@@ -90,16 +90,18 @@ export function ProviderCard({
         </div>
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center gap-1.5">
-        {provider.tags?.slice(0, 4).map((tag) => (
-          <span
-            key={tag}
-            className="rounded-md border border-foreground/5 bg-foreground/[0.03] px-2 py-0.5 text-[10px] text-muted-foreground"
-          >
-            {tag}
-          </span>
-        ))}
-      </div>
+      {provider.tags && provider.tags.length > 0 && (
+        <div className="mt-3 flex flex-wrap items-center gap-1.5">
+          {provider.tags.slice(0, 4).map((tag) => (
+            <span
+              key={tag}
+              className="rounded-md border border-foreground/5 bg-foreground/[0.03] px-2 py-0.5 text-[10px] text-muted-foreground"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
 
       <div className="mt-3 flex flex-wrap items-center gap-1.5">
         {provider.website && (
