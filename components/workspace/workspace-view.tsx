@@ -10,13 +10,15 @@ import {
   Scale,
   Sparkles,
   Check,
+  Save,
+  Loader2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { useStack } from '@/lib/stack-context';
 import { useAnalysisContext } from '@/lib/analysis-context';
 import { useAuth } from '@/lib/auth/auth-context';
-import { StackList } from './stack-list';
+import { SavedStacks } from './saved-stacks';
 import { StackEditor } from './stack-editor';
 import { StackHealth } from './stack-health';
 import { ExportMenu } from './export-menu';
@@ -25,6 +27,7 @@ import { ComparisonModal } from './comparison-modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
+import { WorkspaceShell, WorkspaceNavBar } from './workspace-shell';
 
 function LoadingLayout() {
   return (
@@ -47,7 +50,7 @@ function LoadingLayout() {
 
 function EmptyState() {
   const { createStack } = useStack();
-  const { analysis } = useAnalysisContext();
+  const { analysis, query } = useAnalysisContext();
   const hasAnalysis = !!analysis;
 
   return (
@@ -72,7 +75,7 @@ function EmptyState() {
         </Button>
         {hasAnalysis && (
           <Link
-            href="/results"
+            href={`/search?q=${encodeURIComponent(query ?? '')}`}
             className="inline-flex h-10 items-center gap-2 rounded-md border border-foreground/5 bg-foreground/[0.02] px-4 text-sm text-muted-foreground transition-all hover:border-violet-500/20 hover:text-foreground"
           >
             <RefreshCw className="h-4 w-4" /> Continue from analysis
@@ -84,7 +87,16 @@ function EmptyState() {
 }
 
 function WorkspaceContent() {
-  const { activeStack, hydrated, renameStack, resetStack, clearStack, cloudSynced } = useStack();
+  const {
+    activeStack,
+    hydrated,
+    renameStack,
+    resetStack,
+    clearStack,
+    cloudSynced,
+    saveStatus,
+    saveStack,
+  } = useStack();
   const { user } = useAuth();
   const [editingName, setEditingName] = useState(false);
   const [draftName, setDraftName] = useState('');
@@ -94,7 +106,12 @@ function WorkspaceContent() {
   if (!hydrated) return <LoadingLayout />;
 
   if (!activeStack) {
-    return <EmptyState />;
+    return (
+      <div className="space-y-6">
+        <WorkspaceNavBar />
+        <EmptyState />
+      </div>
+    );
   }
 
   const stack = activeStack;
@@ -102,6 +119,7 @@ function WorkspaceContent() {
 
   return (
     <div className="space-y-6">
+      <WorkspaceNavBar />
       <motion.header
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -169,6 +187,38 @@ function WorkspaceContent() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            {user && (
+              saveStatus === 'saved' ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled
+                  className="h-9 gap-1.5 border-emerald-500/20 bg-emerald-500/[0.06] text-xs text-emerald-300"
+                >
+                  <Check className="h-3.5 w-3.5" /> Saved ✓
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    void saveStack().then((ok) => {
+                      if (ok) toast.success('Stack saved to your account');
+                      else toast.error('Could not save stack — check your connection');
+                    });
+                  }}
+                  disabled={saveStatus === 'saving'}
+                  className="h-9 gap-1.5 text-xs"
+                >
+                  {saveStatus === 'saving' ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Save className="h-3.5 w-3.5" />
+                  )}
+                  {saveStatus === 'saving' ? 'Saving...' : 'Save Stack'}
+                </Button>
+              )
+            )}
             <Button
               variant="outline"
               size="sm"
@@ -207,36 +257,53 @@ function WorkspaceContent() {
         </div>
       </motion.header>
 
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px_300px]">
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px]">
         <div className="min-w-0">
           <StackEditor />
         </div>
         <div className="space-y-8">
           <StackHealth />
-          <StackList />
-        </div>
-        <div className="space-y-8">
           <div className="rounded-2xl glass p-5">
             <div className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500/20 to-teal-500/20 ring-1 ring-emerald-500/20">
-                <RefreshCw className="h-4 w-4 text-emerald-300" />
+                {saveStatus === 'saving' ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-emerald-300" />
+                ) : saveStatus === 'saved' ? (
+                  <Check className="h-4 w-4 text-emerald-300" />
+                ) : (
+                  <RefreshCw className="h-4 w-4 text-emerald-300" />
+                )}
               </div>
               <div>
                 <h3 className="text-sm font-semibold text-foreground">
-                  {user && cloudSynced ? 'Synced to cloud' : 'Auto-saved'}
+                  {!user
+                    ? 'Auto-saved'
+                    : saveStatus === 'saving'
+                      ? 'Saving...'
+                      : saveStatus === 'saved'
+                        ? 'Saved ✓'
+                        : cloudSynced
+                          ? 'Synced to cloud'
+                          : 'Syncing...'}
                 </h3>
                 <p className="text-[11px] text-muted-foreground">
-                  {user
-                    ? cloudSynced
-                      ? 'Changes sync to your StackPilot account'
-                      : 'Syncing your stacks...'
-                    : 'Changes are stored locally on this device'}
+                  {!user
+                    ? 'Changes are stored locally on this device'
+                    : saveStatus === 'saving'
+                      ? 'Writing your latest changes'
+                      : saveStatus === 'saved'
+                        ? 'Changes are saved to your Stack2Set account'
+                        : cloudSynced
+                          ? 'Changes save automatically'
+                          : 'Syncing your stacks...'}
                 </p>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      <SavedStacks />
 
       <ShareModal
         open={shareUrl !== null}
@@ -253,5 +320,9 @@ function WorkspaceContent() {
 }
 
 export function WorkspaceView() {
-  return <WorkspaceContent />;
+  return (
+    <WorkspaceShell>
+      <WorkspaceContent />
+    </WorkspaceShell>
+  );
 }

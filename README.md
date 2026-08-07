@@ -1,4 +1,4 @@
-# 🚀 StackPilot
+# 🚀 Stack2Set
 
 <div align="center">
 
@@ -6,7 +6,7 @@
 
 **Describe your idea. Discover the technologies. Build with confidence.**
 
-StackPilot is an AI-powered platform that helps developers discover the APIs, databases, authentication providers, storage solutions, AI models, hosting platforms, payment gateways, and other services required to build modern software.
+Stack2Set is an AI-powered platform that helps developers discover the APIs, databases, authentication providers, storage solutions, AI models, hosting platforms, payment gateways, and other services required to build modern software.
 
 > 🚧 **Current Version:** v0.1 (Preview)
 
@@ -30,9 +30,9 @@ The difficult part is figuring out:
 
 Developers often spend hours or even days researching technologies before writing their first line of code.
 
-**StackPilot solves this problem.**
+**Stack2Set solves this problem.**
 
-Simply describe your project and StackPilot helps you discover the technologies required to build it.
+Simply describe your project and Stack2Set helps you discover the technologies required to build it.
 
 ---
 
@@ -142,7 +142,7 @@ Generate shareable links for your stack.
 
 # 🎯 Who Is This For?
 
-StackPilot is designed for:
+Stack2Set is designed for:
 
 - 👨‍🎓 Students
 - 🏆 Hackathon Participants
@@ -157,7 +157,7 @@ StackPilot is designed for:
 # 🖥 User Flow
 
 ```text
-User Opens StackPilot
+User Opens Stack2Set
         │
         ▼
 Describe Your Project
@@ -234,7 +234,7 @@ Instead of opening 20 browser tabs searching for APIs and services, developers s
 
 Contributions are welcome!
 
-If you'd like to improve StackPilot:
+If you'd like to improve Stack2Set:
 
 1. Fork this repository
 2. Create a feature branch
@@ -275,7 +275,7 @@ GitHub: https://github.com/David-oy
 
 <div align="center">
 
-### ⭐ If you like StackPilot, consider giving this repository a Star!
+### ⭐ If you like Stack2Set, consider giving this repository a Star!
 
 **Made with ❤️ for Devs.**
 

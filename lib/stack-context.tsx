@@ -21,6 +21,7 @@ import type {
   StackProviderItem,
   UserStack,
 } from './stacks/types';
+import { computeStackHealth } from './stacks/health';
 import { generateId } from './stacks/id';
 
 type StackContextValue = {
@@ -29,6 +30,10 @@ type StackContextValue = {
   activeStackId: string | null;
   hydrated: boolean;
   cloudSynced: boolean;
+  /** Auto-save feedback: idle | saving | saved. */
+  saveStatus: 'idle' | 'saving' | 'saved';
+  /** Persist the current stack to Supabase immediately (Save Stack button). */
+  saveStack: () => Promise<boolean>;
   addProvider: (
     categoryId: string,
     categoryName: string,
@@ -61,15 +66,6 @@ const StackContext = createContext<StackContextValue | null>(null);
 
 const now = () => new Date().toISOString();
 
-function trimAnalysis(analysis: StackAnalysis | null) {
-  if (!analysis) return null;
-  return {
-    projectType: analysis.projectType,
-    summary: analysis.summary,
-    complexity: analysis.complexity,
-  };
-}
-
 function toProviderItem(provider: StackProviderInput): StackProviderItem {
   return { ...provider, addedAt: now() };
 }
@@ -81,7 +77,7 @@ function blankStack(name: string, prompt: string, analysis: StackAnalysis | null
     prompt,
     createdAt: now(),
     updatedAt: now(),
-    sourceAnalysis: trimAnalysis(analysis),
+    sourceAnalysis: analysis,
     categories: [],
   };
 }
@@ -119,7 +115,7 @@ function stackFromAnalysis(prompt: string, analysis: StackAnalysis): UserStack {
     prompt,
     createdAt: now(),
     updatedAt: now(),
-    sourceAnalysis: trimAnalysis(analysis),
+    sourceAnalysis: analysis,
     categories,
   };
 }
@@ -222,6 +218,74 @@ export function StackProvider({
     }, 800);
     return () => clearTimeout(handle);
   }, [user, cloudSynced, hydrated, activeStack]);
+
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const userRef = useRef(user);
+  const activeStackRef = useRef<UserStack | null>(activeStack);
+  const lastSavedFingerprintRef = useRef<string | null>(null);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
+  useEffect(() => {
+    activeStackRef.current = activeStack;
+  }, [activeStack]);
+
+  /**
+   * Content fingerprint used to skip redundant writes. Does not include
+   * updatedAt so toggling unrelated things doesn't spam the database.
+   */
+  const stackFingerprint = useCallback((stack: UserStack) => {
+    return JSON.stringify({
+      name: stack.name,
+      prompt: stack.prompt,
+      sourceAnalysis: stack.sourceAnalysis,
+      categories: stack.categories,
+      createdAt: stack.createdAt,
+    });
+  }, []);
+
+  const saveStackNow = useCallback(async (): Promise<boolean> => {
+    const currentUser = userRef.current;
+    const current = activeStackRef.current;
+    if (!currentUser || !current) return false;
+    const fingerprint = stackFingerprint(current);
+    if (fingerprint === lastSavedFingerprintRef.current) {
+      setSaveStatus('saved');
+      return true;
+    }
+    setSaveStatus('saving');
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    try {
+      const stackWithHealth = current.health
+        ? current
+        : { ...current, health: computeStackHealth(current) };
+      await upsertCloudStack(currentUser.id, stackWithHealth);
+      lastSavedFingerprintRef.current = fingerprint;
+      setSaveStatus('saved');
+      return true;
+    } catch {
+      setSaveStatus('idle');
+      return false;
+    }
+  }, [stackFingerprint]);
+
+  /**
+   * Debounced auto-save: every provider add/remove/move/replace, category
+   * toggle/clear, rename or reset on the active stack schedules one write ~1.2s
+   * after the last change. Fingerprint dedupe prevents no-op writes.
+   */
+  useEffect(() => {
+    if (!user || !cloudSynced || !hydrated || !activeStack) return;
+    setSaveStatus((prev) => (prev === 'saved' ? 'saving' : prev));
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => {
+      void saveStackNow();
+    }, 1200);
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    };
+  }, [user, cloudSynced, hydrated, activeStack, saveStackNow]);
 
   const handleMerge = useCallback(() => {
     setMergeOpen(false);
@@ -386,12 +450,19 @@ export function StackProvider({
 
   const createStackFromAnalysis = useCallback(
     (prompt: string, data: StackAnalysis) => {
+      const existing = stacks.find(
+        (s) => s.prompt === prompt && s.sourceAnalysis?.projectType === data.projectType,
+      );
+      if (existing) {
+        activate(existing);
+        return existing;
+      }
       const stack = stackFromAnalysis(prompt, data);
       setStacks((prev) => [stack, ...prev]);
       activate(stack);
       return stack;
     },
-    [activate],
+    [activate, stacks],
   );
 
   const renameStack = useCallback(
@@ -511,6 +582,8 @@ export function StackProvider({
     activeStackId: activeStack?.id ?? null,
     hydrated,
     cloudSynced,
+    saveStatus,
+    saveStack: saveStackNow,
     addProvider,
     removeProvider,
     moveProvider,

@@ -16,12 +16,12 @@ export type SiteConfig = {
 };
 
 export const siteConfig: SiteConfig = {
-  name: 'StackPilot',
-  shortName: 'StackPilot',
+  name: 'Stack2Set',
+  shortName: 'Stack2Set',
   url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://get-stack.vercel.app',
-  title: 'StackPilot — Discover every technology to build your BIG THING!',
+  title: 'Stack2Set — Discover every technology to build your BIG THING!',
   description:
-    'StackPilot uses AI to analyze your project idea and recommend the best technologies, APIs, databases, authentication providers, and services. Compare providers and build your tech stack in minutes.',
+    'Stack2Set uses AI to analyze your project idea and recommend the best technologies, APIs, databases, authentication providers, and services. Compare providers and build your tech stack in minutes.',
   keywords: [
     'tech stack',
     'technology discovery',
@@ -36,12 +36,12 @@ export const siteConfig: SiteConfig = {
     'AI tools',
     'open source tools',
     'developer tools',
-    'StackPilot',
+    'Stack2Set',
     'build a tech stack',
     'compare providers',
   ],
   creator: 'vijay peddenti',
-  publisher: 'StackPilot',
+  publisher: 'Stack2Set',
   authors: [{ name: 'vijay peddenti' }],
   category: 'Technology',
   twitterHandle: '@vijayyyyy_7',
@@ -52,7 +52,7 @@ export const siteConfig: SiteConfig = {
   },
   openGraph: {
     type: 'website',
-    siteName: 'StackPilot',
+    siteName: 'Stack2Set',
     locale: 'en_US',
   },
 };

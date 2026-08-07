@@ -6,9 +6,10 @@ import { useAuth } from '@/lib/auth/auth-context';
 import { savePendingQuery } from '@/lib/auth/pending-query';
 
 /**
- * Reusable search entry point shared by the home hero and the results page.
+ * Reusable search entry point shared by the home hero, the search page, and
+ * the workspace.
  *
- * Authenticated users are sent straight to the results page. Guests get their
+ * Authenticated users are sent to the dedicated search page. Guests get their
  * query persisted and are prompted to sign in via the auth modal; once signed
  * in the query is restored and the search runs automatically.
  */
@@ -25,7 +26,7 @@ export function useProjectSearch() {
       setAttemptedQuery(query);
 
       if (user) {
-        router.push(`/results?q=${encodeURIComponent(query)}`);
+        router.push(`/search?q=${encodeURIComponent(query)}`);
       } else {
         savePendingQuery(query);
         setAuthOpen(true);

@@ -1,15 +1,16 @@
 import { z } from 'zod';
-import type { AnalysisProvider, Complexity, StackAnalysis } from './types';
+import type { AnalysisProvider, Complexity } from './types';
 
 const MODEL = process.env.GEMINI_MODEL ?? 'gemini-3.5-flash-lite';
 
 const GEMINI_TIMEOUT_MS = Number(process.env.GEMINI_TIMEOUT_MS ?? 50_000);
 
-export type GeminiCategory = {
+export type GeminiIntentCategory = {
   id: string;
   name: string;
   description: string;
-  providers: AnalysisProvider[];
+  confidence?: number;
+  reasoning?: string;
 };
 
 export type GeminiIntegrationCategory = {
@@ -19,11 +20,11 @@ export type GeminiIntegrationCategory = {
   providers: AnalysisProvider[];
 };
 
-export type GeminiAnalysis = {
+export type GeminiIntent = {
   projectType: string;
   summary: string;
   complexity: Complexity;
-  categories: GeminiCategory[];
+  categories: GeminiIntentCategory[];
   integrations: GeminiIntegrationCategory[];
 };
 
@@ -36,8 +37,11 @@ function slugify(value: string): string {
     .slice(0, 60);
 }
 
-function buildSystemPrompt(knownCategorySlugs: string[]): string {
-  return `You are StackPilot, an expert software architect and developer. Analyze a software project idea and return the technology stack required to build it, PLUS the project-specific external integrations (APIs, SDKs, services, datasets, and developer tools) the project will rely on.
+function buildIntentSystemPrompt(knownCategorySlugs: string[]): string {
+  return `You are Stack2Set, an expert software architect. Analyze a software project idea and return ONLY the technology categories (domains) required to build it, PLUS the project-specific external integrations (APIs, SDKs, services, datasets, and developer tools) the project will rely on.
+
+INTENT-ONLY RULE FOR TECHNOLOGY CATEGORIES:
+The backend resolves actual providers for technology categories from its own curated database. You MUST NOT invent or return any providers for technology categories. Return only the category id, name, description, a confidence score, and a short reasoning.
 
 STEP 1 — UNDERSTAND THE PROJECT DOMAIN
 Identify the domain the project belongs to, e.g.: Game Deals, AI Chatbot, Food Delivery, Video Streaming, E-commerce, Social Network, Finance, Healthcare, Education, Music, Maps, Travel, Real Estate, IoT, Cybersecurity, DevTools, Productivity, Blockchain, etc.
@@ -56,7 +60,8 @@ Return ONLY valid JSON. Do not wrap it in markdown, code fences, or add any comm
       "id": "lowercase kebab-case slug",
       "name": "Human readable category name",
       "description": "Why this technology category is needed for this project",
-      "providers": []
+      "confidence": 90,
+      "reasoning": "Brief justification for including this category"
     }
   ],
   "projectIntegrations": [
@@ -70,10 +75,9 @@ Return ONLY valid JSON. Do not wrap it in markdown, code fences, or add any comm
 
 Rules for technologyCategories:
 - Always include between 3 and 7 core technology categories genuinely required to build the project (e.g. frontend, backend, database, authentication, hosting, caching, storage).
-- The following category ids are already curated in our database. When one matches, use exactly that id and return an EMPTY "providers" array for it: ${knownCategorySlugs.join(', ')}.
-- For any OTHER technology category, return the top 6 providers using this provider shape:
-  { "id": "lowercase kebab-case slug", "rank": 1, "name": "Provider name", "description": "Short description", "reason": "Why this provider is recommended", "bestUseCases": ["use case 1", "use case 2", "use case 3"], "website": "https://...", "documentation": "https://..." }
-- Choose providers based on popularity, reliability, production readiness, maintenance, community adoption, documentation quality, free tier, integration ease, security, scalability, and performance. Never invent URLs.
+- Use exactly the category id from this curated list whenever one matches; otherwise create a clean lowercase kebab-case id: ${knownCategorySlugs.join(', ')}
+- confidence is an integer from 1 to 100 reflecting how certain you are this category is required.
+- reasoning is 1-2 sentences. Never include providers here.
 
 Rules for projectIntegrations:
 - Return between 1 and 8 integration categories. Every category must be genuinely relevant to this project's domain — never return a generic list that would apply to any project.
@@ -126,11 +130,19 @@ const providerSchema = z.object({
   tags: z.array(z.string().trim().min(1)).optional().default([]),
 });
 
-const geminiCategorySchema = z.object({
+const geminiIntentCategorySchema = z.object({
   id: z.string().trim().min(1),
   name: z.string().trim().min(1),
   description: z.string().trim().min(1),
-  providers: z.array(providerSchema).optional().default([]),
+  confidence: z
+    .union([z.number().min(1).max(100), z.string().trim()])
+    .transform((value) => {
+      if (typeof value === 'number') return Math.round(value);
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? Math.round(Math.min(100, Math.max(1, parsed))) : undefined;
+    })
+    .optional(),
+  reasoning: z.string().trim().optional().default(''),
 });
 
 const geminiIntegrationCategorySchema = z.object({
@@ -140,12 +152,12 @@ const geminiIntegrationCategorySchema = z.object({
   providers: z.array(providerSchema).min(1),
 });
 
-const analysisSchema = z.object({
+const intentSchema = z.object({
   projectType: z.string().trim().min(1),
   summary: z.string().trim().min(1).optional().default(''),
   complexity: z.enum(['Low', 'Medium', 'High']),
-  technologyCategories: z.array(geminiCategorySchema).optional(),
-  categories: z.array(geminiCategorySchema).optional(),
+  technologyCategories: z.array(geminiIntentCategorySchema).optional(),
+  categories: z.array(geminiIntentCategorySchema).optional(),
   projectIntegrations: z.array(geminiIntegrationCategorySchema).optional().default([]),
 });
 
@@ -303,16 +315,16 @@ function toIntegrationCategory(
   };
 }
 
-export async function analyzeWithGemini(
+export async function analyzeProjectIntent(
   description: string,
   knownCategorySlugs: string[],
-): Promise<GeminiAnalysis> {
+): Promise<GeminiIntent> {
   const parsed = await callGemini(
-    buildSystemPrompt(knownCategorySlugs),
+    buildIntentSystemPrompt(knownCategorySlugs),
     `Project to analyze:\n${description}`,
   );
 
-  const result = analysisSchema.safeParse(parsed);
+  const result = intentSchema.safeParse(parsed);
   if (!result.success) {
     throw new AnalysisError('Gemini returned a response that did not match the expected schema.');
   }
@@ -330,7 +342,8 @@ export async function analyzeWithGemini(
       id: cat.id,
       name: cat.name,
       description: cat.description,
-      providers: cat.providers.map(toAnalysisProvider),
+      confidence: cat.confidence,
+      reasoning: cat.reasoning || undefined,
     })),
     integrations: result.data.projectIntegrations.map(toIntegrationCategory),
   };
@@ -340,7 +353,7 @@ export async function fetchFallbackProviders(
   description: string,
   categories: Array<{ id: string; name: string; description: string }>,
 ): Promise<Record<string, AnalysisProvider[]>> {
-  const prompt = `You are StackPilot, an expert software architect. For the project described below, recommend the TOP 6 providers for each of the listed technology categories.
+  const prompt = `You are Stack2Set, an expert software architect. For the project described below, recommend the TOP 6 providers for each of the listed technology categories.
 
 Return ONLY valid JSON matching exactly this schema:
 {
@@ -387,19 +400,4 @@ ${description}`;
     byId[cat.id] = cat.providers.map(toAnalysisProvider);
   }
   return byId;
-}
-
-export function toStackAnalysis(gemini: GeminiAnalysis): StackAnalysis {
-  return {
-    projectType: gemini.projectType,
-    summary: gemini.summary,
-    complexity: gemini.complexity,
-    categories: gemini.categories.map((cat) => ({
-      id: cat.id,
-      name: cat.name,
-      description: cat.description,
-      providers: cat.providers,
-    })),
-    integrations: gemini.integrations,
-  };
 }

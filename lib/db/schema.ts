@@ -38,6 +38,31 @@ export type ProviderRecord = {
   status: ProviderStatus;
   createdAt: string;
   updatedAt: string;
+  // --- Extended profile (used by detail pages + comparison) ---
+  communityRating?: number;
+  stack2SetRating?: number;
+  monthlyCost?: number;
+  enterprisePricing?: string;
+  learningCurve?: number;
+  speed?: number;
+  scalability?: number;
+  reliability?: number;
+  security?: boolean;
+  compliance?: string[];
+  integrations?: string[];
+  apis?: string[];
+  sdks?: string[];
+  aiFeatures?: string[];
+  languages?: string[];
+  compatibility?: Record<string, boolean>;
+  pros?: string[];
+  cons?: string[];
+  bestUseCases?: string[];
+  aiSummary?: string;
+  // --- Sync metadata (48h sync service) ---
+  aiSuggested?: boolean;
+  source?: string;
+  lastSyncedAt?: string;
 };
 
 export type ProviderFeature = {

@@ -4,7 +4,7 @@ const footerLinks: Record<string, { label: string; href: string }[]> = {
   Product: [
     { label: 'Features', href: '/features' },
     { label: 'Explore', href: '/explore' },
-    { label: 'Compare', href: '/compare' },
+    { label: 'Browse Providers', href: '/browse/providers' },
     { label: 'Pricing', href: '/pricing' },
     { label: 'Changelog', href: '/changelog' },
   ],
@@ -39,7 +39,7 @@ export function Footer() {
                 <Sparkles className="h-5 w-5 text-white" />
               </div>
               <span className="text-lg font-semibold tracking-tight text-foreground">
-                Stack<span className="gradient-text">Pilot</span>
+                Stack<span className="gradient-text">2set</span>
               </span>
             </a>
             <p className="mt-4 max-w-xs text-sm text-muted-foreground">
@@ -80,7 +80,7 @@ export function Footer() {
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-foreground/5 pt-8 sm:flex-row">
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} StackPilot. All rights reserved.
+            © {new Date().getFullYear()} Stack2Set. All rights reserved.
           </p>
           <p className="text-xs text-muted-foreground">
             Built for developers, by developers with LOVE!.

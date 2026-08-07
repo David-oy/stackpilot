@@ -106,7 +106,7 @@ export function parseStackFromPdfText(text: string): UserStack | null {
 
   const prompt = summaryIndex > 1 ? lines[1] : '';
 
-  const META_PREFIXES = ['Why:', 'Pricing:', 'Popularity:', 'Tags:', 'Links:', 'Built with StackPilot'];
+  const META_PREFIXES = ['Why:', 'Pricing:', 'Popularity:', 'Tags:', 'Links:', 'Built with Stack2Set'];
 
   const providerHeadings = lines
     .slice(summaryIndex + 1)
@@ -221,7 +221,7 @@ export function parseStackFromPdfText(text: string): UserStack | null {
       continue;
     }
 
-    if (line.startsWith('Built with StackPilot')) continue;
+    if (line.startsWith('Built with Stack2Set')) continue;
 
     currentProvider.description = currentProvider.description
       ? `${currentProvider.description} ${line}`
@@ -239,11 +239,15 @@ export function parseStackFromPdfText(text: string): UserStack | null {
     prompt,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    sourceAnalysis: {
-      projectType,
-      complexity,
-      summary: '',
-    },
+    sourceAnalysis:
+      projectType || complexity
+        ? {
+            projectType: projectType ?? '',
+            complexity: complexity ?? 'Medium',
+            summary: '',
+            categories: [],
+          }
+        : null,
     categories: filtered.map((c) => ({
       categoryId: slugify(c.name),
       categoryName: c.name,

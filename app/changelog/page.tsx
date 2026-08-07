@@ -5,7 +5,7 @@ import { Footer } from '@/components/landing/footer';
 
 export const metadata: Metadata = {
   title: 'Changelog',
-  description: 'Recent updates, improvements, and fixes to StackPilot.',
+  description: 'Recent updates, improvements, and fixes to Stack2Set.',
   alternates: { canonical: '/changelog' },
 };
 
@@ -52,7 +52,7 @@ const entries = [
   {
     version: '1.0.0',
     date: 'April 2026',
-    items: ['Initial release of StackPilot', 'Core search and results experience'],
+    items: ['Initial release of Stack2Set', 'Core search and results experience'],
   },
 ];
 
@@ -69,7 +69,7 @@ export default function ChangelogPage() {
             What&apos;s <span className="gradient-text">new</span>
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-            Recent updates, improvements, and fixes to StackPilot.
+            Recent updates, improvements, and fixes to Stack2Set.
           </p>
         </header>
 

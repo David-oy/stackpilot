@@ -12,7 +12,7 @@ export function DocsSection() {
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-sm font-medium text-violet-400">Documentation</p>
           <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">
-            Learn to build with <span className="gradient-text">StackPilot</span>
+            Learn to build with <span className="gradient-text">Stack2Set</span>
           </h2>
           <p className="mt-4 text-base text-muted-foreground sm:text-lg">
             Guides for discovering, comparing, and assembling the perfect technology stack.

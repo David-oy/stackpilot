@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { userStackSchema } from '@/lib/stacks/repository';
 import { getShareRepository } from '@/lib/stacks/share';
 import { computeStackHealth, complexityDifficulty } from '@/lib/stacks/health';
+import type { UserStack } from '@/lib/stacks/types';
 import { absoluteUrl } from '@/lib/site';
 
 export const runtime = 'nodejs';
@@ -29,7 +30,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const stack = parsed.data.stack;
+    const stack = parsed.data.stack as unknown as UserStack;
     const health = computeStackHealth(stack);
 
     const payload = getShareRepository().create({

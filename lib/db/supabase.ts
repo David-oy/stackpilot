@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { pricingModelMonthlyCost } from '@/lib/stacks/health';
 import { categoriesSeedData, providersSeedData } from './seed';
 import { fetchWithTimeout } from './supabase-fetch';
 import {
@@ -16,7 +17,7 @@ import type { CategoryInput, ProviderInput, ProviderStore } from './store';
 type Row = Record<string, unknown>;
 
 const PROVIDER_COLUMNS =
-  'id, category_id, name, slug, official_website, short_description, long_description, logo, documentation, github, pricing_model, free_tier, open_source, popularity_score, featured, status';
+  'id, category_id, name, slug, official_website, short_description, long_description, logo, documentation, github, pricing_model, free_tier, open_source, popularity_score, featured, status, ai_suggested';
 
 function mapRowToCategory(row: Row): CategoryRecord {
   return {
@@ -33,6 +34,7 @@ function mapRowToCategory(row: Row): CategoryRecord {
 
 function mapRowToProvider(row: Row): ProviderRecord {
   const categoryRef = row.categories as { slug?: string } | undefined;
+  const compat = row.compatibility;
   return {
     id: String(row.slug),
     categoryId: String(categoryRef?.slug ?? row.category_slug ?? ''),
@@ -52,7 +54,48 @@ function mapRowToProvider(row: Row): ProviderRecord {
     status: (row.status as ProviderRecord['status']) ?? 'active',
     createdAt: String(row.created_at ?? ''),
     updatedAt: String(row.updated_at ?? ''),
+    communityRating: num(row.community_rating),
+    stack2SetRating: num(row.stack2set_rating),
+    monthlyCost: num(row.monthly_cost),
+    enterprisePricing: strOrUndef(row.enterprise_pricing),
+    learningCurve: num(row.learning_curve),
+    speed: num(row.speed),
+    scalability: num(row.scalability),
+    reliability: num(row.reliability),
+    security: row.security == null ? undefined : Boolean(row.security),
+    compliance: arr(row.compliance),
+    integrations: arr(row.integrations),
+    apis: arr(row.apis),
+    sdks: arr(row.sdks),
+    aiFeatures: arr(row.ai_features),
+    languages: arr(row.languages),
+    compatibility:
+      compat && typeof compat === 'object'
+        ? (compat as Record<string, boolean>)
+        : undefined,
+    pros: arr(row.pros),
+    cons: arr(row.cons),
+    bestUseCases: arr(row.best_use_cases),
+    aiSummary: strOrUndef(row.ai_summary),
+    aiSuggested: row.ai_suggested == null ? undefined : Boolean(row.ai_suggested),
+    source: strOrUndef(row.source),
+    lastSyncedAt: strOrUndef(row.last_synced_at),
   };
+}
+
+function num(value: unknown): number | undefined {
+  if (value == null || value === '') return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+function strOrUndef(value: unknown): string | undefined {
+  return value == null || value === '' ? undefined : String(value);
+}
+
+function arr(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  return value.filter((v): v is string => typeof v === 'string');
 }
 
 type Relations = Pick<ProviderWithRelations, 'features' | 'tags' | 'alternatives'>;
@@ -85,6 +128,7 @@ export class SupabaseProviderStore implements ProviderStore {
         .from(this.t('providers'))
         .select('id', { count: 'exact', head: true });
       if (count != null && count > 0) {
+        await this.backfillProviderProfiles();
         console.log(
           `[supabase] provider store already seeded (${count} providers) — skipped in ${Date.now() - started}ms`,
         );
@@ -156,6 +200,125 @@ export class SupabaseProviderStore implements ProviderStore {
       console.log(`[supabase] provider store seeded in ${Date.now() - started}ms`);
     } catch (error) {
       console.error('[supabase] ensureSeeded failed:', error);
+    }
+  }
+
+  /**
+   * Migration 0004 backfill: rows seeded before the profile columns existed
+   * have NULL source. Pass 1 fills rows still present in the seed file from
+   * seed data; pass 2 derives a profile for legacy rows removed from the seed
+   * file from their basic columns. Idempotent — once source is set the loop
+   * finds nothing.
+   */
+  private async backfillProviderProfiles(): Promise<void> {
+    const { data: legacy } = await this.client
+      .from(this.t('providers'))
+      .select('slug, popularity_score, pricing_model, free_tier, open_source, github, short_description')
+      .is('source', null);
+    const rows = (legacy ?? []) as unknown as Row[];
+    if (rows.length === 0) return;
+
+    const bySlug = new Map(providersSeedData.map((p) => [p.slug, p]));
+    const nowIso = new Date().toISOString();
+    const round1 = (value: number): number => Math.round(value * 10) / 10;
+    const clampScore = (value: number, min: number, max: number): number =>
+      Math.max(min, Math.min(max, Math.round(value)));
+
+    let updated = 0;
+    for (const row of rows) {
+      const slug = String(row.slug);
+      const seed = bySlug.get(slug);
+      let patch: Row;
+      if (seed) {
+        patch = {
+          community_rating: seed.communityRating ?? null,
+          stack2set_rating: seed.stack2SetRating ?? null,
+          monthly_cost: seed.monthlyCost ?? null,
+          enterprise_pricing: seed.enterprisePricing ?? null,
+          learning_curve: seed.learningCurve ?? null,
+          speed: seed.speed ?? null,
+          scalability: seed.scalability ?? null,
+          reliability: seed.reliability ?? null,
+          security: seed.security ?? null,
+          compliance: seed.compliance ?? [],
+          integrations: seed.integrations ?? [],
+          apis: seed.apis ?? [],
+          sdks: seed.sdks ?? [],
+          ai_features: seed.aiFeatures ?? [],
+          languages: seed.languages ?? [],
+          compatibility: seed.compatibility ?? {},
+          pros: seed.pros ?? [],
+          cons: seed.cons ?? [],
+          best_use_cases: seed.bestUseCases ?? [],
+          ai_summary: seed.aiSummary ?? null,
+          ai_suggested: seed.aiSuggested ?? false,
+          source: seed.source ?? 'seed',
+          last_synced_at: nowIso,
+        };
+      } else {
+        const popularity = Number(row.popularity_score) || 50;
+        const openSource = Boolean(row.open_source);
+        const pricingModel = String(row.pricing_model ?? '');
+        const freeTier = Boolean(row.free_tier);
+        const communityRating = round1(3.6 + (popularity / 100) * 1.4);
+        const monthlyCost = pricingModel ? pricingModelMonthlyCost(pricingModel) : 0;
+        patch = {
+          community_rating: communityRating,
+          stack2set_rating: round1(
+            Math.min(5, communityRating + (openSource ? 0.4 : 0.2)),
+          ),
+          monthly_cost: monthlyCost,
+          enterprise_pricing:
+            pricingModel && pricingModel !== 'open-source'
+              ? 'Custom enterprise plans available'
+              : 'Self-hosted / source available',
+          learning_curve: Number(row.popularity_score) ? clampScore(5 - popularity / 25, 1, 5) : 3,
+          speed: Number(row.popularity_score) ? clampScore(3 + popularity / 30, 1, 5) : 4,
+          scalability: openSource ? 4 : clampScore(3 + (popularity / 100) * 2, 1, 5),
+          reliability: clampScore(4 + popularity / 100, 1, 5),
+          security: Boolean(row.github) || pricingModel !== 'free',
+          compliance: ['SOC 2', 'GDPR'],
+          integrations: [],
+          apis: ['REST', 'Webhooks'],
+          sdks: [],
+          ai_features: [],
+          languages: ['JavaScript', 'TypeScript', 'Node.js'],
+          compatibility: {
+            React: true,
+            'Next.js': true,
+            Vue: true,
+            Angular: true,
+            Node: true,
+            Python: true,
+            Java: true,
+            Go: true,
+            Mobile: true,
+          },
+          pros: [
+            freeTier
+              ? 'Generous free tier to get started without upfront cost'
+              : 'Clear and transparent pricing model',
+            openSource
+              ? 'Fully open source with an active community'
+              : 'Production-grade managed service with vendor support',
+          ],
+          cons: [
+            monthlyCost > 0
+              ? `Paid tier adds ~$${monthlyCost}/mo per project`
+              : 'Advanced enterprise features may require a paid plan',
+          ],
+          best_use_cases: [],
+          ai_summary: String(row.short_description ?? ''),
+          ai_suggested: false,
+          source: 'legacy',
+          last_synced_at: nowIso,
+        };
+      }
+      await this.client.from(this.t('providers')).update(patch).eq('slug', slug);
+      updated += 1;
+    }
+    if (updated > 0) {
+      console.log(`[supabase] backfilled profile columns for ${updated} legacy providers`);
     }
   }
 
@@ -538,6 +701,7 @@ export class SupabaseProviderStore implements ProviderStore {
             popularity_score: provider.popularityScore,
             featured: provider.featured,
             status: provider.status,
+            ai_suggested: provider.aiSuggested ?? false,
           })),
         )
         .select('id, slug');
@@ -612,6 +776,7 @@ export class SupabaseProviderStore implements ProviderStore {
       popularity_score: (row.popularity_score as number) ?? input.popularityScore ?? 50,
       featured: (row.featured as boolean) ?? input.featured ?? false,
       status: fill(row.status, input.status) || 'active',
+      ai_suggested: (row.ai_suggested as boolean) ?? input.aiSuggested ?? false,
     };
 
     const patch: Record<string, unknown> = {};

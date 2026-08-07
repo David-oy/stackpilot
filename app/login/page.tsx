@@ -13,7 +13,7 @@ function LoginContent() {
   return (
     <AuthCard
       eyebrow="Welcome back"
-      title="Sign in to StackPilot"
+      title="Sign in to Stack2Set"
       subtitle="Sync your stacks, save favorites, and pick up where you left off."
       footer={
         <>

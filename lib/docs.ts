@@ -24,7 +24,7 @@ export type DocGroup = {
   items: { slug: string; title: string; description: string }[];
 };
 
-const curlAnalyze = `# Requires an authenticated session (sign in to StackPilot first, then run
+const curlAnalyze = `# Requires an authenticated session (sign in to Stack2Set first, then run
 # this from the same browser, or include your session cookie).
 curl -X POST https://get-stack.vercel.app/api/analyze \\
   -H "Content-Type: application/json" \\
@@ -81,7 +81,7 @@ export const docGroups: DocGroup[] = [
       {
         slug: 'tech-discovery',
         title: 'Tech Discovery',
-        description: 'How StackPilot identifies the categories your project needs.',
+        description: 'How Stack2Set identifies the categories your project needs.',
       },
     ],
   },
@@ -136,12 +136,12 @@ export const docGroups: DocGroup[] = [
       {
         slug: 'api',
         title: 'API',
-        description: 'Reference for the StackPilot analysis endpoint.',
+        description: 'Reference for the Stack2Set analysis endpoint.',
       },
       {
         slug: 'faq',
         title: 'FAQ',
-        description: 'Frequently asked questions about StackPilot.',
+        description: 'Frequently asked questions about Stack2Set.',
       },
     ],
   },
@@ -153,18 +153,18 @@ export const allDocs: Doc[] = [
     title: 'Getting Started',
     description:
       'Learn how to describe your project, review the recommended technology categories, compare providers, and assemble a complete stack.',
-    keywords: ['getting started', 'how it works', 'introduction', 'quick start', 'stackpilot'],
+    keywords: ['getting started', 'how it works', 'introduction', 'quick start', 'stack2set'],
     blocks: [
       {
         type: 'p',
-        text: 'StackPilot turns a plain-English project description into a complete technology stack. You describe what you want to build — a YouTube clone, a SaaS dashboard, an AI chatbot — and StackPilot identifies every category of technology your project needs and recommends the best providers for each one.',
+        text: 'Stack2Set turns a plain-English project description into a complete technology stack. You describe what you want to build — a YouTube clone, a SaaS dashboard, an AI chatbot — and Stack2Set identifies every category of technology your project needs and recommends the best providers for each one.',
       },
       { type: 'h2', text: 'Try it in one minute' },
       {
         type: 'ul',
         items: [
           'Go to the homepage and type a short description of your project.',
-          'Press Search. StackPilot analyzes your idea with AI.',
+          'Press Search. Stack2Set analyzes your idea with AI.',
           'Review the recommended categories and ranked providers on the results page.',
           'Open any category to compare providers in detail.',
           'Add your favorites and export your stack when ready.',
@@ -197,12 +197,12 @@ export const allDocs: Doc[] = [
     slug: 'search',
     title: 'Search',
     description:
-      'How to describe your project on the homepage, use popular searches, and what happens while StackPilot analyzes your idea.',
+      'How to describe your project on the homepage, use popular searches, and what happens while Stack2Set analyzes your idea.',
     keywords: ['search', 'query', 'describe project', 'popular searches', 'loading screen'],
     blocks: [
       {
         type: 'p',
-        text: 'The search box on the homepage is the entry point to StackPilot. Type a description of the project you want to build and press Search to start the analysis.',
+        text: 'The search box on the homepage is the entry point to Stack2Set. Type a description of the project you want to build and press Search to start the analysis.',
       },
       { type: 'h2', text: 'Writing a good description' },
       {
@@ -223,7 +223,7 @@ export const allDocs: Doc[] = [
       { type: 'h2', text: 'While the analysis runs' },
       {
         type: 'p',
-        text: 'After you search, StackPilot shows a progress screen that walks through understanding your project, identifying required technologies, finding the best providers, and building your stack.',
+        text: 'After you search, Stack2Set shows a progress screen that walks through understanding your project, identifying required technologies, finding the best providers, and building your stack.',
       },
       { type: 'h2', text: 'Handling errors' },
       {
@@ -236,12 +236,12 @@ export const allDocs: Doc[] = [
     slug: 'tech-discovery',
     title: 'Tech Discovery',
     description:
-      'How StackPilot identifies which technology categories your project needs and how the category pages are organized.',
+      'How Stack2Set identifies which technology categories your project needs and how the category pages are organized.',
     keywords: ['categories', 'tech discovery', 'technology', 'stack', 'discovery'],
     blocks: [
       {
         type: 'p',
-        text: 'Tech discovery is the core of StackPilot. After reading your project description, the AI decides which technology categories your project genuinely requires — nothing more, nothing less.',
+        text: 'Tech discovery is the core of Stack2Set. After reading your project description, the AI decides which technology categories your project genuinely requires — nothing more, nothing less.',
       },
       { type: 'h2', text: 'How categories are chosen' },
       {
@@ -312,17 +312,17 @@ export const allDocs: Doc[] = [
     slug: 'ai',
     title: 'AI',
     description:
-      'The AI models and structured criteria StackPilot uses to analyze projects and rank technology providers.',
+      'The AI models and structured criteria Stack2Set uses to analyze projects and rank technology providers.',
     keywords: ['ai', 'model', 'gemini', 'recommendation', 'ranking criteria', 'llm'],
     blocks: [
       {
         type: 'p',
-        text: 'StackPilot uses large language models to read your project description and generate technology recommendations. Analysis runs on your latest description, so results are always fresh.',
+        text: 'Stack2Set uses large language models to read your project description and generate technology recommendations. Analysis runs on your latest description, so results are always fresh.',
       },
       { type: 'h2', text: 'Which AI models are supported' },
       {
         type: 'p',
-        text: 'StackPilot is powered by the Google Gemini API for analysis. The provider library also includes AI categories, so your project can get recommendations for LLM providers, AI SDKs, and vector databases when it needs them.',
+        text: 'Stack2Set is powered by the Google Gemini API for analysis. The provider library also includes AI categories, so your project can get recommendations for LLM providers, AI SDKs, and vector databases when it needs them.',
       },
       { type: 'h2', text: 'Ranking criteria' },
       {
@@ -359,7 +359,7 @@ export const allDocs: Doc[] = [
         type: 'p',
         text: 'Authentication handles user identity: sign-up, sign-in, sessions, and permissions. Choosing the right provider early avoids painful migration later.',
       },
-      { type: 'h2', text: 'What StackPilot recommends' },
+      { type: 'h2', text: 'What Stack2Set recommends' },
       {
         type: 'ul',
         items: [
@@ -390,12 +390,12 @@ export const allDocs: Doc[] = [
     slug: 'databases',
     title: 'Databases',
     description:
-      'SQL, NoSQL, vector, and real-time databases — and how StackPilot recommends the right one for your data model.',
+      'SQL, NoSQL, vector, and real-time databases — and how Stack2Set recommends the right one for your data model.',
     keywords: ['database', 'sql', 'nosql', 'postgresql', 'mongodb', 'redis', 'vector'],
     blocks: [
       {
         type: 'p',
-        text: 'The database is the foundation of your stack. StackPilot recommends the engine that fits your data model, scale, and team.',
+        text: 'The database is the foundation of your stack. Stack2Set recommends the engine that fits your data model, scale, and team.',
       },
       { type: 'h2', text: 'Database families' },
       {
@@ -468,7 +468,7 @@ export const allDocs: Doc[] = [
     blocks: [
       {
         type: 'p',
-        text: 'The cloud layer runs your application: compute, storage, networking, and managed services. StackPilot matches the platform to your deployment needs.',
+        text: 'The cloud layer runs your application: compute, storage, networking, and managed services. Stack2Set matches the platform to your deployment needs.',
       },
       { type: 'h2', text: 'Platforms' },
       {
@@ -538,12 +538,12 @@ vercel deploy --prebuilt --prod`,
     slug: 'api',
     title: 'API',
     description:
-      'Reference for the StackPilot analysis endpoint: request format, response schema, and error handling.',
+      'Reference for the Stack2Set analysis endpoint: request format, response schema, and error handling.',
     keywords: ['api', 'endpoint', 'analyze', 'request', 'response', 'reference', 'curl'],
     blocks: [
       {
         type: 'p',
-        text: 'The StackPilot analysis API powers the search experience. It accepts a project description and returns a ranked technology stack.',
+        text: 'The Stack2Set analysis API powers the search experience. It accepts a project description and returns a ranked technology stack.',
       },
       { type: 'h2', text: 'Endpoint' },
       {
@@ -576,7 +576,7 @@ Content-Type: application/json`,
       {
         type: 'ul',
         items: [
-          '401 — you are not signed in. Sign in to StackPilot before calling this endpoint.',
+          '401 — you are not signed in. Sign in to Stack2Set before calling this endpoint.',
           '400 — the description is empty or too short.',
           '502 — the AI provider could not be reached. Try again shortly.',
           '500 — an unexpected server error occurred.',
@@ -588,7 +588,7 @@ Content-Type: application/json`,
     slug: 'faq',
     title: 'FAQ',
     description:
-      'Frequently asked questions about StackPilot, recommendations, pricing, and supported providers.',
+      'Frequently asked questions about Stack2Set, recommendations, pricing, and supported providers.',
     keywords: ['faq', 'questions', 'help', 'support', 'frequently asked'],
     blocks: [
       {
@@ -599,8 +599,8 @@ Content-Type: application/json`,
       {
         type: 'ul',
         items: [
-          'What is StackPilot? — an AI tool that turns a project idea into a complete tech stack.',
-          'Is it free? — yes, StackPilot is free to use.',
+          'What is Stack2Set? — an AI tool that turns a project idea into a complete tech stack.',
+          'Is it free? — yes, Stack2Set is free to use.',
           'Which AI models are supported? — the analysis uses the Google Gemini API.',
           'Can I compare providers? — yes, every category page ranks multiple providers.',
           'Can I export my stack? — yes, you can export your assembled stack.',

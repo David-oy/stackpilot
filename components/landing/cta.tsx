@@ -21,7 +21,7 @@ export function CTA() {
               Start Planning Your <span className="gradient-text">Next Project</span>
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Join thousands of developers using StackPilot to discover and assemble the perfect
+              Join thousands of developers using Stack2Set to discover and assemble the perfect
               tech stack.
             </p>
 

@@ -7,7 +7,7 @@ const steps = [
     icon: PencilLine,
     title: 'Describe your project',
     description:
-      'Tell StackPilot what you want to build. A YouTube clone, a Spotify-like app, an AI chatbot — anything.',
+      'Tell Stack2Set what you want to build. A YouTube clone, a Spotify-like app, an AI chatbot — anything.',
   },
   {
     number: '02',

@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 export const metadata: Metadata = {
   title: 'Pricing',
   description:
-    'StackPilot is free to use. Explore plans for individuals, startups, and teams — no credit card required.',
+    'Stack2Set is free to use. Explore plans for individuals, startups, and teams — no credit card required.',
   alternates: { canonical: '/pricing' },
 };
 
@@ -76,7 +76,7 @@ export default function PricingPage() {
             Start <span className="gradient-text">free</span>, scale when you&apos;re ready
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-            StackPilot is free for everyone today. Simple plans for developers, startups, and teams.
+            Stack2Set is free for everyone today. Simple plans for developers, startups, and teams.
           </p>
         </header>
 

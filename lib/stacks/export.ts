@@ -75,7 +75,7 @@ export function toMarkdown(stack: UserStack): string {
   lines.push('---');
   lines.push('');
   lines.push(
-    `_Built with [StackPilot](${'https://get-stack.vercel.app'}) — AI-powered tech stack discovery._`,
+    `_Built with [Stack2Set](${'https://get-stack.vercel.app'}) — AI-powered tech stack discovery._`,
   );
   return lines.join('\n').trim() + '\n';
 }
@@ -89,10 +89,10 @@ export function parseStackImport(text: string): UserStack | null {
       (parsed as StackExportFile).type === STACK_EXPORT_TYPE
     ) {
       const result = stackExportSchema.safeParse(parsed);
-      if (result.success) return result.data.stack;
+      if (result.success) return result.data.stack as unknown as UserStack;
     }
     const result = userStackSchema.safeParse(parsed);
-    if (result.success) return result.data;
+    if (result.success) return result.data as unknown as UserStack;
     return null;
   } catch {
     return null;
@@ -178,7 +178,7 @@ export function printStackHtml(stack: UserStack, health: StackHealth): void {
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>${ESCAPE_HTML(stack.name)} — StackPilot</title>
+  <title>${ESCAPE_HTML(stack.name)} — Stack2Set</title>
   <style>
     body { font-family: system-ui, -apple-system, sans-serif; color: #1a1a2e; margin: 40px; }
     h1 { font-size: 26px; margin-bottom: 4px; }
@@ -206,7 +206,7 @@ export function printStackHtml(stack: UserStack, health: StackHealth): void {
     · Est. monthly cost: <strong>${formatCurrency(cost)}</strong>
   </div>
   ${categoriesHtml}
-  <p class="footer">Built with StackPilot — AI-powered tech stack discovery.</p>
+  <p class="footer">Built with Stack2Set — AI-powered tech stack discovery.</p>
   <script>window.onload = function(){ window.focus(); window.print(); };</script>
 </body>
 </html>`;

@@ -87,5 +87,54 @@ export function sanitizeProviderInput(input: ProviderInput): ProviderInput {
     features: cleanList(input.features, 10, 120),
     tags: cleanList(input.tags, 10, 60),
     alternatives: cleanList(input.alternatives, 8, 60),
+    communityRating: clampFloat(input.communityRating, 1, 5),
+    stack2SetRating: clampFloat(input.stack2SetRating, 1, 5),
+    monthlyCost:
+      input.monthlyCost !== undefined && Number.isFinite(input.monthlyCost)
+        ? Math.max(0, Math.round(input.monthlyCost))
+        : undefined,
+    enterprisePricing: cleanText(input.enterprisePricing, 240) || undefined,
+    learningCurve: clampScore(input.learningCurve, 1, 5),
+    speed: clampScore(input.speed, 1, 5),
+    scalability: clampScore(input.scalability, 1, 5),
+    reliability: clampScore(input.reliability, 1, 5),
+    security: input.security === undefined ? undefined : Boolean(input.security),
+    compliance: cleanList(input.compliance, 8, 60),
+    integrations: cleanList(input.integrations, 10, 60),
+    apis: cleanList(input.apis, 8, 40),
+    sdks: cleanList(input.sdks, 8, 40),
+    aiFeatures: cleanList(input.aiFeatures, 8, 80),
+    languages: cleanList(input.languages, 8, 40),
+    compatibility: cleanCompat(input.compatibility),
+    pros: cleanList(input.pros, 8, 200),
+    cons: cleanList(input.cons, 8, 200),
+    bestUseCases: cleanList(input.bestUseCases, 8, 120),
+    aiSummary: cleanText(input.aiSummary, 1600) || undefined,
+    aiSuggested:
+      input.aiSuggested === undefined ? undefined : Boolean(input.aiSuggested),
+    source: cleanText(input.source, 60) || undefined,
+    lastSyncedAt: input.lastSyncedAt || undefined,
   };
+}
+
+function clampScore(value: number | undefined, min: number, max: number): number | undefined {
+  if (value === undefined || !Number.isFinite(value)) return undefined;
+  return Math.max(min, Math.min(max, Math.round(value)));
+}
+
+function clampFloat(value: number | undefined, min: number, max: number): number | undefined {
+  if (value === undefined || !Number.isFinite(value)) return undefined;
+  return Math.max(min, Math.min(max, Math.round(value * 10) / 10));
+}
+
+function cleanCompat(
+  value: Record<string, boolean> | undefined,
+): Record<string, boolean> | undefined {
+  if (!value || typeof value !== 'object') return undefined;
+  const out: Record<string, boolean> = {};
+  for (const [key, val] of Object.entries(value)) {
+    if (!key || key.length > 40) continue;
+    out[key] = Boolean(val);
+  }
+  return Object.keys(out).length ? out : undefined;
 }

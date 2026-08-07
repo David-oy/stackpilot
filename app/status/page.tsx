@@ -5,7 +5,7 @@ import { Footer } from '@/components/landing/footer';
 
 export const metadata: Metadata = {
   title: 'Status',
-  description: 'Current status and uptime for StackPilot services.',
+  description: 'Current status and uptime for Stack2Set services.',
   alternates: { canonical: '/status' },
 };
 

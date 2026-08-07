@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
 function encodeShareText(title: string, url: string): string {
-  return encodeURIComponent(`${title} — built with StackPilot`);
+  return encodeURIComponent(`${title} — built with Stack2Set`);
 }
 
 export function ShareModal({

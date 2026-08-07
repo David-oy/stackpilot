@@ -4,14 +4,14 @@ import { StaticPage } from '@/components/pages/static-page';
 export const metadata: Metadata = {
   title: 'Features',
   description:
-    'Explore StackPilot features: AI project planning, API discovery, database recommendations, provider comparison, and stack building.',
+    'Explore Stack2Set features: AI project planning, API discovery, database recommendations, provider comparison, and stack building.',
   alternates: { canonical: '/features' },
 };
 
 const sections = [
   {
     title: 'Core features',
-    body: 'StackPilot turns a project idea into a complete technology blueprint — automatically.',
+    body: 'Stack2Set turns a project idea into a complete technology blueprint — automatically.',
     items: [
       { title: 'AI Project Planner', body: 'Describe your idea in plain English and get a complete project blueprint with recommended technologies.', href: '/docs/ai' },
       { title: 'API Discovery', body: 'Find the right APIs for payments, email, search, maps, AI, and hundreds of other use cases.', href: '/docs/tech-discovery' },

@@ -6,7 +6,7 @@ import { siteConfig } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: 'Contact',
-  description: 'Get in touch with the StackPilot team — report issues, ask questions, or share feedback.',
+  description: 'Get in touch with the Stack2Set team — report issues, ask questions, or share feedback.',
   alternates: { canonical: '/contact' },
 };
 

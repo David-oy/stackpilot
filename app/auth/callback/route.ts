@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 // Mirrors AUTH_NEXT_COOKIE in lib/auth/pending-query.ts. Kept literal here to
 // avoid importing a 'use client' module from a server route.
-const AUTH_NEXT_COOKIE = 'stackpilot:auth-next';
+const AUTH_NEXT_COOKIE = 'stack2set:auth-next';
 
 function safePath(path: string | null | undefined): string | null {
   return path && path.startsWith('/') && !path.startsWith('//') ? path : null;

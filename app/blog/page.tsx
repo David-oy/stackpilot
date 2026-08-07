@@ -31,11 +31,11 @@ const posts = [
     tag: 'Authentication',
   },
   {
-    title: 'From idea to deployed app with StackPilot',
+    title: 'From idea to deployed app with Stack2Set',
     date: 'July 2026',
     readTime: '4 min',
     excerpt:
-      'A step-by-step walkthrough of taking a project idea to a deployed stack using StackPilot.',
+      'A step-by-step walkthrough of taking a project idea to a deployed stack using Stack2Set.',
     href: '/docs/getting-started',
     tag: 'Tutorial',
   },

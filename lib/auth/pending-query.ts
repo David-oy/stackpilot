@@ -9,7 +9,7 @@
  * OAuth provider round-trip and email confirmation flows that may open a new tab.
  */
 
-const STORAGE_KEY = 'stackpilot:pending-query';
+const STORAGE_KEY = 'stack2set:pending-query';
 const PENDING_TTL_MS = 24 * 60 * 60 * 1000;
 
 /**
@@ -18,7 +18,7 @@ const PENDING_TTL_MS = 24 * 60 * 60 * 1000;
  * the callback URL stays a bare, allowlist-friendly path (Supabase matches the
  * full redirect URL against the dashboard allowlist, query params included).
  */
-export const AUTH_NEXT_COOKIE = 'stackpilot:auth-next';
+export const AUTH_NEXT_COOKIE = 'stack2set:auth-next';
 
 type StoredPendingQuery = {
   query: string;
@@ -66,7 +66,7 @@ export function clearPendingQuery(): void {
 
 /**
  * Persists the destination the auth callback should redirect to (e.g.
- * /results?q=...). Written right before starting an OAuth flow or a sign-up so
+ * /search?q=...). Written right before starting an OAuth flow or a sign-up so
  * it survives the provider round-trip and email confirmation, then read and
  * cleared server-side by /auth/callback.
  */
@@ -87,7 +87,7 @@ export function setAuthNextCookie(path: string): void {
 export function getPostAuthTarget(fallback: string): { path: string; hasPending: boolean } {
   const pending = getPendingQuery();
   if (pending) {
-    return { path: `/results?q=${encodeURIComponent(pending)}`, hasPending: true };
+    return { path: `/search?q=${encodeURIComponent(pending)}`, hasPending: true };
   }
   const safe = fallback.startsWith('/') && !fallback.startsWith('//') ? fallback : '/workspace';
   return { path: safe, hasPending: false };

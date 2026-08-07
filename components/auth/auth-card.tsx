@@ -30,7 +30,7 @@ export function AuthCard({
               <Sparkles className="h-5 w-5 text-white" />
             </div>
             <span className="text-lg font-semibold tracking-tight text-foreground">
-              Stack<span className="gradient-text">Pilot</span>
+              Stack<span className="gradient-text">2set</span>
             </span>
           </Link>
         </div>

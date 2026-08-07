@@ -22,7 +22,7 @@ type ThemeContextValue = {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-const DEFAULT_STORAGE_KEY = 'stackpilot-theme';
+const DEFAULT_STORAGE_KEY = 'stack2set-theme';
 const MEDIA_QUERY = '(prefers-color-scheme: dark)';
 
 function getSystemTheme(): ResolvedTheme {

@@ -9,42 +9,42 @@ export const faqCategories = ['General', 'Pricing', 'AI & Models', 'Providers', 
 
 export const faqItems: FaqItem[] = [
   {
-    question: 'What is StackPilot?',
+    question: 'What is Stack2Set?',
     answer:
-      'StackPilot is an AI-powered developer tool that analyzes a project idea and recommends the best technologies, APIs, databases, authentication providers, hosting services, and developer tools to build it without searching randomly.',
+      'Stack2Set is an AI-powered developer tool that analyzes a project idea and recommends the best technologies, APIs, databases, authentication providers, hosting services, and developer tools to build it without searching randomly.',
     category: 'General',
     featured: true,
   },
   {
-    question: 'How does StackPilot work?',
+    question: 'How does Stack2Set work?',
     answer:
-      "Describe your project in plain English. StackPilot's AI analyzes your idea, identifies the required technology categories, and returns the best and filter-based providers, listed on the UI with provider details, links, and explanations for each one.",
+      "Describe your project in plain English. Stack2Set's AI analyzes your idea, identifies the required technology categories, and returns the best and filter-based providers, listed on the UI with provider details, links, and explanations for each one.",
     category: 'General',
   },
   {
-    question: 'Does StackPilot support startups?',
+    question: 'Does Stack2Set support startups?',
     answer:
-      'Yes. StackPilot is designed for developers of all levels, from solo builders to startups. It recommends production-ready, cost-effective, and free-tier options so early-stage teams can move fast without expensive research.',
+      'Yes. Stack2Set is designed for developers of all levels, from solo builders to startups. It recommends production-ready, cost-effective, and free-tier options so early-stage teams can move fast without expensive research.',
     category: 'General',
     featured: true,
   },
   {
-    question: 'Why should I use StackPilot instead of searching manually?',
+    question: 'Why should I use Stack2Set instead of searching manually?',
     answer:
-      'StackPilot saves hours of research by analyzing your whole project at once, covering every technology category, ranking providers, and explaining why each one fits — all in one place.',
+      'Stack2Set saves hours of research by analyzing your whole project at once, covering every technology category, ranking providers, and explaining why each one fits — all in one place.',
     category: 'General',
   },
   {
-    question: 'Is StackPilot free?',
+    question: 'Is Stack2Set free?',
     answer:
-      'Yes, StackPilot is free to use. You can describe unlimited project ideas and explore recommended providers without any cost.',
+      'Yes, Stack2Set is free to use. You can describe unlimited project ideas and explore recommended providers without any cost.',
     category: 'Pricing',
     featured: true,
   },
   {
     question: 'Which AI models are supported?',
     answer:
-      'StackPilot is powered by modern large language models. It uses the Google Gemini API for analysis and can also leverage AI models for recommendations. Providers for AI models, LLMs, and vector databases are recommended as part of your stack when your project needs them.',
+      'Stack2Set is powered by modern large language models. It uses the Google Gemini API for analysis and can also leverage AI models for recommendations. Providers for AI models, LLMs, and vector databases are recommended as part of your stack when your project needs them.',
     category: 'AI & Models',
     featured: true,
   },
@@ -62,9 +62,9 @@ export const faqItems: FaqItem[] = [
     category: 'AI & Models',
   },
   {
-    question: 'Does StackPilot use AI?',
+    question: 'Does Stack2Set use AI?',
     answer:
-      'Yes. StackPilot uses AI models to analyze your project description and generate technology recommendations automatically.',
+      'Yes. Stack2Set uses AI models to analyze your project description and generate technology recommendations automatically.',
     category: 'AI & Models',
   },
   {
@@ -88,51 +88,51 @@ export const faqItems: FaqItem[] = [
     featured: true,
   },
   {
-    question: 'Can StackPilot recommend AI tools?',
+    question: 'Can Stack2Set recommend AI tools?',
     answer:
-      'Yes. StackPilot can recommend AI models, LLM providers, and AI-powered tools when your project requires them, including vector databases and machine learning APIs.',
+      'Yes. Stack2Set can recommend AI models, LLM providers, and AI-powered tools when your project requires them, including vector databases and machine learning APIs.',
     category: 'Providers',
   },
   {
-    question: 'Can StackPilot recommend databases?',
+    question: 'Can Stack2Set recommend databases?',
     answer:
-      "Yes. StackPilot recommends SQL, NoSQL, vector, and real-time databases and explains which type best fits your project's data needs.",
+      "Yes. Stack2Set recommends SQL, NoSQL, vector, and real-time databases and explains which type best fits your project's data needs.",
     category: 'Providers',
   },
   {
     question: 'Which frontend frameworks are supported?',
     answer:
-      'StackPilot can recommend frontend frameworks such as React, Next.js, Vue, Svelte, and more based on the specific needs of your project.',
+      'Stack2Set can recommend frontend frameworks such as React, Next.js, Vue, Svelte, and more based on the specific needs of your project.',
     category: 'Providers',
   },
   {
     question: 'Which backend frameworks are supported?',
     answer:
-      'StackPilot can recommend backend frameworks including Node.js/Express, NestJS, Python/Django, FastAPI, Ruby on Rails, Go, and others depending on your project requirements.',
+      'Stack2Set can recommend backend frameworks including Node.js/Express, NestJS, Python/Django, FastAPI, Ruby on Rails, Go, and others depending on your project requirements.',
     category: 'Providers',
   },
   {
     question: 'Which databases are supported?',
     answer:
-      'StackPilot covers major databases such as PostgreSQL, MySQL, MongoDB, Redis, and serverless and vector databases, recommending the best fit for your data model and scale.',
+      'Stack2Set covers major databases such as PostgreSQL, MySQL, MongoDB, Redis, and serverless and vector databases, recommending the best fit for your data model and scale.',
     category: 'Providers',
   },
   {
-    question: 'Does StackPilot recommend cloud providers?',
+    question: 'Does Stack2Set recommend cloud providers?',
     answer:
-      'Yes. StackPilot recommends cloud platforms and hosting providers such as AWS, Vercel, Netlify, Railway, and others, matched to your deployment needs.',
+      'Yes. Stack2Set recommends cloud platforms and hosting providers such as AWS, Vercel, Netlify, Railway, and others, matched to your deployment needs.',
     category: 'Providers',
   },
   {
     question: 'Can I discover APIs?',
     answer:
-      'Yes. StackPilot helps you discover APIs for payments, email, search, maps, AI, authentication, storage, and hundreds of other use cases.',
+      'Yes. Stack2Set helps you discover APIs for payments, email, search, maps, AI, authentication, storage, and hundreds of other use cases.',
     category: 'Providers',
   },
   {
-    question: 'Does StackPilot recommend open-source tools?',
+    question: 'Does Stack2Set recommend open-source tools?',
     answer:
-      'Yes. Providers are marked with open-source indicators, and StackPilot frequently recommends open-source tools when they are the best fit for a project.',
+      'Yes. Providers are marked with open-source indicators, and Stack2Set frequently recommends open-source tools when they are the best fit for a project.',
     category: 'Providers',
   },
   {
@@ -143,9 +143,9 @@ export const faqItems: FaqItem[] = [
     featured: true,
   },
   {
-    question: 'Can beginners use StackPilot?',
+    question: 'Can beginners use Stack2Set?',
     answer:
-      'Absolutely. StackPilot is designed for developers of all levels. Beginners can discover a sensible stack without deep research, and each recommendation includes an explanation.',
+      'Absolutely. Stack2Set is designed for developers of all levels. Beginners can discover a sensible stack without deep research, and each recommendation includes an explanation.',
     category: 'Stack & Export',
   },
 ];

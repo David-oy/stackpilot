@@ -21,7 +21,7 @@ import { breadcrumbSchema } from '@/lib/jsonld';
 export const metadata: Metadata = {
   title: 'Documentation',
   description:
-    'Learn how to use StackPilot: describe your project, review AI-recommended technology categories, compare providers, and build your tech stack.',
+    'Learn how to use Stack2Set: describe your project, review AI-recommended technology categories, compare providers, and build your tech stack.',
   alternates: {
     canonical: '/docs',
   },
@@ -29,14 +29,14 @@ export const metadata: Metadata = {
     type: 'website',
     title: `Documentation — ${siteConfig.name}`,
     description:
-      'Learn how to use StackPilot to discover and assemble the perfect technology stack for your project.',
+      'Learn how to use Stack2Set to discover and assemble the perfect technology stack for your project.',
   },
 };
 
 const quickStartCode = `# 1. Describe your project on the homepage
 "I want to build a YouTube clone"
 
-# 2. StackPilot analyzes it with AI
+# 2. Stack2Set analyzes it with AI
 # 3. Review categories, compare providers
 # 4. Build and export your stack`;
 
@@ -66,7 +66,7 @@ export default function DocsPage() {
         <header className="text-center">
           <p className="text-sm font-medium text-violet-400">Documentation</p>
           <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">
-            Build smarter with <span className="gradient-text">StackPilot</span>
+            Build smarter with <span className="gradient-text">Stack2Set</span>
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground sm:text-lg">
             Everything you need to discover, compare, and assemble the perfect technology stack.

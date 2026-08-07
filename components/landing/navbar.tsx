@@ -27,7 +27,7 @@ type NavLink = {
 const navLinks: NavLink[] = [
   { label: 'Home', href: '/', pattern: '/' },
   { label: 'Explore', href: '/explore', pattern: '/explore' },
-  { label: 'Compare', href: '/compare', pattern: '/compare' },
+  { label: 'Browse', href: '/browse/providers', pattern: '/browse/providers' },
   { label: 'Pricing', href: '/pricing', pattern: '/pricing' },
 ];
 
@@ -81,7 +81,7 @@ export function Navbar() {
               <Sparkles className="h-5 w-5 text-white" />
             </div>
             <span className="text-lg font-semibold tracking-tight text-foreground">
-              Stack<span className="gradient-text">Pilot</span>
+              Stack<span className="gradient-text">2set</span>
             </span>
           </Link>
           <div className="hidden md:block">

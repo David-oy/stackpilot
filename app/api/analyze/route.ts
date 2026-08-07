@@ -6,7 +6,7 @@ import { getRouteSession } from '@/lib/supabase/route-user';
 import type { AnalysisProvider } from '@/lib/types';
 import type { StackAnalysis } from '@/lib/types';
 import {
-  analyzeWithGemini,
+  analyzeProjectIntent,
   fetchFallbackProviders,
   AnalysisError,
 } from '@/lib/gemini';
@@ -90,19 +90,18 @@ async function handleAnalyze(request: NextRequest) {
   const slugIndex = buildSlugIndex(allCategories);
 
   const geminiStart = Date.now();
-  const gemini = await analyzeWithGemini(
+  const intent = await analyzeProjectIntent(
     parsed.data.description,
     Array.from(slugIndex.keys()),
   );
-  trace(`gemini analysis (${Date.now() - geminiStart}ms)`);
+  trace(`gemini intent analysis (${Date.now() - geminiStart}ms)`);
 
   const categories: StackAnalysis['categories'] = [];
   const fallbackNeeded: Array<{ id: string; name: string; description: string }> = [];
 
-  for (const cat of gemini.categories) {
+  for (const cat of intent.categories) {
     const canonicalSlug = slugIndex.get(cat.id) ?? cat.id;
     let providers: AnalysisProvider[] = [];
-    let usedDatabase = false;
 
     if (slugIndex.has(cat.id)) {
       const lookupStart = Date.now();
@@ -110,11 +109,6 @@ async function handleAnalyze(request: NextRequest) {
       trace(
         `provider lookup ${canonicalSlug} (${Date.now() - lookupStart}ms, ${providers.length} providers)`,
       );
-      usedDatabase = providers.length > 0;
-    }
-
-    if (providers.length === 0 && cat.providers.length > 0) {
-      providers = cat.providers;
     }
 
     if (providers.length === 0) {
@@ -125,15 +119,10 @@ async function handleAnalyze(request: NextRequest) {
       id: canonicalSlug,
       name: cat.name,
       description: cat.description,
+      confidence: cat.confidence,
+      reasoning: cat.reasoning,
       providers,
     });
-
-    if (!usedDatabase && cat.providers.length > 0) {
-      void providerService.storeFallbackCategoryAndProviders(
-        { id: canonicalSlug, name: cat.name, description: cat.description },
-        cat.providers,
-      );
-    }
   }
   trace(`category generation (${categories.length} categories)`);
 
@@ -149,21 +138,25 @@ async function handleAnalyze(request: NextRequest) {
     for (const category of categories) {
       const fallbackProviders = fallback[category.id];
       if (fallbackProviders && fallbackProviders.length > 0) {
-        category.providers = fallbackProviders;
+        const flaggedProviders = fallbackProviders.map((provider) => ({
+          ...provider,
+          aiSuggested: true,
+        }));
+        category.providers = flaggedProviders;
         void providerService.storeFallbackCategoryAndProviders(
           { id: category.id, name: category.name, description: category.description },
-          fallbackProviders,
+          flaggedProviders,
         );
       }
     }
   }
 
   const analysis: StackAnalysis = {
-    projectType: gemini.projectType,
-    summary: gemini.summary,
-    complexity: gemini.complexity,
+    projectType: intent.projectType,
+    summary: intent.summary,
+    complexity: intent.complexity,
     categories,
-    integrations: gemini.integrations,
+    integrations: intent.integrations,
   };
 
   const cacheWriteStart = Date.now();

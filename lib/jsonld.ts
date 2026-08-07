@@ -29,7 +29,7 @@ export function websiteSchema(): JsonLd {
       '@type': 'SearchAction',
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: absoluteUrl('/results?q={search_term_string}'),
+        urlTemplate: absoluteUrl('/search?q={search_term_string}'),
       },
       'query-input': 'required name=search_term_string',
     },

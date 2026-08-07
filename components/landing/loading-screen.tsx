@@ -54,7 +54,7 @@ export function LoadingScreen({
       } else if (autoNavigate) {
         timers.push(
           setTimeout(() => {
-            if (!cancelled) router.push(`/results?q=${encodeURIComponent(query)}`);
+            if (!cancelled) router.push(`/search?q=${encodeURIComponent(query)}`);
           }, loadingSteps.length * stepDuration + 600),
         );
       }

@@ -59,7 +59,7 @@ export default function AccountPage() {
               </div>
               <div className="min-w-0">
                 <h2 className="truncate text-lg font-semibold text-foreground">
-                  {displayName || 'StackPilot user'}
+                  {displayName || 'Stack2Set user'}
                 </h2>
                 <p className="truncate text-sm text-muted-foreground">{user.email}</p>
                 {emailVerified ? (

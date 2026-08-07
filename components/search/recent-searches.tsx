@@ -34,7 +34,7 @@ export function RecentSearches() {
         {searchHistory.map((item) => (
           <Link
             key={item}
-            href={`/results?q=${encodeURIComponent(item)}`}
+            href={`/search?q=${encodeURIComponent(item)}`}
             className="flex items-center gap-2.5 rounded-lg border border-foreground/5 bg-foreground/[0.02] px-3 py-2.5 text-xs text-muted-foreground transition-colors hover:border-violet-500/20 hover:text-foreground"
           >
             <Search className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" />

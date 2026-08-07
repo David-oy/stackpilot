@@ -4,8 +4,8 @@ import { createContext, useCallback, useContext, useEffect, useState } from 'rea
 import type { ReactNode } from 'react';
 import type { StackAnalysis } from './types';
 
-const STORAGE_KEY = 'stackpilot:analysis';
-const HISTORY_KEY = 'stackpilot:search-history';
+const STORAGE_KEY = 'stack2set:analysis';
+const HISTORY_KEY = 'stack2set:search-history';
 const MAX_HISTORY = 8;
 
 type StoredAnalysis = {

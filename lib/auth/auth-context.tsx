@@ -10,7 +10,7 @@ type OAuthProvider = 'google' | 'github';
 
 type SignUpOptions = {
   name?: string;
-  /** Where to send the user after email confirmation (e.g. /results?q=...). */
+  /** Where to send the user after email confirmation (e.g. /search?q=...). */
   next?: string;
 };
 

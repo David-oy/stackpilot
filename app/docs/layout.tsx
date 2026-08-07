@@ -8,7 +8,7 @@ import { siteConfig } from '@/lib/site';
 export const metadata: Metadata = {
   title: 'Documentation',
   description:
-    'Learn how to use StackPilot: describe your project, review AI-recommended technology categories, compare providers, and build your tech stack.',
+    'Learn how to use Stack2Set: describe your project, review AI-recommended technology categories, compare providers, and build your tech stack.',
   alternates: {
     canonical: '/docs',
   },

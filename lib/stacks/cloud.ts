@@ -7,6 +7,7 @@ type StackRow = {
   name: string;
   prompt: string;
   source_analysis: UserStack['sourceAnalysis'];
+  health: UserStack['health'];
   created_at: string;
   updated_at: string;
 };
@@ -44,6 +45,7 @@ function toRow(stack: UserStack, userId: string): Omit<StackRow, 'id'> {
     name: stack.name,
     prompt: stack.prompt ?? '',
     source_analysis: stack.sourceAnalysis ?? null,
+    health: stack.health ?? null,
     created_at: stack.createdAt,
     updated_at: stack.updatedAt,
   };
@@ -95,6 +97,7 @@ function fromRow(stack: StackRow, items: StackItemRow[]): UserStack {
     createdAt: stack.created_at,
     updatedAt: stack.updated_at,
     sourceAnalysis: stack.source_analysis ?? null,
+    health: stack.health ?? null,
     categories,
   };
 }

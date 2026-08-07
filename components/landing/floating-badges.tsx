@@ -36,7 +36,7 @@ const badges: Badge[] = [
 export function FloatingBadges() {
   return (
     <section
-      aria-label="What StackPilot offers"
+      aria-label="What Stack2Set offers"
       className="relative px-4 py-10 sm:px-6 sm:py-14"
     >
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-3 sm:gap-4">

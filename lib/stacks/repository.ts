@@ -2,8 +2,8 @@ import { z } from 'zod';
 import type { UserStack } from './types';
 import { STACK_EXPORT_TYPE, STACK_EXPORT_VERSION } from './types';
 
-export const STACKS_KEY = 'stackpilot:stacks';
-export const ACTIVE_STACK_KEY = 'stackpilot:active-stack';
+export const STACKS_KEY = 'stack2set:stacks';
+export const ACTIVE_STACK_KEY = 'stack2set:active-stack';
 export const MAX_RECENT_STACKS = 20;
 
 /**
@@ -52,14 +52,8 @@ export const userStackSchema = z.object({
   prompt: z.string().default(''),
   createdAt: z.string(),
   updatedAt: z.string(),
-  sourceAnalysis: z
-    .object({
-      projectType: z.string().optional(),
-      summary: z.string().optional(),
-      complexity: z.enum(['Low', 'Medium', 'High']).optional(),
-    })
-    .nullable()
-    .optional(),
+  sourceAnalysis: z.record(z.unknown()).nullable().optional(),
+  health: z.record(z.unknown()).nullable().optional(),
   categories: z.array(stackCategorySchema).default([]),
 });
 

@@ -141,7 +141,7 @@ export function buildPdfDoc(stack: UserStack, health: StackHealth): jsPDF {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
   doc.setTextColor(140, 140, 160);
-  doc.text('Built with StackPilot — AI-powered tech stack discovery.', MARGIN, BOTTOM);
+  doc.text('Built with Stack2Set — AI-powered tech stack discovery.', MARGIN, BOTTOM);
 
   return doc;
 }

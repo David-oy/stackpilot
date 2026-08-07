@@ -144,7 +144,7 @@ function CategoryContent({ initialProviders }: { initialProviders?: Provider[] }
   const categoryName = searchParams.get('name');
   const category = getCategoryMeta(categoryId);
   const displayName = categoryName || category.name;
-  const { query: analysisQuery, analysis } = useAnalysisContext();
+  const { analysis } = useAnalysisContext();
   const aiCategory = analysis?.categories.find((c) => c.id === categoryId);
   const staticProviders = useMemo(
     () => (categoryId ? providersByCategory[categoryId] ?? [] : []),
@@ -196,7 +196,7 @@ function CategoryContent({ initialProviders }: { initialProviders?: Provider[] }
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
             <nav aria-label="Breadcrumb">
               <Link
-                href={`/results?q=${encodeURIComponent(analysisQuery ?? 'your project')}`}
+                href="/browse/categories"
                 className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
               >
                 <ArrowLeft className="h-4 w-4" />

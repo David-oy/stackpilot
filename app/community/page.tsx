@@ -7,7 +7,7 @@ import { siteConfig } from '@/lib/site';
 export const metadata: Metadata = {
   title: 'Community',
   description:
-    'Join the StackPilot community on GitHub and Twitter. Share your stacks, ask questions, and shape what gets built next.',
+    'Join the Stack2Set community on GitHub and Twitter. Share your stacks, ask questions, and shape what gets built next.',
   alternates: { canonical: '/community' },
 };
 
@@ -15,7 +15,7 @@ const channels = [
   {
     icon: Github,
     name: 'GitHub',
-    description: 'Browse the code, open issues, and contribute to StackPilot.',
+    description: 'Browse the code, open issues, and contribute to Stack2Set.',
     href: siteConfig.github,
     color: 'text-foreground',
   },
@@ -48,7 +48,7 @@ export default function CommunityPage() {
             Built for developers, <span className="gradient-text">by developers</span>
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-            Share your stacks, ask questions, and help shape what StackPilot builds next.
+            Share your stacks, ask questions, and help shape what Stack2Set builds next.
           </p>
         </header>
 

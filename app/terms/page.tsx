@@ -28,11 +28,11 @@ const sections = [
   },
   {
     title: 'Intellectual property',
-    body: 'The StackPilot name, branding, and site content belong to StackPilot. You may reference StackPilot and link to it, but you may not copy or reuse the site or its content for commercial purposes without permission.',
+    body: 'The Stack2Set name, branding, and site content belong to Stack2Set. You may reference Stack2Set and link to it, but you may not copy or reuse the site or its content for commercial purposes without permission.',
   },
   {
     title: 'Limitation of liability',
-    body: 'To the maximum extent permitted by law, StackPilot is not liable for any direct, indirect, incidental, or consequential damages arising from your use of the service.',
+    body: 'To the maximum extent permitted by law, Stack2Set is not liable for any direct, indirect, incidental, or consequential damages arising from your use of the service.',
   },
   {
     title: 'Changes to these terms',
