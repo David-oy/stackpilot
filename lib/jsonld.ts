@@ -94,6 +94,24 @@ export function breadcrumbSchema(items: { name: string; url: string }[]): JsonLd
   };
 }
 
+export function itemListSchema(
+  items: { name: string; slug: string }[],
+  listName?: string,
+): JsonLd {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: listName,
+    numberOfItems: items.length,
+    itemListElement: items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      url: absoluteUrl(`/browse/providers/${item.slug}`),
+    })),
+  };
+}
+
 export function faqSchema(questions: { question: string; answer: string }[]): JsonLd {
   return {
     '@context': 'https://schema.org',

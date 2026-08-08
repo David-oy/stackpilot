@@ -59,7 +59,7 @@ function CategoryHeader({
       </div>
       <div className="flex items-center gap-1.5">
         <Link
-          href={`/category?id=${categoryId}&name=${encodeURIComponent(categoryName)}`}
+          href={`/browse/categories/${categoryId}`}
           className="inline-flex items-center gap-1.5 rounded-lg border border-foreground/5 bg-foreground/[0.02] px-3 py-1.5 text-[11px] text-muted-foreground transition-all hover:border-violet-500/20 hover:text-foreground"
         >
           <Plus className="h-3 w-3" /> Add
@@ -152,7 +152,7 @@ export function StackEditor() {
                             No providers in this category yet.
                           </p>
                           <Link
-                            href={`/category?id=${category.categoryId}&name=${encodeURIComponent(category.categoryName)}`}
+                            href={`/browse/categories/${category.categoryId}`}
                             className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-violet-500 to-blue-500 px-4 py-2 text-xs font-medium text-white transition-opacity hover:opacity-90"
                           >
                             <Plus className="h-3.5 w-3.5" /> Browse providers

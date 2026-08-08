@@ -4,7 +4,24 @@ import { siteConfig } from '@/lib/site';
 export default function robots(): MetadataRoute.Robots {
   const allow = {
     allow: ['/'],
-    disallow: ['/api/'],
+    disallow: [
+      '/api/',
+      '/account',
+      '/account/',
+      '/workspace',
+      '/workspace/',
+      '/forgot-password',
+      '/forgot-password/',
+      '/login',
+      '/login/',
+      '/signup',
+      '/signup/',
+      '/auth/',
+      '/dashboard',
+      '/dashboard/',
+      '/admin',
+      '/admin/',
+    ],
   };
 
   return {

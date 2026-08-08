@@ -120,7 +120,7 @@ export default function DocsPage() {
             {categories.map((cat) => (
               <Link
                 key={cat.id}
-                href={`/category?id=${cat.id}&name=${encodeURIComponent(cat.name)}`}
+                href={`/browse/categories/${cat.id}`}
                 className="glass glass-hover flex items-center gap-3 rounded-xl p-3.5 transition-all hover:-translate-y-0.5"
               >
                 <span

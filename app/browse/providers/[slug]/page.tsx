@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import {
-  ArrowLeft,
   BookOpen,
+  ChevronRight,
   DollarSign,
   ExternalLink,
   Github,
@@ -20,6 +20,8 @@ import { categoryIcon } from '@/lib/browse/category-icons';
 import { WorkspaceShell } from '@/components/workspace/workspace-shell';
 import { compareBadge, badgeIcon } from '@/lib/stacks/badge';
 import { FavoriteButton } from '@/components/browse/favorite-button';
+import { siteConfig, absoluteUrl } from '@/lib/site';
+import { breadcrumbSchema, serializeJsonLd } from '@/lib/jsonld';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -32,9 +34,36 @@ export async function generateMetadata({
   const { slug } = await params;
   const provider = await providerService.getProviderBySlug(slug);
   if (!provider) return { title: 'Provider not found' };
+  const category = provider.categoryId
+    ? await providerService.getCategoryBySlug(provider.categoryId)
+    : null;
+  const canonical = `/browse/providers/${provider.slug}`;
+  const title = `${provider.name} — ${category?.name ?? 'Technology'} Provider`;
+  const description = provider.shortDescription;
+
   return {
-    title: `${provider.name} · Provider`,
-    description: provider.shortDescription,
+    title,
+    description,
+    alternates: { canonical },
+    robots: {
+      index: true,
+      follow: true,
+    },
+    openGraph: {
+      type: 'website',
+      url: absoluteUrl(canonical),
+      title,
+      description,
+      siteName: siteConfig.openGraph.siteName,
+      locale: siteConfig.openGraph.locale,
+      images: [{ url: absoluteUrl('/og.svg'), width: 1200, height: 630, alt: siteConfig.name }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [absoluteUrl('/og.svg')],
+    },
   };
 }
 
@@ -167,16 +196,45 @@ export default async function ProviderDetailPage({
   const badge = compareBadge(provider, group);
   const BadgeIcon = badge ? badgeIcon(badge) : null;
   const sourceIsFallback = provider.aiSuggested;
+  const breadcrumbItems = [
+    { name: 'Home', url: '/' },
+    { name: 'Browse Categories', url: '/browse/categories' },
+  ];
+  if (category) breadcrumbItems.push({ name: category.name, url: `/browse/categories/${category.slug}` });
+  breadcrumbItems.push({ name: provider.name, url: `/browse/providers/${provider.slug}` });
 
   return (
     <WorkspaceShell>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbSchema(breadcrumbItems)) }}
+      />
       <div className="space-y-6">
-        <Link
-          href="/browse/providers"
-          className="inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
+        <nav
+          aria-label="Breadcrumb"
+          className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground"
         >
-          <ArrowLeft className="h-3.5 w-3.5" /> Back to providers
-        </Link>
+          <Link href="/" className="transition-colors hover:text-foreground">
+            Home
+          </Link>
+          <ChevronRight className="h-3 w-3" />
+          <Link href="/browse/categories" className="transition-colors hover:text-foreground">
+            Browse Categories
+          </Link>
+          {category && (
+            <>
+              <ChevronRight className="h-3 w-3" />
+              <Link
+                href={`/browse/categories/${category.slug}`}
+                className="transition-colors hover:text-foreground"
+              >
+                {category.name}
+              </Link>
+            </>
+          )}
+          <ChevronRight className="h-3 w-3" />
+          <span className="font-medium text-foreground">{provider.name}</span>
+        </nav>
 
         <div className="rounded-2xl glass p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
@@ -201,7 +259,16 @@ export default async function ProviderDetailPage({
               </div>
               <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
                 <Icon className="h-3.5 w-3.5" />
-                {category?.name ?? 'Provider'}
+                {category ? (
+                  <Link
+                    href={`/browse/categories/${category.slug}`}
+                    className="transition-colors hover:text-violet-300"
+                  >
+                    {category.name}
+                  </Link>
+                ) : (
+                  'Provider'
+                )}
               </p>
               <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
                 {provider.longDescription || provider.shortDescription}

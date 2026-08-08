@@ -179,7 +179,14 @@ export function BrowseCategories() {
                     </div>
                   </div>
 
-                  <h2 className="mt-5 text-lg font-semibold text-foreground">{category.name}</h2>
+                  <h2 className="mt-5 text-lg font-semibold text-foreground">
+                    <Link
+                      href={`/browse/categories/${category.slug}`}
+                      className="transition-colors hover:text-violet-300"
+                    >
+                      {category.name}
+                    </Link>
+                  </h2>
                   <p className="mt-2 min-h-[40px] text-sm leading-relaxed text-muted-foreground">
                     {category.description}
                   </p>
@@ -192,7 +199,7 @@ export function BrowseCategories() {
                   </div>
 
                   <Link
-                    href={`/browse/providers?category=${encodeURIComponent(category.slug)}`}
+                    href={`/browse/categories/${category.slug}`}
                     className="mt-5 flex w-full items-center justify-between rounded-lg border border-foreground/5 bg-foreground/[0.02] px-4 py-2.5 text-sm text-muted-foreground transition-all hover:border-violet-500/20 hover:bg-foreground/[0.04] hover:text-foreground"
                   >
                     Browse providers

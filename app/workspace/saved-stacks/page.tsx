@@ -5,6 +5,10 @@ import { WorkspaceShell } from '@/components/workspace/workspace-shell';
 export const metadata: Metadata = {
   title: 'Saved Stacks',
   description: 'Browse, open, and manage all of your saved technology stacks.',
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default function SavedStacksPageRoute() {

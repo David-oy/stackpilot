@@ -330,7 +330,12 @@ function ProvidersContent() {
                 Browse Categories
               </Link>
               <ChevronRight className="h-3 w-3" />
-              <span className="font-medium text-foreground">{activeCategory.name}</span>
+              <Link
+                href={`/browse/categories/${activeCategory.slug}`}
+                className="font-medium text-foreground transition-colors hover:text-violet-300"
+              >
+                {activeCategory.name}
+              </Link>
             </div>
           )}
           <p className="mt-2 text-sm text-muted-foreground">

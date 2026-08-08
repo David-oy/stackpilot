@@ -25,12 +25,12 @@ const sections = [
     title: 'Covered categories',
     body: 'Recommendations span every layer of a modern application.',
     items: [
-      { title: 'Authentication', body: 'Clerk, Auth0, Supabase Auth, NextAuth and more.', href: '/category?id=authentication&name=Authentication' },
-      { title: 'Database', body: 'PostgreSQL, MongoDB, Redis, and vector databases.', href: '/category?id=database&name=Database' },
-      { title: 'Storage', body: 'Cloudinary, S3, and object storage solutions.', href: '/category?id=storage&name=Storage' },
-      { title: 'Video APIs', body: 'Streaming, transcoding, and live video providers.', href: '/category?id=video-apis&name=Video%20APIs' },
-      { title: 'Email & Notifications', body: 'Transactional email and multi-channel notifications.', href: '/category?id=email&name=Email' },
-      { title: 'Hosting & CDN', body: 'Vercel, Netlify, Cloudflare, and global CDNs.', href: '/category?id=hosting&name=Hosting' },
+      { title: 'Authentication', body: 'Clerk, Auth0, Supabase Auth, NextAuth and more.', href: '/browse/categories/authentication' },
+      { title: 'Database', body: 'PostgreSQL, MongoDB, Redis, and vector databases.', href: '/browse/categories/database' },
+      { title: 'Storage', body: 'Cloudinary, S3, and object storage solutions.', href: '/browse/categories/storage' },
+      { title: 'Video APIs', body: 'Streaming, transcoding, and live video providers.', href: '/browse/categories/video-apis' },
+      { title: 'Email & Notifications', body: 'Transactional email and multi-channel notifications.', href: '/browse/categories/email' },
+      { title: 'Hosting & CDN', body: 'Vercel, Netlify, Cloudflare, and global CDNs.', href: '/browse/categories/hosting' },
     ],
   },
 ];

@@ -5,6 +5,10 @@ export const metadata: Metadata = {
   title: 'Workspace',
   description:
     'Build, compare, and share your perfect technology stack. Your stack is saved automatically and synced to your account when signed in.',
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default function WorkspacePage() {

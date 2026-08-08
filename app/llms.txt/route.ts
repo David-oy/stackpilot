@@ -22,7 +22,7 @@ Stack2Set helps developers discover every technology, API, and service needed to
 
 - Homepage: ${base}/
 - Results: ${base}/results
-- Category providers: ${base}/category?id={category}
+- Category providers: ${base}/browse/categories/{category}
 - FAQ: ${base}/faq
 - Documentation: ${base}/docs
 - Sitemap: ${base}/sitemap.xml
