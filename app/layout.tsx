@@ -9,6 +9,7 @@ import { AnalysisProvider } from '@/lib/analysis-context';
 import { FavoritesProvider } from '@/lib/favorites-context';
 import { siteConfig } from '@/lib/site';
 import { Analytics } from '@vercel/analytics/next';
+import { Toaster } from '@/components/ui/sonner';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 const spaceGrotesk = Space_Grotesk({
@@ -108,6 +109,7 @@ export default function RootLayout({
               </FavoritesProvider>
             </WorkspaceProvider>
           </AuthProvider>
+          <Toaster position="bottom-center" />
         </ThemeProvider>
         <Analytics />
       </body>

@@ -10,12 +10,13 @@ import {
   Link2,
   Loader2,
   Plus,
+  Save,
   Scale,
   Sparkles,
   Trash2,
 } from 'lucide-react';
 import Link from 'next/link';
-import { getCategoryMeta } from '@/lib/categories';
+import { getCategoryMeta, categoryCssVars } from '@/lib/categories';
 import { useStack } from '@/lib/stack-context';
 import { ProviderCard } from './provider-card';
 import { AddProviderDialog } from './add-provider-dialog';
@@ -54,9 +55,9 @@ function CategoryHeader({
         {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
       </button>
       <div
-        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${meta.gradient} ring-1 ring-foreground/10`}
+        className={`cat-icon-box cat-glow-sm flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ring-1 ring-foreground/10`}
       >
-        <meta.icon className={`h-4.5 w-4.5 ${meta.iconColor}`} />
+        <meta.icon className={`h-4.5 w-4.5 ${meta.color.text}`} />
       </div>
       <div className="min-w-0 flex-1">
         <button onClick={onToggle} className="text-left">
@@ -67,7 +68,7 @@ function CategoryHeader({
       <div className="flex items-center gap-1.5">
         <button
           onClick={onAdd}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-teal-500/25 bg-teal-500/10 px-3 py-1.5 text-[11px] font-medium text-teal-300 transition-colors hover:bg-teal-500/15"
+          className="cat-border cat-soft-bg cat-text-accent inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium transition-colors hover:opacity-80"
         >
           <Plus className="h-3 w-3" /> Add
         </button>
@@ -100,11 +101,15 @@ function AssemblyBanner({
   placed,
   ready,
   providerCount,
+  onSave,
+  saveStatus = 'idle',
 }: {
   total: number;
   placed: number;
   ready: boolean;
   providerCount: number;
+  onSave?: () => void;
+  saveStatus?: 'idle' | 'saving' | 'saved';
 }) {
   const progress = total ? Math.min(100, Math.round((Math.min(placed + 1, total) / total) * 100)) : 100;
   return (
@@ -147,11 +152,40 @@ function AssemblyBanner({
           transition={{ duration: 0.3 }}
         />
       </div>
+      {ready && (
+        <div className="shrink-0">
+          {saveStatus === 'saved' ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3.5 py-2 text-[11px] font-medium text-emerald-300 ring-1 ring-emerald-500/25">
+              <Check className="h-3.5 w-3.5" /> Saved
+            </span>
+          ) : (
+            <Button
+              size="sm"
+              onClick={onSave}
+              disabled={saveStatus === 'saving'}
+              className="h-8 gap-1.5 rounded-lg bg-teal-500 px-3.5 text-[11px] font-medium text-white shadow-lg shadow-teal-500/25 transition-all hover:bg-teal-600 disabled:opacity-70"
+            >
+              {saveStatus === 'saving' ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Save className="h-3.5 w-3.5" />
+              )}
+              {saveStatus === 'saving' ? 'Saving\u2026' : 'Save to Cloud'}
+            </Button>
+          )}
+        </div>
+      )}
     </motion.div>
   );
 }
 
-export function StackEditor() {
+export function StackEditor({
+  onSave,
+  saveStatus = 'idle',
+}: {
+  onSave?: () => void;
+  saveStatus?: 'idle' | 'saving' | 'saved';
+}) {
   const { activeStack, toggleCategory, clearCategory } = useStack();
   const [compareCategory, setCompareCategory] = useState<string | null>(null);
   const [addCategoryId, setAddCategoryId] = useState<string | null>(null);
@@ -198,15 +232,46 @@ export function StackEditor() {
   const assembling = assemble && !dismissed && total > 0;
 
   return (
-    <div className="space-y-4">
+    <div className="relative space-y-4">
+      <motion.div
+        aria-hidden="true"
+        initial={false}
+        animate={{ opacity: assembling && !ready ? 1 : 0 }}
+        transition={{ duration: 0.9 }}
+        className="pointer-events-none absolute -inset-x-6 -top-12 -z-10 h-72 bg-[radial-gradient(58%_100%_at_50%_0%,rgba(45,212,191,0.13),transparent_70%)] blur-2xl"
+      />
       {assembling && (
-        <AssemblyBanner total={total} placed={placed} ready={ready} providerCount={providerCount} />
+        <AssemblyBanner
+          total={total}
+          placed={placed}
+          ready={ready}
+          providerCount={providerCount}
+          onSave={onSave}
+          saveStatus={saveStatus}
+        />
       )}
 
       {hasCategories ? (
-        <AnimatePresence mode="popLayout">
+        <div className="relative">
+          {assembling && (
+            <motion.div
+              aria-hidden="true"
+              initial={{ opacity: 0 }}
+              animate={
+                reduceMotion ? { opacity: 0.4 } : { opacity: [0.12, 0.35, 0.12] }
+              }
+              transition={
+                reduceMotion
+                  ? { duration: 0.4 }
+                  : { duration: 2.6, repeat: Infinity, ease: 'easeInOut' }
+              }
+              className="pointer-events-none absolute inset-0 -z-10 rounded-[2rem] bg-gradient-to-br from-teal-500/15 via-purple-500/10 to-cyan-500/15 blur-3xl"
+            />
+          )}
+          <AnimatePresence mode="popLayout">
           {activeStack.categories.map((category, index) => {
             const count = category.providers.length;
+            const meta = getCategoryMeta(category.categoryId);
             return (
               <motion.section
                 key={category.categoryId}
@@ -221,8 +286,18 @@ export function StackEditor() {
                 onAnimationComplete={() => {
                   if (assemble) setPlaced((current) => Math.max(current, index + 1));
                 }}
-                className="rounded-2xl glass p-5"
+                style={categoryCssVars(meta.color)}
+                className="cat-hover-glow relative overflow-hidden rounded-2xl glass p-5"
               >
+                <span aria-hidden="true" className="cat-top-line absolute inset-x-5 top-0 h-px" />
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-24 -top-24 h-56 w-56 rounded-full opacity-[0.12] blur-3xl"
+                  style={{
+                    background:
+                      'radial-gradient(circle, rgba(var(--cat-rgb, 148, 163, 184), 0.9), transparent 70%)',
+                  }}
+                />
                 <CategoryHeader
                   categoryId={category.categoryId}
                   categoryName={category.categoryName}
@@ -286,7 +361,8 @@ export function StackEditor() {
               </motion.section>
             );
           })}
-        </AnimatePresence>
+          </AnimatePresence>
+        </div>
       ) : (
         <div className="flex flex-col items-center justify-center rounded-2xl glass py-20 text-center">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-500/20 to-cyan-500/20 ring-1 ring-teal-500/20">

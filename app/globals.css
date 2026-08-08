@@ -73,9 +73,10 @@
     @apply bg-background text-foreground;
     background-color: #06060a;
     background-image:
-      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(20, 184, 166, 0.16), transparent),
-      radial-gradient(ellipse 60% 50% at 80% 50%, rgba(13, 148, 136, 0.08), transparent),
-      radial-gradient(ellipse 50% 50% at 20% 80%, rgba(45, 212, 191, 0.07), transparent);
+      radial-gradient(ellipse 70% 45% at 12% -8%, rgba(167, 139, 250, 0.13), transparent),
+      radial-gradient(ellipse 65% 45% at 88% -6%, rgba(34, 211, 238, 0.11), transparent),
+      radial-gradient(ellipse 55% 50% at 50% 110%, rgba(52, 211, 153, 0.09), transparent),
+      radial-gradient(ellipse 45% 40% at 82% 62%, rgba(129, 140, 248, 0.05), transparent);
     background-attachment: fixed;
     transition: background-color 0.3s ease, color 0.3s ease;
   }
@@ -106,9 +107,9 @@
   html.light body {
     background-color: #f6f5fb;
     background-image:
-      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(20, 184, 166, 0.10), transparent),
-      radial-gradient(ellipse 60% 50% at 80% 50%, rgba(13, 148, 136, 0.06), transparent),
-      radial-gradient(ellipse 50% 50% at 20% 80%, rgba(45, 212, 191, 0.05), transparent);
+      radial-gradient(ellipse 70% 45% at 12% -8%, rgba(167, 139, 250, 0.08), transparent),
+      radial-gradient(ellipse 65% 45% at 88% -6%, rgba(34, 211, 238, 0.07), transparent),
+      radial-gradient(ellipse 55% 50% at 50% 110%, rgba(52, 211, 153, 0.06), transparent);
   }
 }
 
@@ -118,6 +119,48 @@
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  /* ===== Category accent system =====
+     Consume `--cat-rgb` (set via categoryCssVars) so a category's color can
+     drive borders, glows, top lines and icon boxes without inline styles.
+     Falls back to neutral when the variable is not present. */
+  .cat-border {
+    border-color: rgba(var(--cat-rgb, 148, 163, 184), 0.35);
+  }
+  .cat-glow-sm {
+    box-shadow: 0 0 0 1px rgba(var(--cat-rgb, 148, 163, 184), 0.18);
+  }
+  .cat-glow {
+    box-shadow: 0 0 40px rgba(var(--cat-rgb, 148, 163, 184), 0.16);
+  }
+  .cat-icon-box {
+    background-image: linear-gradient(
+      135deg,
+      rgba(var(--cat-rgb, 148, 163, 184), 0.22),
+      rgba(var(--cat-rgb, 148, 163, 184), 0.05)
+    );
+  }
+  .cat-top-line {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(var(--cat-rgb, 148, 163, 184), 0.7),
+      transparent
+    );
+  }
+  .cat-hover-glow {
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+  }
+  .cat-hover-glow:hover {
+    border-color: rgba(var(--cat-rgb, 148, 163, 184), 0.42);
+    box-shadow: 0 12px 44px rgba(var(--cat-rgb, 148, 163, 184), 0.16);
+  }
+  .cat-text-accent {
+    color: rgba(var(--cat-rgb, 148, 163, 184), 0.92);
+  }
+  .cat-soft-bg {
+    background-color: rgba(var(--cat-rgb, 148, 163, 184), 0.07);
   }
   html.light .glass {
     background: rgba(255, 255, 255, 0.55);
@@ -192,6 +235,68 @@
     12% { opacity: 1; }
     88% { opacity: 1; }
     100% { left: 100%; opacity: 0; }
+  }
+
+  /* Slow volumetric drift for cinematic light blobs. Frozen by the global
+     reduced-motion rule (animation-duration → 0.01ms). */
+  .animate-aurora {
+    animation: aurora 18s ease-in-out infinite;
+    will-change: transform;
+  }
+  @keyframes aurora {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    33% { transform: translate3d(4%, 3%, 0) scale(1.1); }
+    66% { transform: translate3d(-3%, -2%, 0) scale(0.95); }
+  }
+
+  /* Global scroll-driven light overlay. Dimmed in light mode so the traveling
+     light stays subtle on near-white backgrounds. */
+  .scroll-light {
+    opacity: 1;
+  }
+  html.light .scroll-light {
+    opacity: 0.3;
+  }
+
+  /* Soft breathing glow for the island action dot. */
+  .animate-island-pulse {
+    animation: islandPulse 2.4s ease-in-out infinite;
+  }
+  @keyframes islandPulse {
+    0%, 100% { opacity: 0.55; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.18); }
+  }
+  /* Cinematic field: slow ambient drift for travelling light blobs. */
+  .animate-light-drift {
+    animation: lightDrift 14s ease-in-out infinite alternate;
+  }
+  @keyframes lightDrift {
+    0% { transform: translate(-50%, -50%) scale(1); }
+    100% { transform: translate(-50%, -50%) scale(1.08); }
+  }
+  html.dark [data-cinematic-canvas] {
+    mix-blend-mode: screen;
+  }
+  /* Dynamic Island: slow hue shift for the accent glow. */
+  .island-glow {
+    background-image: linear-gradient(
+      120deg,
+      rgba(34, 211, 238, 0.16),
+      rgba(168, 85, 247, 0.16),
+      rgba(52, 211, 153, 0.16)
+    );
+    animation: islandHue 16s linear infinite;
+  }
+  @keyframes islandHue {
+    0% { filter: hue-rotate(0deg); }
+    100% { filter: hue-rotate(360deg); }
+  }
+  /* Pause non-essential motion while the page is hidden. */
+  html[data-page-hidden] .animate-light-drift,
+  html[data-page-hidden] .island-glow,
+  html[data-page-hidden] .animate-flow,
+  html[data-page-hidden] .animate-float-badge {
+    animation-play-state: paused;
   }
   .tk-keyword { color: #c792ea; }
   .tk-string { color: #addb67; }

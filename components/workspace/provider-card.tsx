@@ -47,7 +47,7 @@ export function ProviderCard({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.96 }}
       transition={{ duration: 0.25, delay }}
-      className="group rounded-xl border border-foreground/5 bg-foreground/[0.02] p-4 transition-all hover:border-teal-500/25 hover:bg-foreground/[0.04]"
+      className="cat-hover-glow group rounded-xl border border-foreground/5 bg-foreground/[0.02] p-4 transition-all hover:bg-foreground/[0.04]"
     >
       <div className="flex items-start gap-3">
         <ProviderLogo name={provider.name} className="h-11 w-11 rounded-lg text-base" />
@@ -67,8 +67,8 @@ export function ProviderCard({
             {provider.description}
           </p>
           {provider.reason && (
-            <p className="mt-1.5 text-[11px] leading-relaxed text-teal-300/80">
-              <span className="font-medium text-teal-300">Why:</span> {provider.reason}
+            <p className="cat-text-accent mt-1.5 text-[11px] leading-relaxed">
+              <span className="cat-text-accent font-medium">Why:</span> {provider.reason}
             </p>
           )}
         </div>

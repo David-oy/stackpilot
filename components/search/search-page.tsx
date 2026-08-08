@@ -35,10 +35,12 @@ function ErrorState({
   message,
   onRetry,
   notProject = false,
+  onSearch,
 }: {
   message: string;
   onRetry: () => void;
   notProject?: boolean;
+  onSearch?: (query: string) => void;
 }) {
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-6">
@@ -54,9 +56,21 @@ function ErrorState({
           <AlertTriangle className={`h-6 w-6 ${notProject ? 'text-amber-400' : 'text-rose-400'}`} />
         </div>
         <h2 className="mt-4 text-lg font-semibold text-foreground">
-          {notProject ? 'That doesn\u2019t look like a project' : 'Analysis failed'}
+          {notProject ? 'Couldn\u2019t understand that.' : 'Analysis failed'}
         </h2>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{message}</p>
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+          {notProject
+            ? 'Tell me what you\u2019re trying to build and I\u2019ll identify the technology stack.'
+            : message}
+        </p>
+        {notProject && onSearch && (
+          <div className="mt-6 text-left">
+            <SearchBar
+              onSearch={onSearch}
+              placeholder="Try describing your idea differently..."
+            />
+          </div>
+        )}
         <div className="mt-6 flex flex-col items-center gap-3">
           <button
             onClick={onRetry}
@@ -264,6 +278,7 @@ function SearchPageContent() {
         message={error ?? 'No analysis available for this project.'}
         onRetry={retry}
         notProject={errorCode === 'NOT_A_PROJECT'}
+        onSearch={errorCode === 'NOT_A_PROJECT' ? handleSearch : undefined}
       />
     );
   }

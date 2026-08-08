@@ -20,6 +20,7 @@ import {
 import Link from 'next/link';
 import { toast } from 'sonner';
 import type { ProviderWithRelations } from '@/lib/db/schema';
+import { getCategoryMeta, categoryCssVars } from '@/lib/categories';
 import { useBrowseData } from '@/hooks/use-browse-data';
 import { providerCostLabel } from '@/lib/stacks/health';
 import { useStack } from '@/lib/stack-context';
@@ -74,21 +75,23 @@ function ProviderCard({
   onAddToStack?: () => void;
 }) {
   const rating = provider.stack2SetRating ?? provider.communityRating;
+  const meta = getCategoryMeta(provider.categoryId);
   return (
     <motion.article
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: Math.min(index * 0.03, 0.35) }}
-      className="glass glass-hover group flex flex-col rounded-2xl p-5"
+      style={categoryCssVars(meta.color)}
+      className="glass glass-hover cat-hover-glow group flex flex-col rounded-2xl p-5"
     >
       <div className="flex items-start gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500/20 to-cyan-500/20 ring-1 ring-foreground/10">
-          <span className="text-sm font-semibold text-teal-300">{provider.name.charAt(0)}</span>
+        <div className="cat-icon-box cat-glow-sm flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ring-1 ring-foreground/10">
+          <span className="cat-text-accent text-sm font-semibold">{provider.name.charAt(0)}</span>
         </div>
         <div className="min-w-0 flex-1">
           <Link
             href={`/browse/providers/${provider.slug}`}
-            className="block truncate text-sm font-semibold text-foreground transition-colors hover:text-teal-300"
+            className="cat-text-accent block truncate text-sm font-semibold text-foreground transition-colors"
           >
             {provider.name}
           </Link>
@@ -145,8 +148,11 @@ function ProviderCard({
           <div className="flex items-center gap-2">
             <div className="h-1.5 w-24 overflow-hidden rounded-full bg-foreground/10">
               <div
-                className="h-full rounded-full bg-teal-500"
-                style={{ width: `${provider.popularityScore ?? 0}%` }}
+                className="h-full rounded-full"
+                style={{
+                  width: `${provider.popularityScore ?? 0}%`,
+                  backgroundColor: 'rgba(var(--cat-rgb, 20, 184, 166), 0.85)',
+                }}
               />
             </div>
             <span className="tabular-nums">{provider.popularityScore ?? 0}</span>
@@ -368,6 +374,8 @@ function ProvidersContent() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const headerMeta = getCategoryMeta(category);
+
   return (
     <WorkspaceShell>
       <div className="space-y-6">
@@ -375,8 +383,10 @@ function ProvidersContent() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="rounded-2xl glass p-6"
+          style={categoryCssVars(headerMeta.color)}
+          className="cat-hover-glow relative overflow-hidden rounded-2xl glass p-6"
         >
+          <span aria-hidden="true" className="cat-top-line absolute inset-x-6 top-0 h-px" />
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
               {addToStack ? (
@@ -403,8 +413,8 @@ function ProvidersContent() {
               ) : (
                 <>
                   <div className="flex items-center gap-2">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-teal-500/20 to-cyan-500/20 ring-1 ring-teal-500/20">
-                      <Boxes className="h-4 w-4 text-teal-300" />
+                    <div className="cat-icon-box cat-glow-sm flex h-9 w-9 items-center justify-center rounded-lg ring-1 ring-foreground/10">
+                      <Boxes className="cat-text-accent h-4 w-4" />
                     </div>
                     <h1 className="text-2xl font-semibold tracking-tight text-foreground">
                       Browse Providers

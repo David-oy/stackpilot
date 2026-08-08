@@ -1,8 +1,18 @@
 'use client';
 
+import { useRef, type PointerEvent as ReactPointerEvent } from 'react';
+import {
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useSpring,
+  useTransform,
+} from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import { SearchBar } from '@/components/search/search-bar';
 import { AuthModal } from '@/components/auth/auth-modal';
+import { StackPreview } from '@/components/landing/stack-preview';
+import { CanvasParticles } from '@/components/ui/canvas-particles';
 import { useProjectSearch } from '@/hooks/use-project-search';
 
 const popularSearches = [
@@ -15,14 +25,50 @@ const popularSearches = [
   'AI Chatbot',
 ];
 
+const PARTICLE_COLORS = [
+  'rgba(34, 211, 238, 0.7)',
+  'rgba(99, 102, 241, 0.7)',
+  'rgba(168, 85, 247, 0.7)',
+  'rgba(244, 114, 182, 0.7)',
+  'rgba(52, 211, 153, 0.7)',
+];
+
 export function Hero() {
   const { handleSearch, authOpen, setAuthOpen, attemptedQuery } = useProjectSearch();
+  const reduceMotion = useReducedMotion();
+
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const springX = useSpring(mx, { stiffness: 40, damping: 20 });
+  const springY = useSpring(my, { stiffness: 40, damping: 20 });
+  const blobX = useTransform(springX, (v) => v * -22);
+  const blobY = useTransform(springY, (v) => v * -14);
+
+  const onPointerMove = (event: ReactPointerEvent<HTMLElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    mx.set((event.clientX - rect.left) / rect.width - 0.5);
+    my.set((event.clientY - rect.top) / rect.height - 0.5);
+  };
 
   return (
-    <section id="hero" className="relative overflow-hidden pb-20 pt-32 sm:pb-28 sm:pt-40">
-      <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[500px] w-[800px] -translate-x-1/2 rounded-full bg-teal-500/20 blur-[120px]" />
-      <div className="pointer-events-none absolute right-0 top-40 -z-10 h-[400px] w-[400px] rounded-full bg-blue-600/15 blur-[100px]" />
-      <div className="pointer-events-none absolute -left-20 bottom-0 -z-10 h-[300px] w-[300px] rounded-full bg-fuchsia-600/10 blur-[90px]" />
+    <section
+      id="hero"
+      onPointerMove={onPointerMove}
+      className="relative overflow-hidden pb-24 pt-32 sm:pb-32 sm:pt-40"
+    >
+      {/* Generative technology backdrop */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
+        <CanvasParticles colors={PARTICLE_COLORS} className="h-full w-full opacity-70" />
+        <motion.div
+          style={reduceMotion ? undefined : { x: blobX, y: blobY }}
+          className="animate-aurora absolute left-1/2 top-0 h-[540px] w-[820px] -translate-x-1/2 rounded-full bg-purple-500/12 blur-[130px]"
+        />
+        <motion.div
+          style={reduceMotion ? undefined : { x: blobX, y: blobY }}
+          className="animate-aurora absolute right-[-8%] top-44 h-[420px] w-[420px] rounded-full bg-cyan-500/11 blur-[110px]"
+        />
+        <div className="animate-aurora absolute -left-24 bottom-0 h-[320px] w-[320px] rounded-full bg-emerald-500/10 blur-[100px]" />
+      </div>
 
       <div className="mx-auto max-w-4xl px-4 text-center sm:px-6">
         <div className="mb-7 inline-flex animate-fade-up items-center gap-2 rounded-full glass px-4 py-1.5 text-xs font-medium tracking-wide text-muted-foreground">
@@ -41,12 +87,20 @@ export function Hero() {
           className="mx-auto mt-6 max-w-2xl animate-fade-up text-balance text-base leading-relaxed text-muted-foreground sm:text-lg"
           style={{ animationDelay: '0.1s' }}
         >
-          Discover every technology, API, database, authentication provider, and service needed to
-          build your next application.
+          Describe what you&apos;re building. Stack2Set identifies the technologies and providers
+          you need, then helps you build your stack.
         </p>
 
-        <div className="mx-auto mt-10 max-w-2xl animate-fade-up" style={{ animationDelay: '0.15s' }}>
-          <SearchBar onSearch={handleSearch} />
+        <div className="relative mx-auto mt-10 max-w-2xl animate-fade-up" style={{ animationDelay: '0.15s' }}>
+          <div
+            aria-hidden="true"
+            className="animate-pulse-glow pointer-events-none absolute -inset-8 -z-10 rounded-full bg-gradient-to-r from-purple-500/10 via-cyan-500/10 to-emerald-500/10 blur-2xl"
+          />
+          <SearchBar
+            onSearch={handleSearch}
+            placeholder="Describe what you're building..."
+            inputId="hero-search"
+          />
 
           <div className="mt-7 flex flex-wrap items-center justify-center gap-2">
             <span className="text-xs text-muted-foreground">Popular:</span>
@@ -62,6 +116,8 @@ export function Hero() {
             ))}
           </div>
         </div>
+
+        <StackPreview />
       </div>
 
       <AuthModal open={authOpen} onOpenChange={setAuthOpen} query={attemptedQuery} />

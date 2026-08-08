@@ -21,7 +21,7 @@ export function CTA() {
               Turn your idea into a <span className="gradient-text">production-ready stack</span>
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Describe what you're building and Stack2Set maps it to the technology categories it
+              Describe what you&apos;re building and Stack2Set maps it to the technology categories it
               needs, ranks the best providers, and assembles a stack you can act on.
             </p>
 

@@ -8,6 +8,8 @@ import { FaqSection } from '@/components/landing/faq-section';
 import { DocsSection } from '@/components/landing/docs-section';
 import { CTA } from '@/components/landing/cta';
 import { Footer } from '@/components/landing/footer';
+import { DynamicIsland } from '@/components/landing/dynamic-island';
+import { ScrollLightField, LightReveal, SectionGlow } from '@/components/cinematic/scroll-lighting';
 import { siteConfig, absoluteUrl } from '@/lib/site';
 import {
   organizationSchema,
@@ -49,7 +51,7 @@ const jsonLd = [
 
 export default function Home() {
   return (
-    <main className="relative min-h-screen overflow-x-hidden">
+    <main className="relative min-h-screen overflow-x-hidden pb-28">
       {jsonLd.map((schema, index) => (
         <script
           key={index}
@@ -57,15 +59,26 @@ export default function Home() {
           dangerouslySetInnerHTML={{ __html: serializeJsonLd(schema) }}
         />
       ))}
+      <ScrollLightField />
       <Navbar />
       <Hero />
-      <HowItWorks />
+      <LightReveal className="relative">
+        <SectionGlow glow="purple" />
+        <HowItWorks />
+      </LightReveal>
       <FloatingBadges />
-      <Features />
+      <LightReveal className="relative">
+        <SectionGlow glow="indigo" />
+        <Features />
+      </LightReveal>
       <FaqSection />
       <DocsSection />
-      <CTA />
+      <LightReveal className="relative">
+        <SectionGlow glow="pink" />
+        <CTA />
+      </LightReveal>
       <Footer />
+      <DynamicIsland />
     </main>
   );
 }

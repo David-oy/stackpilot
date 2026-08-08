@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   CloudUpload,
   Eraser,
@@ -104,12 +104,14 @@ function SaveToCloudDialog({
   stackName,
   categoryCount,
   providerCount,
+  onSaved,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   stackName: string;
   categoryCount: number;
   providerCount: number;
+  onSaved?: () => void;
 }) {
   const { user } = useAuth();
   const { saveStatus, saveStack } = useStack();
@@ -121,7 +123,9 @@ function SaveToCloudDialog({
     const ok = await saveStack();
     setSaving(false);
     if (ok) {
-      toast.success('Stack saved to your account');
+      toast.success('Saved to cloud', {
+        description: 'Your stack is synced and available anywhere.',
+      });
       onOpenChange(false);
     } else {
       toast.error('Could not save stack — check your connection');
@@ -216,6 +220,13 @@ function WorkspaceContent() {
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [compareOpen, setCompareOpen] = useState(false);
   const [saveOpen, setSaveOpen] = useState(false);
+  const [savedNotice, setSavedNotice] = useState(false);
+
+  useEffect(() => {
+    if (!savedNotice) return;
+    const timer = setTimeout(() => setSavedNotice(false), 4200);
+    return () => clearTimeout(timer);
+  }, [savedNotice]);
 
   if (switching) return <LoadingLayout />;
 
@@ -360,7 +371,7 @@ function WorkspaceContent() {
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px]">
         <div className="min-w-0">
-          <StackEditor />
+          <StackEditor onSave={() => setSaveOpen(true)} saveStatus={saveStatus} />
         </div>
         <div className="space-y-8">
           <StackHealth />
@@ -422,7 +433,32 @@ function WorkspaceContent() {
         stackName={stack.name}
         categoryCount={stack.categories.length}
         providerCount={providerCount}
+        onSaved={() => setSavedNotice(true)}
       />
+
+      <AnimatePresence>
+        {savedNotice && (
+          <motion.div
+            initial={{ opacity: 0, y: 24, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 16, scale: 0.96 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+            role="status"
+            aria-live="polite"
+            className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-3 rounded-full border border-emerald-500/25 bg-[#0b0b14]/90 px-5 py-3 shadow-[0_18px_50px_rgba(0,0,0,0.5)] backdrop-blur-xl"
+          >
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 ring-1 ring-emerald-500/30">
+              <Check className="h-3.5 w-3.5 text-emerald-300" />
+            </span>
+            <div>
+              <p className="text-sm font-semibold text-foreground">Saved to cloud</p>
+              <p className="text-[11px] text-muted-foreground">
+                Your stack is synced and available anywhere.
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

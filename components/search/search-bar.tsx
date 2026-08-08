@@ -16,6 +16,7 @@ export function SearchBar({
   autoFocus = false,
   size = 'lg',
   className,
+  inputId,
 }: {
   initialQuery?: string;
   onSearch: (query: string) => void;
@@ -23,6 +24,7 @@ export function SearchBar({
   autoFocus?: boolean;
   size?: 'lg' | 'md';
   className?: string;
+  inputId?: string;
 }) {
   const [query, setQuery] = useState(initialQuery);
 
@@ -50,6 +52,7 @@ export function SearchBar({
         />
         <input
           type="text"
+          id={inputId}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={placeholder}

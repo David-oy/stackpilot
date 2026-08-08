@@ -74,7 +74,12 @@ export function Navbar() {
           : 'border-b border-transparent',
       )}
     >
-      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+      <nav
+        className={cn(
+          'mx-auto flex max-w-7xl items-center justify-between px-4 transition-[height] duration-300 sm:px-6',
+          scrolled ? 'h-14' : 'h-16',
+        )}
+      >
         <div className="flex items-center gap-3 sm:gap-5">
           <Link href="/" className="flex items-center gap-2" onClick={() => setMobileOpen(false)}>
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-500">

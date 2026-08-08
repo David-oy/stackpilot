@@ -12,6 +12,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { useStack } from '@/lib/stack-context';
+import { getCategoryMeta, categoryCssVars } from '@/lib/categories';
 import type { ProviderSuggestion } from '@/lib/gemini';
 import {
   isProviderInCategory,
@@ -97,7 +98,10 @@ export function AddProviderDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent
+        style={categoryCssVars(getCategoryMeta(categoryId).color)}
+        className="sm:max-w-md"
+      >
         <DialogHeader>
           <DialogTitle>
             {mode === 'menu' && 'How would you like to add?'}
@@ -182,19 +186,19 @@ function MenuOptions({
   return (
     <div className="space-y-2.5">
       <OptionButton
-        icon={<Sparkles className="h-4 w-4 text-teal-300" />}
+        icon={<Sparkles className="cat-text-accent h-4 w-4" />}
         title="Suggest with AI"
         description="Let Gemini find providers suitable for this category and project."
         onClick={onSuggest}
       />
       <OptionButton
-        icon={<Search className="h-4 w-4 text-sky-300" />}
+        icon={<Search className="cat-text-accent h-4 w-4" />}
         title="Browse providers"
         description="Browse existing providers in this category."
         onClick={onBrowse}
       />
       <OptionButton
-        icon={<Plus className="h-4 w-4 text-amber-300" />}
+        icon={<Plus className="cat-text-accent h-4 w-4" />}
         title="Add a provider"
         description="I already know the provider I want."
         onClick={onManual}
@@ -218,13 +222,13 @@ function OptionButton({
     <button
       type="button"
       onClick={onClick}
-      className="group flex w-full items-start gap-3 rounded-xl border border-foreground/5 bg-foreground/[0.02] p-3.5 text-left transition-all hover:border-teal-500/25 hover:bg-foreground/[0.04]"
+      className="cat-hover-glow group flex w-full items-start gap-3 rounded-xl border border-foreground/5 bg-foreground/[0.02] p-3.5 text-left transition-all hover:bg-foreground/[0.04]"
     >
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-teal-500/15 to-cyan-500/15 ring-1 ring-foreground/10">
+      <div className="cat-icon-box cat-glow-sm flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ring-1 ring-foreground/10">
         {icon}
       </div>
       <div className="min-w-0">
-        <p className="text-sm font-semibold text-foreground transition-colors group-hover:text-teal-300">
+        <p className="cat-text-accent text-sm font-semibold text-foreground transition-colors">
           {title}
         </p>
         <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{description}</p>
@@ -353,14 +357,14 @@ function AiSuggestions({
   return (
     <div className="space-y-2.5">
       <p className="flex items-center gap-1.5 text-xs font-medium text-foreground">
-        <Sparkles className="h-3.5 w-3.5 text-teal-400" /> Suggested for {categoryName}
+        <Sparkles className="cat-text-accent h-3.5 w-3.5" /> Suggested for {categoryName}
       </p>
       {suggestions.map((suggestion) => {
         const busy = submitting === suggestion.name;
         return (
           <div
             key={suggestion.name}
-            className="rounded-xl border border-foreground/5 bg-foreground/[0.02] p-3.5 transition-colors hover:border-teal-500/25"
+            className="cat-hover-glow rounded-xl border border-foreground/5 bg-foreground/[0.02] p-3.5 transition-all hover:bg-foreground/[0.04]"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
@@ -369,8 +373,8 @@ function AiSuggestions({
                   {suggestion.description}
                 </p>
                 {suggestion.reason && (
-                  <p className="mt-1.5 text-[11px] leading-relaxed text-teal-300/80">
-                    <span className="font-medium text-teal-300">Why it fits:</span>{' '}
+                  <p className="cat-text-accent mt-1.5 text-[11px] leading-relaxed">
+                    <span className="cat-text-accent font-medium">Why it fits:</span>{' '}
                     {suggestion.reason}
                   </p>
                 )}
