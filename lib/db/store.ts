@@ -233,10 +233,13 @@ export function createProviderStore(): ProviderStore {
 
 export async function getConfiguredStore(): Promise<ProviderStore> {
   const supabaseUrl = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (supabaseUrl && supabaseKey) {
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (supabaseUrl && (serviceRoleKey || anonKey)) {
     const { SupabaseProviderStore } = await import('./supabase');
-    const store = new SupabaseProviderStore(supabaseUrl, supabaseKey);
+    const store = new SupabaseProviderStore(supabaseUrl, serviceRoleKey ?? anonKey!, {
+      canWrite: Boolean(serviceRoleKey),
+    });
     await store.ensureSeeded();
     return store;
   }

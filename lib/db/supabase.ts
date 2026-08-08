@@ -104,15 +104,17 @@ export class SupabaseProviderStore implements ProviderStore {
   private client: SupabaseClient;
   private tablePrefix: string;
   private ensured = false;
+  private canWrite = true;
   private categoryIdCache = new Map<string, string | null>();
 
-  constructor(url: string, key: string) {
+  constructor(url: string, key: string, options?: { canWrite?: boolean }) {
     const timeoutMs = Number(process.env.SUPABASE_TIMEOUT_MS ?? 10_000);
     this.client = createClient(url, key, {
       auth: { persistSession: false },
       global: { fetch: fetchWithTimeout(timeoutMs) },
     });
     this.tablePrefix = process.env.SUPABASE_TABLE_PREFIX ?? '';
+    this.canWrite = options?.canWrite ?? true;
   }
 
   private t(name: string): string {
@@ -124,6 +126,16 @@ export class SupabaseProviderStore implements ProviderStore {
     this.ensured = true;
     const started = Date.now();
     try {
+      if (!this.canWrite) {
+        const { count } = await this.client
+          .from(this.t('providers'))
+          .select('id', { count: 'exact', head: true });
+        console.log(
+          `[supabase] hosted catalog ready (${count ?? 'n/a'} providers) — reads via public key; ` +
+            'SUPABASE_SERVICE_ROLE_KEY not set, skipping seed/backfill writes',
+        );
+        return;
+      }
       const { count } = await this.client
         .from(this.t('providers'))
         .select('id', { count: 'exact', head: true });

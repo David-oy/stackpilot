@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 const entries = [
   {
-    version: '1.4.0',
+    version: '2.4.1',
     date: 'August 2026',
     items: [
       'New floating badges on the homepage',
@@ -22,7 +22,7 @@ const entries = [
     ],
   },
   {
-    version: '1.3.0',
+    version: '2.1.0',
     date: 'July 2026',
     items: [
       'Top 6 ranked providers per category with best use cases',
