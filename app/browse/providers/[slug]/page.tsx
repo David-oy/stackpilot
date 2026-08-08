@@ -18,7 +18,7 @@ import type { ProviderWithRelations } from '@/lib/db/schema';
 import { isProviderFree, providerCostLabel } from '@/lib/stacks/health';
 import { categoryIcon } from '@/lib/browse/category-icons';
 import { WorkspaceShell } from '@/components/workspace/workspace-shell';
-import { compareBadge, badgeIcon } from '@/components/browse/provider-compare';
+import { compareBadge, badgeIcon } from '@/lib/stacks/badge';
 import { FavoriteButton } from '@/components/browse/favorite-button';
 
 export const runtime = 'nodejs';
@@ -122,7 +122,7 @@ function FactsGrid({ provider }: { provider: ProviderWithRelations }) {
       </div>
       <div className="rounded-xl border border-foreground/5 bg-foreground/[0.02] p-3">
         <p className="text-[11px] text-muted-foreground">Popularity</p>
-        <p className="mt-0.5 text-sm font-medium text-foreground">{provider.popularityScore}/100</p>
+        <p className="mt-0.5 text-sm font-medium text-foreground">{provider.popularityScore ?? 0}/100</p>
       </div>
       {typeof rating === 'number' && (
         <div className="rounded-xl border border-foreground/5 bg-foreground/[0.02] p-3">
@@ -155,10 +155,11 @@ export default async function ProviderDetailPage({
   const provider = await providerService.getProviderBySlug(slug);
   if (!provider) notFound();
 
+  const categoryId = provider.categoryId;
   const [category, alternatives, categoryProviders] = await Promise.all([
-    providerService.getCategoryBySlug(provider.categoryId),
+    categoryId ? providerService.getCategoryBySlug(categoryId) : Promise.resolve(null),
     providerService.getAlternatives(slug),
-    providerService.getProvidersByCategory(provider.categoryId),
+    categoryId ? providerService.getProvidersByCategory(categoryId) : Promise.resolve([]),
   ]);
 
   const Icon = categoryIcon(category?.icon);

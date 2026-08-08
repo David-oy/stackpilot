@@ -1,0 +1,42 @@
+
+> nextjs@0.1.0 start
+> next start -p 3005
+
+  ▲ Next.js 13.5.1
+  - Local:        http://localhost:3005
+
+ ✓ Ready in 384ms
+Error: Cannot find module './chunks/vendor-chunks/next.js'
+Require stack:
+- C:\coding\getstack\get.stack\.next\server\webpack-runtime.js
+- C:\coding\getstack\get.stack\.next\server\pages\_document.js
+- C:\coding\getstack\get.stack\node_modules\next\dist\server\require.js
+- C:\coding\getstack\get.stack\node_modules\next\dist\server\next-server.js
+- C:\coding\getstack\get.stack\node_modules\next\dist\server\next.js
+- C:\coding\getstack\get.stack\node_modules\next\dist\server\lib\start-server.js
+- C:\coding\getstack\get.stack\node_modules\next\dist\cli\next-start.js
+- C:\coding\getstack\get.stack\node_modules\next\dist\lib\commands.js
+- C:\coding\getstack\get.stack\node_modules\next\dist\bin\next
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1421:15)
+    at C:\coding\getstack\get.stack\node_modules\next\dist\server\require-hook.js:54:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+    at Module._load (node:internal/modules/cjs/loader:1227:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1504:12)
+    at mod.require (C:\coding\getstack\get.stack\node_modules\next\dist\server\require-hook.js:64:28)
+    at require (node:internal/modules/helpers:152:16) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\coding\\getstack\\get.stack\\.next\\server\\webpack-runtime.js',
+    'C:\\coding\\getstack\\get.stack\\.next\\server\\pages\\_document.js',
+    'C:\\coding\\getstack\\get.stack\\node_modules\\next\\dist\\server\\require.js',
+    'C:\\coding\\getstack\\get.stack\\node_modules\\next\\dist\\server\\next-server.js',
+    'C:\\coding\\getstack\\get.stack\\node_modules\\next\\dist\\server\\next.js',
+    'C:\\coding\\getstack\\get.stack\\node_modules\\next\\dist\\server\\lib\\start-server.js',
+    'C:\\coding\\getstack\\get.stack\\node_modules\\next\\dist\\cli\\next-start.js',
+    'C:\\coding\\getstack\\get.stack\\node_modules\\next\\dist\\lib\\commands.js',
+    'C:\\coding\\getstack\\get.stack\\node_modules\\next\\dist\\bin\\next'
+  ]
+}

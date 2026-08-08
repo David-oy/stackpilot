@@ -1,3 +1,5 @@
+import { siteConfig } from '@/lib/site';
+
 export type DocBlock =
   | { type: 'p'; text: string }
   | { type: 'h2'; text: string }
@@ -26,7 +28,7 @@ export type DocGroup = {
 
 const curlAnalyze = `# Requires an authenticated session (sign in to Stack2Set first, then run
 # this from the same browser, or include your session cookie).
-curl -X POST https://get-stack.vercel.app/api/analyze \\
+curl -X POST ${siteConfig.url}/api/analyze \\
   -H "Content-Type: application/json" \\
   -d '{"description": "I want to build a YouTube clone"}';`;
 

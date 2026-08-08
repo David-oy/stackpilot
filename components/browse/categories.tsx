@@ -8,8 +8,16 @@ import type { CategoryRecord, ProviderWithRelations } from '@/lib/db/schema';
 import { useBrowseData } from '@/hooks/use-browse-data';
 import { categoryIcon, categoryVisual } from '@/lib/browse/category-icons';
 import { WorkspaceShell } from '@/components/workspace/workspace-shell';
+import { FilterSelect, type FilterSelectOption } from '@/components/ui/filter-select';
 
 type SortKey = 'name' | 'providers' | 'popularity' | 'updated';
+
+const SORT_OPTIONS: FilterSelectOption[] = [
+  { value: 'name', label: 'Name (A–Z)' },
+  { value: 'providers', label: 'Most providers' },
+  { value: 'popularity', label: 'Most popular' },
+  { value: 'updated', label: 'Recently updated' },
+];
 
 type CategoryStats = CategoryRecord & {
   providerCount: number;
@@ -124,17 +132,12 @@ export function BrowseCategories() {
                   className="h-10 w-full rounded-lg border border-foreground/5 bg-foreground/[0.02] pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-violet-500/30 focus:outline-none sm:w-64"
                 />
               </label>
-              <select
+              <FilterSelect
                 value={sort}
-                onChange={(e) => setSort(e.target.value as SortKey)}
+                onChange={(value) => setSort(value as SortKey)}
                 aria-label="Sort categories"
-                className="h-10 rounded-lg border border-foreground/5 bg-foreground/[0.02] px-3 text-sm text-foreground focus:border-violet-500/30 focus:outline-none"
-              >
-                <option value="name">Name (A–Z)</option>
-                <option value="providers">Most providers</option>
-                <option value="popularity">Most popular</option>
-                <option value="updated">Recently updated</option>
-              </select>
+                options={SORT_OPTIONS}
+              />
             </div>
           </div>
         </motion.div>

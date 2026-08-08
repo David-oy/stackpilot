@@ -76,6 +76,15 @@
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 
+  select option {
+    background-color: var(--popover);
+    color: var(--popover-foreground);
+  }
+  select option:checked {
+    background-color: var(--accent);
+    color: var(--accent-foreground);
+  }
+
   html.light body {
     background-color: #f6f5fb;
     background-image:

@@ -1,4 +1,10 @@
-# Stack2Set
+import { siteConfig } from '@/lib/site';
+
+export const dynamic = 'force-dynamic';
+
+export async function GET(): Promise<Response> {
+  const base = siteConfig.url;
+  const body = `# Stack2Set
 
 > AI-powered technology stack discovery for developers.
 
@@ -10,17 +16,17 @@ Stack2Set helps developers discover every technology, API, and service needed to
 
 ## Homepage
 
--https://get-stack.vercel.app/
+- ${base}/
 
 ## Important URLs
 
-- Homepage: https://get-stack.vercel.app/
-- Results: https://get-stack.vercel.app/results
-- Category providers: https://get-stack.vercel.app/category?id={category}
-- FAQ: https://get-stack.vercel.app/faq
-- Documentation: https://get-stack.vercel.app/docs
-- Sitemap: https://get-stack.vercel.app/sitemap.xml
-- robots.txt: https://get-stack.vercel.app/robots.txt
+- Homepage: ${base}/
+- Results: ${base}/results
+- Category providers: ${base}/category?id={category}
+- FAQ: ${base}/faq
+- Documentation: ${base}/docs
+- Sitemap: ${base}/sitemap.xml
+- robots.txt: ${base}/robots.txt
 
 ## Supported features
 
@@ -53,3 +59,11 @@ Stack2Set helps developers discover every technology, API, and service needed to
 ## Contact
 
 - GitHub: https://github.com/David-oy/get.stack
+`;
+
+  return new Response(body, {
+    headers: {
+      'Content-Type': 'text/plain; charset=utf-8',
+    },
+  });
+}

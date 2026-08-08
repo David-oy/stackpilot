@@ -19,11 +19,11 @@ export type SiteConfig = {
 export const siteConfig: SiteConfig = {
   name: 'Stack2Set',
   shortName: 'Stack2Set',
-  version: '4.1.2',
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://get-stack.vercel.app',
-  title: 'Stack2Set — Discover every technology to build your BIG THING!',
+  version: '4.2.1',
+  url: (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.stack2set.me').replace(/\/+$/, ''),
+  title: 'Stack2Set — Discover every technology to build your next BIG THING!',
   description:
-    'Stack2Set uses AI to analyze your project idea and recommend the best technologies, APIs, databases, authentication providers, and services. Compare providers and build your tech stack in minutes.',
+    'Stack2Set uses AI to analyze your project idea and recommend the best technologies, APIs, databases.Gives all needed stack Compare providers and build your tech stack in seconds.',
   keywords: [
     'tech stack',
     'technology discovery',

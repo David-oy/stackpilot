@@ -1,10 +1,11 @@
 'use client';
 
-import { Suspense, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
   Boxes,
+  ChevronRight,
   ExternalLink,
   Github,
   Loader2,
@@ -20,6 +21,7 @@ import { providerCostLabel } from '@/lib/stacks/health';
 import { WorkspaceShell } from '@/components/workspace/workspace-shell';
 import { ProviderCompare } from '@/components/browse/provider-compare';
 import { FavoriteButton } from '@/components/browse/favorite-button';
+import { FilterSelect, type FilterSelectOption } from '@/components/ui/filter-select';
 
 type SortKey = 'popularity' | 'rating' | 'cost-asc' | 'cost-desc' | 'name';
 
@@ -32,6 +34,14 @@ const PRICING_MODELS = [
   'per-seat',
   'open-source',
 ] as const;
+
+const SORT_OPTIONS: FilterSelectOption[] = [
+  { value: 'popularity', label: 'Most popular' },
+  { value: 'rating', label: 'Best rated' },
+  { value: 'cost-asc', label: 'Lowest cost' },
+  { value: 'cost-desc', label: 'Highest cost' },
+  { value: 'name', label: 'Name (A–Z)' },
+];
 
 const PAGE_SIZE = 12;
 
@@ -205,6 +215,22 @@ function ProvidersContent() {
 
   const categoryById = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
 
+  const activeCategory = category ? categoryById.get(category) : undefined;
+
+  const categoryParam = searchParams.get('category');
+
+  useEffect(() => {
+    setCategory(categoryParam ?? 'all');
+    setPage(1);
+  }, [categoryParam]);
+
+  useEffect(() => {
+    if (category !== 'all' && categories.length > 0 && !categoryById.has(category)) {
+      setCategory('all');
+      setPage(1);
+    }
+  }, [category, categories, categoryById]);
+
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
     let list = providers.filter((provider) => {
@@ -295,8 +321,21 @@ function ProvidersContent() {
               Browse Providers
             </h1>
           </div>
+          {activeCategory && (
+            <div className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Link
+                href="/browse/categories"
+                className="transition-colors hover:text-foreground"
+              >
+                Browse Categories
+              </Link>
+              <ChevronRight className="h-3 w-3" />
+              <span className="font-medium text-foreground">{activeCategory.name}</span>
+            </div>
+          )}
           <p className="mt-2 text-sm text-muted-foreground">
-            {filtered.length} providers in our database. Select 2–4 to compare side by side.
+            {filtered.length} providers{activeCategory ? ` in ${activeCategory.name}` : ' in our database'}
+            . Select 2–4 to compare side by side.
           </p>
 
           <div className="mt-5 flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center">
@@ -314,52 +353,39 @@ function ProvidersContent() {
                 className="h-10 w-full rounded-lg border border-foreground/5 bg-foreground/[0.02] pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-violet-500/30 focus:outline-none lg:w-64"
               />
             </label>
-            <select
+            <FilterSelect
               value={category}
-              onChange={(e) => {
-                setCategory(e.target.value);
+              onChange={(value) => {
+                setCategory(value);
                 setPage(1);
               }}
               aria-label="Filter by category"
-              className="h-10 rounded-lg border border-foreground/5 bg-foreground/[0.02] px-3 text-sm text-foreground focus:border-violet-500/30 focus:outline-none"
-            >
-              <option value="all">All categories</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-            <select
+              options={[
+                { value: 'all', label: 'All categories' },
+                ...categories.map((c) => ({ value: c.id, label: c.name })),
+              ]}
+            />
+            <FilterSelect
               value={pricing}
-              onChange={(e) => {
-                setPricing(e.target.value);
+              onChange={(value) => {
+                setPricing(value);
                 setPage(1);
               }}
               aria-label="Filter by pricing model"
-              className="h-10 rounded-lg border border-foreground/5 bg-foreground/[0.02] px-3 text-sm text-foreground focus:border-violet-500/30 focus:outline-none"
-            >
-              {PRICING_MODELS.map((model) => (
-                <option key={model} value={model}>
-                  {model === 'all' ? 'All pricing' : model}
-                </option>
-              ))}
-            </select>
-            <select
+              options={PRICING_MODELS.map((model) => ({
+                value: model,
+                label: model === 'all' ? 'All pricing' : model,
+              }))}
+            />
+            <FilterSelect
               value={sort}
-              onChange={(e) => {
-                setSort(e.target.value as SortKey);
+              onChange={(value) => {
+                setSort(value as SortKey);
                 setPage(1);
               }}
               aria-label="Sort providers"
-              className="h-10 rounded-lg border border-foreground/5 bg-foreground/[0.02] px-3 text-sm text-foreground focus:border-violet-500/30 focus:outline-none"
-            >
-              <option value="popularity">Most popular</option>
-              <option value="rating">Best rated</option>
-              <option value="cost-asc">Lowest cost</option>
-              <option value="cost-desc">Highest cost</option>
-              <option value="name">Name (A–Z)</option>
-            </select>
+              options={SORT_OPTIONS}
+            />
             <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <input
                 type="checkbox"

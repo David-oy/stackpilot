@@ -1,0 +1,22 @@
+
+> nextjs@0.1.0 dev
+> next dev -p 3005
+
+  ▲ Next.js 13.5.1
+  - Local:        http://localhost:3005
+  - Environments: .env.local
+
+ ✓ Ready in 4.3s
+ ✓ Compiled /middleware in 2.6s (113 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (114kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (270kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+ ○ compiling /browse/providers/page ...
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+ ✓ Compiled /browse/providers/page in 19.3s (1737 modules)
+ ✓ Compiled in 1447ms (857 modules)
+ ✓ Compiled in 265ms (843 modules)
+ ✓ Compiled in 1947ms (857 modules)
+ ✓ Compiled /browse/providers/page in 862ms (869 modules)
+[?25h

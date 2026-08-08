@@ -3,6 +3,7 @@ import { STACK_EXPORT_TYPE, STACK_EXPORT_VERSION } from './types';
 import { stackExportSchema, userStackSchema } from './repository';
 import { complexityDifficulty, formatCurrency, stackCategoryCount, stackProviderCount } from './health';
 import { pricingLabel } from './comparison';
+import { siteConfig } from '@/lib/site';
 
 export function stackToExportFile(stack: UserStack, health: StackHealth): StackExportFile {
   return {
@@ -75,7 +76,7 @@ export function toMarkdown(stack: UserStack): string {
   lines.push('---');
   lines.push('');
   lines.push(
-    `_Built with [Stack2Set](${'https://get-stack.vercel.app'}) — AI-powered tech stack discovery._`,
+    `_Built with [Stack2Set](${siteConfig.url}) — AI-powered tech stack discovery._`,
   );
   return lines.join('\n').trim() + '\n';
 }

@@ -109,15 +109,34 @@ function isItemActive(item: NavItem, pathname: string, hash: string): boolean {
 function useRouteState() {
   const pathname = usePathname();
   const [hash, setHash] = useState('');
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
-    const sync = () => setHash(window.location.hash);
+    const sync = () => {
+      setHash(window.location.hash);
+      setSearch(window.location.search);
+    };
     sync();
     window.addEventListener('hashchange', sync);
-    return () => window.removeEventListener('hashchange', sync);
-  }, []);
+    window.addEventListener('popstate', sync);
+    return () => {
+      window.removeEventListener('hashchange', sync);
+      window.removeEventListener('popstate', sync);
+    };
+  }, [pathname]);
 
-  return { pathname, hash };
+  return { pathname, hash, search };
+}
+
+/**
+ * True while browsing the provider list through a category: pathname is
+ * `/browse/providers` and a `category` search param is present. In that mode
+ * the sidebar highlights "Browse Categories" instead of "Browse Providers".
+ */
+function isCategoryBrowseActive(pathname: string, search: string): boolean {
+  if (pathname !== '/browse/providers') return false;
+  const category = new URLSearchParams(search).get('category');
+  return Boolean(category) && category !== '' && category !== 'all';
 }
 
 /**
@@ -132,12 +151,17 @@ function WorkspaceNavItems({
   collapsed?: boolean;
   onNavigate?: () => void;
 }) {
-  const { pathname, hash } = useRouteState();
+  const { pathname, hash, search } = useRouteState();
 
   return (
     <div className="space-y-1">
       {NAV_ITEMS.map((item) => {
-        const active = isItemActive(item, pathname, hash);
+        let active = isItemActive(item, pathname, hash);
+        const categoryBrowseActive = isCategoryBrowseActive(pathname, search);
+        if (categoryBrowseActive) {
+          if (item.href === '/browse/categories') active = true;
+          if (item.href === '/browse/providers') active = false;
+        }
         const Icon = item.icon;
         return (
           <Link

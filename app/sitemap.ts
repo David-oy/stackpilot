@@ -25,6 +25,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
+  let providerPages: MetadataRoute.Sitemap = [];
+  try {
+    const providers = await providerService.getAllProviders();
+    providerPages = providers
+      .filter((p) => p.status === 'active')
+      .map((p) => {
+        let lastModified = new Date(p.updatedAt);
+        if (Number.isNaN(lastModified.getTime())) lastModified = now;
+        return {
+          url: absoluteUrl(`/browse/providers/${p.slug}`),
+          lastModified,
+          changeFrequency: 'weekly' as const,
+          priority: 0.7,
+        };
+      });
+  } catch (error) {
+    console.error('[sitemap] Skipping provider detail pages:', error);
+  }
+
   const docPages: MetadataRoute.Sitemap = allDocs.map((doc) => ({
     url: absoluteUrl(`/docs/${doc.slug}`),
     lastModified: now,
@@ -68,6 +87,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     ...categoryPages,
+    ...providerPages,
     {
       url: absoluteUrl('/faq'),
       lastModified: now,

@@ -3,6 +3,7 @@ import { Navbar } from '@/components/landing/navbar';
 import { Footer } from '@/components/landing/footer';
 import { CodeBlock } from '@/components/docs/code-block';
 import { breadcrumbSchema, serializeJsonLd } from '@/lib/jsonld';
+import { siteConfig } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: 'API Reference',
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 
 const curlExample = `# Requires an authenticated session (sign in to Stack2Set first,
 # then run this from the same browser, or include your session cookie).
-curl -X POST https://get-stack.vercel.app/api/analyze \\
+curl -X POST ${siteConfig.url}/api/analyze \\
   -H "Content-Type: application/json" \\
   -d '{"description": "I want to build a YouTube clone"}';`;
 

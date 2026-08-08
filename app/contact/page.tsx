@@ -29,7 +29,7 @@ const options = [
     icon: Mail,
     title: 'Email us',
     description: 'For anything else, drop us a line — we read everything.',
-    href: 'mailto:hello@get-stack.vercel.app',
+    href: 'mailto:vijay.peddenti434@gmail.com',
     color: 'text-sky-400',
   },
   {
