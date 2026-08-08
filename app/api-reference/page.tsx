@@ -51,11 +51,11 @@ export default function ApiReferencePage() {
       />
       <Navbar />
       <div className="relative overflow-hidden px-4 pb-24 pt-32 sm:px-6 sm:pt-36">
-        <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-violet-600/10 blur-[120px]" />
+        <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-teal-500/10 blur-[120px]" />
 
         <div className="mx-auto max-w-3xl">
           <header className="text-center">
-            <p className="text-sm font-medium text-violet-400">API Reference</p>
+            <p className="text-sm font-medium text-teal-400">API Reference</p>
             <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">
               Stack2Set <span className="gradient-text">analysis API</span>
             </h1>
@@ -85,14 +85,14 @@ Content-Type: application/json`}
                 ['500', 'An unexpected server error occurred.'],
               ].map(([code, text]) => (
                 <li key={code} className="flex gap-3 text-sm leading-relaxed text-muted-foreground">
-                  <span className="mt-0.5 font-mono text-xs text-violet-400">{code}</span>
+                  <span className="mt-0.5 font-mono text-xs text-teal-400">{code}</span>
                   {text}
                 </li>
               ))}
             </ul>
             <p className="mt-8 text-sm text-muted-foreground">
               Read the full guide in the{' '}
-              <a href="/docs/api" className="text-violet-400 transition-colors hover:text-violet-300">
+              <a href="/docs/api" className="text-teal-400 transition-colors hover:text-teal-300">
                 API documentation
               </a>
               .

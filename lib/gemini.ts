@@ -24,9 +24,43 @@ export type GeminiIntent = {
   projectType: string;
   summary: string;
   complexity: Complexity;
+  isProject: boolean;
+  isProjectReason: string;
   categories: GeminiIntentCategory[];
   integrations: GeminiIntegrationCategory[];
 };
+
+/**
+ * Fast-path heuristic that rejects obvious gibberish before any paid
+ * AI call. The LLM's `isProject` decision is authoritative; this only
+ * saves a Gemini round-trip on clearly meaningless input.
+ */
+export function isLikelyGibberish(input: string): boolean {
+  const text = input.trim();
+  if (!text) return true;
+  if (text.length < 4) return true;
+
+  const lower = text.toLowerCase();
+  const letters = lower.replace(/[^a-z]/g, '');
+
+  // No real letters at all (e.g. "1234 5678").
+  if (!/[a-z]/.test(letters)) return true;
+
+  // Keyboard rows / repeated keystroke runs.
+  if (/qwerty|asdf|zxcv/.test(letters)) return true;
+  if (/(.)\1{4,}/.test(letters)) return true;
+
+  // Consonant mash with almost no vowels (e.g. "asdkjfhasjkdfh").
+  const vowels = (letters.match(/[aeiouy]/g) ?? []).length;
+  if (letters.length >= 8 && vowels / letters.length < 0.18) return true;
+
+  // Require at least one real word (a token containing a vowel).
+  const words = text.split(/\s+/);
+  const wordy = words.filter((w) => /[a-z]/i.test(w) && /[aeiouy]/i.test(w.toLowerCase()));
+  if (wordy.length === 0) return true;
+
+  return false;
+}
 
 function slugify(value: string): string {
   return value
@@ -46,6 +80,9 @@ The backend resolves actual providers for technology categories from its own cur
 STEP 1 — UNDERSTAND THE PROJECT DOMAIN
 Identify the domain the project belongs to, e.g.: Game Deals, AI Chatbot, Food Delivery, Video Streaming, E-commerce, Social Network, Finance, Healthcare, Education, Music, Maps, Travel, Real Estate, IoT, Cybersecurity, DevTools, Productivity, Blockchain, etc.
 
+DECISION RULE — IS THIS A SOFTWARE PROJECT?
+Before anything else, decide whether the user's text actually describes a software project (or a request to plan one). It is NOT a project if it is: gibberish or random keystrokes (e.g. "asdkjfhasjkdfh qwerty123"), a single random word with no context, an unrelated topic (e.g. "how to cook pasta"), a shopping list, or a nonsensical phrase. If it is not a project, set "isProject": false, set "isProjectReason" to a short human explanation, and still return "projectType": "Not a project" with an empty "technologyCategories" array. Otherwise set "isProject": true.
+
 STEP 2 — DETECT ALL EXTERNAL INTEGRATIONS
 Determine every external API, SDK, official platform API, public dataset, search API, AI provider, payment provider, authentication provider, analytics, notifications, email provider, maps, cloud service, CDN, search engine, web scraping tool, monitoring, logging, media service, video API, OCR API, translation API, speech API, image API, gaming API, weather API, finance API, sports API, news API, government API, and open data API the project would realistically integrate with. Only include categories genuinely relevant to the project's domain.
 
@@ -55,6 +92,8 @@ Return ONLY valid JSON. Do not wrap it in markdown, code fences, or add any comm
   "projectType": "short label for the kind of app, e.g. Game Deals Platform",
   "summary": "2-3 sentence overview of what building this project requires",
   "complexity": "Low" | "Medium" | "High",
+  "isProject": true,
+  "isProjectReason": "",
   "technologyCategories": [
     {
       "id": "lowercase kebab-case slug",
@@ -156,6 +195,12 @@ const intentSchema = z.object({
   projectType: z.string().trim().min(1),
   summary: z.string().trim().min(1).optional().default(''),
   complexity: z.enum(['Low', 'Medium', 'High']),
+  isProject: z
+    .union([z.boolean(), z.string().trim()])
+    .transform((value) => (typeof value === 'boolean' ? value : value.toLowerCase() === 'true'))
+    .optional()
+    .default(true),
+  isProjectReason: z.string().trim().optional().default(''),
   technologyCategories: z.array(geminiIntentCategorySchema).optional(),
   categories: z.array(geminiIntentCategorySchema).optional(),
   projectIntegrations: z.array(geminiIntegrationCategorySchema).optional().default([]),
@@ -338,6 +383,8 @@ export async function analyzeProjectIntent(
     projectType: result.data.projectType,
     summary: result.data.summary,
     complexity: result.data.complexity,
+    isProject: result.data.isProject,
+    isProjectReason: result.data.isProjectReason,
     categories: techCategories.map((cat) => ({
       id: cat.id,
       name: cat.name,
@@ -400,4 +447,70 @@ ${description}`;
     byId[cat.id] = cat.providers.map(toAnalysisProvider);
   }
   return byId;
+}
+
+const suggestSchema = z.object({
+  providers: z
+    .array(
+      z.object({
+        name: z.string().trim().min(1),
+        description: z.string().trim().min(1),
+        reason: z.string().trim().optional().default(''),
+        website: z.string().trim().optional().default(''),
+        tags: z.array(z.string().trim().min(1)).optional().default([]),
+      }),
+    )
+    .min(1)
+    .max(6),
+});
+
+export type ProviderSuggestion = z.infer<typeof suggestSchema>['providers'][number];
+
+export async function suggestProviders(
+  categoryName: string,
+  project: string,
+  existing: string[],
+): Promise<ProviderSuggestion[]> {
+  const projectBlock = project
+    ? `\nPROJECT BEING BUILT (recommend against this context):\n${project}`
+    : '';
+  const existingBlock =
+    existing.length > 0
+      ? `\nPROVIDERS ALREADY IN THIS CATEGORY (NEVER recommend these — avoid duplicates):\n${existing.join(', ')}`
+      : '';
+
+  const prompt = `You are Stack2Set, an expert software architect. Recommend 3-5 real, well-known providers, services, or tools that genuinely belong in the "${categoryName}" category.
+  ${projectBlock}
+  ${existingBlock}
+
+Rules:
+- Only recommend providers that actually exist and are widely used. Never invent names or URLs.
+- Recommend providers that make sense for THIS project and THIS category specifically — do not return a generic list.
+- NEVER return a provider already in this category.
+- Include the official website URL; if you don't know it, return an empty string.
+- Each provider needs a short description, 2-4 relevant tags, and a short "reason" explaining why it fits this project and category.
+
+Return ONLY valid JSON matching exactly this schema:
+{
+  "providers": [
+    {
+      "name": "Provider name",
+      "description": "Short description of what this provider does",
+      "reason": "Why this fits the project and category",
+      "website": "https://official-website.com",
+      "tags": ["tag1", "tag2"]
+    }
+  ]
+}`;
+
+  const parsed = await callGemini(
+    prompt,
+    `Suggest providers to add to the "${categoryName}" category.`,
+  );
+
+  const result = suggestSchema.safeParse(parsed);
+  if (!result.success) {
+    throw new AnalysisError('Gemini returned suggestions that did not match the expected schema.');
+  }
+  return result.data.providers;
 }

@@ -39,9 +39,9 @@ export function SearchBar({
       }}
       className={`group relative ${className ?? ''}`}
     >
-      <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-r from-violet-500/30 to-blue-500/30 opacity-0 blur transition-opacity duration-300 group-focus-within:opacity-100" />
+      <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-r from-teal-500/30 to-cyan-500/30 opacity-0 blur transition-opacity duration-300 group-focus-within:opacity-100" />
       <div
-        className={`relative flex items-center gap-2 rounded-2xl glass shadow-lg shadow-black/5 transition-shadow focus-within:shadow-xl focus-within:shadow-violet-500/10 ${
+        className={`relative flex items-center gap-2 rounded-2xl glass shadow-lg shadow-black/5 transition-shadow focus-within:shadow-xl focus-within:shadow-teal-500/10 ${
           size === 'lg' ? 'px-5 py-4' : 'px-4 py-2.5'
         }`}
       >
@@ -60,7 +60,7 @@ export function SearchBar({
         <button
           type="submit"
           aria-label="Search"
-          className={`flex shrink-0 items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-blue-500 text-white shadow-md shadow-violet-500/25 transition-transform hover:scale-105 active:scale-95 ${
+          className={`flex shrink-0 items-center justify-center rounded-xl bg-teal-500 text-white shadow-md shadow-teal-500/25 transition-transform hover:scale-105 active:scale-95 ${
             size === 'lg' ? 'h-9 w-9' : 'h-8 w-8'
           }`}
         >

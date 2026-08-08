@@ -50,7 +50,7 @@ export function DocsToc({ items }: { items: TocItem[] }) {
                 '-ml-px block border-l py-1 pr-2 text-sm transition-colors',
                 item.level === 3 ? 'pl-6' : 'pl-4',
                 activeId === item.id
-                  ? 'border-violet-500 font-medium text-foreground'
+                  ? 'border-teal-500 font-medium text-foreground'
                   : 'border-transparent text-muted-foreground hover:border-foreground/20 hover:text-foreground',
               )}
             >

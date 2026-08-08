@@ -10,19 +10,19 @@
     --card-foreground: 240 10% 10%;
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 10%;
-    --primary: 263 70% 50%;
+    --primary: 174 62% 36%;
     --primary-foreground: 0 0% 100%;
     --secondary: 240 5% 94%;
     --secondary-foreground: 240 6% 15%;
     --muted: 240 5% 94%;
-    --muted-foreground: 240 4% 42%;
-    --accent: 240 5% 94%;
-    --accent-foreground: 240 6% 15%;
+    --muted-foreground: 240 5% 40%;
+    --accent: 174 40% 94%;
+    --accent-foreground: 174 60% 24%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
     --border: 240 6% 88%;
     --input: 240 6% 88%;
-    --ring: 263 70% 55%;
+    --ring: 174 62% 42%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -39,19 +39,19 @@
     --card-foreground: 0 0% 98%;
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
-    --primary: 263 70% 60%;
+    --primary: 174 65% 50%;
     --primary-foreground: 0 0% 98%;
     --secondary: 240 3.9% 14.9%;
     --secondary-foreground: 0 0% 98%;
     --muted: 240 3.9% 14.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted-foreground: 240 6% 68%;
     --accent: 240 3.9% 14.9%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
     --border: 240 3.9% 14.9%;
     --input: 240 3.9% 14.9%;
-    --ring: 263 70% 60%;
+    --ring: 174 65% 52%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -65,15 +65,33 @@
   * {
     @apply border-border;
   }
+  html {
+    --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-display: var(--font-sans);
+  }
   body {
     @apply bg-background text-foreground;
     background-color: #06060a;
     background-image:
-      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(120, 70, 255, 0.18), transparent),
-      radial-gradient(ellipse 60% 50% at 80% 50%, rgba(40, 90, 255, 0.10), transparent),
-      radial-gradient(ellipse 50% 50% at 20% 80%, rgba(140, 60, 220, 0.08), transparent);
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(20, 184, 166, 0.16), transparent),
+      radial-gradient(ellipse 60% 50% at 80% 50%, rgba(13, 148, 136, 0.08), transparent),
+      radial-gradient(ellipse 50% 50% at 20% 80%, rgba(45, 212, 191, 0.07), transparent);
     background-attachment: fixed;
     transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring) / 0.7);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 
   select option {
@@ -88,9 +106,9 @@
   html.light body {
     background-color: #f6f5fb;
     background-image:
-      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(120, 70, 255, 0.1), transparent),
-      radial-gradient(ellipse 60% 50% at 80% 50%, rgba(40, 90, 255, 0.06), transparent),
-      radial-gradient(ellipse 50% 50% at 20% 80%, rgba(140, 60, 220, 0.05), transparent);
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(20, 184, 166, 0.10), transparent),
+      radial-gradient(ellipse 60% 50% at 80% 50%, rgba(13, 148, 136, 0.06), transparent),
+      radial-gradient(ellipse 50% 50% at 20% 80%, rgba(45, 212, 191, 0.05), transparent);
   }
 }
 
@@ -111,11 +129,11 @@
   }
   .glass-hover:hover {
     background: rgba(255, 255, 255, 0.07);
-    border-color: rgba(168, 130, 255, 0.3);
-    box-shadow: 0 8px 40px rgba(120, 70, 255, 0.12);
+    border-color: rgba(45, 212, 191, 0.3);
+    box-shadow: 0 8px 40px rgba(13, 148, 136, 0.12);
   }
   .gradient-text {
-    background: linear-gradient(135deg, #a78bfa 0%, #60a5fa 100%);
+    background: linear-gradient(135deg, #2dd4bf 0%, #5eead4 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -124,15 +142,15 @@
   .gradient-border {
     position: relative;
     background: linear-gradient(rgba(13, 13, 20, 0.9), rgba(13, 13, 20, 0.9)) padding-box,
-      linear-gradient(135deg, rgba(167, 139, 250, 0.5), rgba(96, 165, 250, 0.3), rgba(167, 139, 250, 0.1)) border-box;
+      linear-gradient(135deg, rgba(45, 212, 191, 0.45), rgba(94, 234, 212, 0.2), rgba(45, 212, 191, 0.08)) border-box;
     border: 1px solid transparent;
   }
   html.light .gradient-border {
     background: linear-gradient(rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.92)) padding-box,
-      linear-gradient(135deg, rgba(167, 139, 250, 0.5), rgba(96, 165, 250, 0.3), rgba(167, 139, 250, 0.1)) border-box;
+      linear-gradient(135deg, rgba(45, 212, 191, 0.45), rgba(94, 234, 212, 0.2), rgba(45, 212, 191, 0.08)) border-box;
   }
   .glow {
-    box-shadow: 0 0 80px rgba(120, 70, 255, 0.25);
+    box-shadow: 0 0 80px rgba(20, 184, 166, 0.22);
   }
   .text-balance {
     text-wrap: balance;
@@ -166,6 +184,15 @@
     0%, 100% { transform: translateY(0) rotate(var(--tilt, 0deg)); }
     50% { transform: translateY(-8px) rotate(var(--tilt, 0deg)); }
   }
+  .animate-flow {
+    animation: flow 3.5s linear infinite;
+  }
+  @keyframes flow {
+    0% { left: 0%; opacity: 0; }
+    12% { opacity: 1; }
+    88% { opacity: 1; }
+    100% { left: 100%; opacity: 0; }
+  }
   .tk-keyword { color: #c792ea; }
   .tk-string { color: #addb67; }
   .tk-comment { color: #7a8a99; font-style: italic; }
@@ -180,6 +207,12 @@
   html {
     scroll-behavior: smooth;
     scroll-padding-top: 5.5rem;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
   }
   @media (prefers-reduced-motion: reduce) {
     html {

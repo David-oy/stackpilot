@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  ArrowLeft,
+  CloudUpload,
   Eraser,
+  LogIn,
   Pencil,
   RefreshCw,
   Scale,
@@ -19,6 +20,14 @@ import { useStack } from '@/lib/stack-context';
 import { useAnalysisContext } from '@/lib/analysis-context';
 import { useAuth } from '@/lib/auth/auth-context';
 import { useWorkspaces } from '@/lib/workspaces/context';
+import { AuthModal } from '@/components/auth/auth-modal';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { SavedStacks } from './saved-stacks';
 import { FavoritesSection } from './favorites-section';
 import { StackEditor } from './stack-editor';
@@ -26,6 +35,7 @@ import { StackHealth } from './stack-health';
 import { ExportMenu } from './export-menu';
 import { ShareModal } from './share-modal';
 import { ComparisonModal } from './comparison-modal';
+import { StackBreadcrumbs } from './stack-breadcrumbs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -57,7 +67,7 @@ function EmptyState() {
 
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl glass py-24 text-center">
-      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-blue-500 shadow-lg">
+      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-teal-500 shadow-lg">
         <Sparkles className="h-7 w-7 text-white" />
       </div>
       <h2 className="mt-5 text-xl font-semibold text-foreground">Welcome to your Workspace</h2>
@@ -71,20 +81,121 @@ function EmptyState() {
             const stack = createStack();
             if (stack) toast.success(`Created "${stack.name}"`);
           }}
-          className="h-10 gap-2 bg-gradient-to-r from-violet-500 to-blue-500 text-sm text-white hover:from-violet-600 hover:to-blue-600"
+          className="h-10 gap-2 bg-teal-500 text-sm text-white hover:bg-teal-600"
         >
           <Sparkles className="h-4 w-4" /> Create New Stack
         </Button>
         {hasAnalysis && (
           <Link
             href={`/search?q=${encodeURIComponent(query ?? '')}`}
-            className="inline-flex h-10 items-center gap-2 rounded-md border border-foreground/5 bg-foreground/[0.02] px-4 text-sm text-muted-foreground transition-all hover:border-violet-500/20 hover:text-foreground"
+            className="inline-flex h-10 items-center gap-2 rounded-md border border-foreground/5 bg-foreground/[0.02] px-4 text-sm text-muted-foreground transition-all hover:border-teal-500/25 hover:text-foreground"
           >
             <RefreshCw className="h-4 w-4" /> Continue from analysis
           </Link>
         )}
       </div>
     </div>
+  );
+}
+
+function SaveToCloudDialog({
+  open,
+  onOpenChange,
+  stackName,
+  categoryCount,
+  providerCount,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  stackName: string;
+  categoryCount: number;
+  providerCount: number;
+}) {
+  const { user } = useAuth();
+  const { saveStatus, saveStack } = useStack();
+  const [authOpen, setAuthOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    setSaving(true);
+    const ok = await saveStack();
+    setSaving(false);
+    if (ok) {
+      toast.success('Stack saved to your account');
+      onOpenChange(false);
+    } else {
+      toast.error('Could not save stack — check your connection');
+    }
+  };
+
+  return (
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Save to Cloud</DialogTitle>
+            <DialogDescription>
+              Keep this stack synced across your devices and browser sessions.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex items-center gap-3 rounded-xl border border-foreground/5 bg-foreground/[0.02] p-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-teal-500/20 to-cyan-500/20 ring-1 ring-teal-500/20">
+              <CloudUpload className="h-5 w-5 text-teal-300" />
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium text-foreground">{stackName}</p>
+              <p className="text-[11px] text-muted-foreground">
+                {categoryCount} categories · {providerCount} providers
+              </p>
+            </div>
+          </div>
+
+          {!user ? (
+            <div className="space-y-3">
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                Saving to the cloud requires a free Stack2Set account. Your stack stays on this
+                device until you sign in.
+              </p>
+              <Button
+                className="h-10 w-full gap-2 bg-teal-500 text-white hover:bg-teal-600"
+                onClick={() => setAuthOpen(true)}
+              >
+                <LogIn className="h-4 w-4" /> Create a free account
+              </Button>
+            </div>
+          ) : saveStatus === 'saved' ? (
+            <div className="flex items-center gap-2 rounded-xl border border-emerald-500/25 bg-emerald-500/[0.06] p-3">
+              <Check className="h-4 w-4 shrink-0 text-emerald-300" />
+              <p className="text-sm text-emerald-300">
+                This stack is already saved to your account.
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                Your stack will be saved to your account and kept in sync automatically on this
+                device.
+              </p>
+              <Button
+                className="h-10 w-full gap-2 bg-teal-500 text-white hover:bg-teal-600"
+                onClick={handleSave}
+                disabled={saving || saveStatus === 'saving'}
+              >
+                {saving || saveStatus === 'saving' ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
+                {saving || saveStatus === 'saving' ? 'Saving...' : 'Save Stack'}
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <AuthModal open={authOpen} onOpenChange={setAuthOpen} next="/workspace" />
+    </>
   );
 }
 
@@ -97,7 +208,6 @@ function WorkspaceContent() {
     clearStack,
     cloudSynced,
     saveStatus,
-    saveStack,
   } = useStack();
   const { user } = useAuth();
   const { switching } = useWorkspaces();
@@ -105,6 +215,7 @@ function WorkspaceContent() {
   const [draftName, setDraftName] = useState('');
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [compareOpen, setCompareOpen] = useState(false);
+  const [saveOpen, setSaveOpen] = useState(false);
 
   if (switching) return <LoadingLayout />;
 
@@ -131,14 +242,13 @@ function WorkspaceContent() {
       >
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
-            <nav aria-label="Breadcrumb">
-              <Link
-                href="/"
-                className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-              >
-                <ArrowLeft className="h-4 w-4" /> Back to home
-              </Link>
-            </nav>
+            <StackBreadcrumbs
+              items={[
+                { label: 'Home', href: '/' },
+                { label: 'My Stacks', href: '/workspace' },
+                { label: stack.name },
+              ]}
+            />
 
             <div className="mt-3 flex items-center gap-2">
               {editingName ? (
@@ -172,7 +282,7 @@ function WorkspaceContent() {
                       setDraftName(stack.name);
                     }}
                     aria-label="Rename stack"
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-foreground/5 text-muted-foreground transition-colors hover:border-violet-500/20 hover:text-foreground"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-foreground/5 text-muted-foreground transition-colors hover:border-teal-500/25 hover:text-foreground"
                   >
                     <Pencil className="h-3.5 w-3.5" />
                   </button>
@@ -190,38 +300,26 @@ function WorkspaceContent() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            {user && (
-              saveStatus === 'saved' ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled
-                  className="h-9 gap-1.5 border-emerald-500/20 bg-emerald-500/[0.06] text-xs text-emerald-300"
-                >
-                  <Check className="h-3.5 w-3.5" /> Saved ✓
-                </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSaveOpen(true)}
+              disabled={saveStatus === 'saving' || providerCount === 0}
+              className="h-9 gap-1.5 text-xs"
+            >
+              {saveStatus === 'saving' ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : saveStatus === 'saved' ? (
+                <Check className="h-3.5 w-3.5 text-emerald-300" />
               ) : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    void saveStack().then((ok) => {
-                      if (ok) toast.success('Stack saved to your account');
-                      else toast.error('Could not save stack — check your connection');
-                    });
-                  }}
-                  disabled={saveStatus === 'saving'}
-                  className="h-9 gap-1.5 text-xs"
-                >
-                  {saveStatus === 'saving' ? (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  ) : (
-                    <Save className="h-3.5 w-3.5" />
-                  )}
-                  {saveStatus === 'saving' ? 'Saving...' : 'Save Stack'}
-                </Button>
-              )
-            )}
+                <Save className="h-3.5 w-3.5" />
+              )}
+              {saveStatus === 'saving'
+                ? 'Saving...'
+                : saveStatus === 'saved'
+                  ? 'Saved'
+                  : 'Save to Cloud'}
+            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -318,6 +416,13 @@ function WorkspaceContent() {
         prompt={stack.prompt}
       />
       <ComparisonModal open={compareOpen} onOpenChange={setCompareOpen} />
+      <SaveToCloudDialog
+        open={saveOpen}
+        onOpenChange={setSaveOpen}
+        stackName={stack.name}
+        categoryCount={stack.categories.length}
+        providerCount={providerCount}
+      />
     </div>
   );
 }

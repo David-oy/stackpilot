@@ -50,7 +50,7 @@ export function AuthModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader className="text-center">
-          <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-blue-500">
+          <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-teal-500">
             <Sparkles className="h-5 w-5 text-white" />
           </div>
           <DialogTitle className="text-center">{title}</DialogTitle>

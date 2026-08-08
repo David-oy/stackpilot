@@ -37,7 +37,7 @@ export function ResultFilters({
             className={cn(
               'rounded-full px-3 py-1 text-xs font-medium transition-colors',
               value === option.value
-                ? 'bg-gradient-to-r from-violet-500 to-blue-500 text-white'
+                ? 'bg-teal-500 text-white'
                 : 'text-muted-foreground hover:text-foreground',
             )}
           >
@@ -49,7 +49,7 @@ export function ResultFilters({
         <button
           type="button"
           onClick={() => onChange('all')}
-          className="inline-flex items-center gap-1 text-xs text-violet-400 transition-colors hover:text-violet-300"
+          className="inline-flex items-center gap-1 text-xs text-teal-400 transition-colors hover:text-teal-300"
         >
           <X className="h-3 w-3" />
           Clear

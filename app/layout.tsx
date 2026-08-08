@@ -1,6 +1,6 @@
 import './globals.css';
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Space_Grotesk } from 'next/font/google';
 import { ThemeProvider } from '@/lib/theme-provider';
 import { AuthProvider } from '@/lib/auth/auth-context';
 import { WorkspaceProvider } from '@/lib/workspaces/context';
@@ -10,7 +10,11 @@ import { FavoritesProvider } from '@/lib/favorites-context';
 import { siteConfig } from '@/lib/site';
 import { Analytics } from '@vercel/analytics/next';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  variable: '--font-display',
+});
 
 const themeInitScript = `(function(){try{var e=localStorage.getItem('stack2set-theme');var m=window.matchMedia('(prefers-color-scheme: dark)');var isDark;if(e==='light'){isDark=false}else if(e==='dark'){isDark=true}else{isDark=!e||e==='system'?m.matches:false}var d=document.documentElement;d.classList.add(isDark?'dark':'light');d.style.colorScheme=isDark?'dark':'light'}catch(e){}})()`;
 
@@ -93,7 +97,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://generativelanguage.googleapis.com" />
       </head>
-      <body className={inter.className}>
+      <body className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased`}>
         <ThemeProvider>
           <AuthProvider>
             <WorkspaceProvider>

@@ -67,7 +67,7 @@ export function SavedStacksPage() {
       >
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-blue-500 shadow-lg shadow-violet-500/20">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-teal-500 shadow-lg shadow-teal-500/20">
               <Bookmark className="h-5 w-5 text-white" />
             </div>
             <div>
@@ -91,7 +91,7 @@ export function SavedStacksPage() {
             </Button>
             <Button
               size="sm"
-              className="h-9 gap-1.5 bg-gradient-to-r from-violet-500 to-blue-500 text-xs text-white hover:from-violet-600 hover:to-blue-600"
+              className="h-9 gap-1.5 bg-teal-500 text-xs text-white hover:bg-teal-600"
               onClick={() => {
                 const stack = createStack();
                 if (stack) toast.success(`Created "${stack.name}"`);
@@ -115,8 +115,8 @@ export function SavedStacksPage() {
 
         <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div className="flex items-center gap-3 rounded-xl border border-foreground/5 bg-foreground/[0.02] p-4">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500/15 ring-1 ring-violet-500/20">
-              <FolderOpen className="h-4 w-4 text-violet-300" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-500/15 ring-1 ring-teal-500/20">
+              <FolderOpen className="h-4 w-4 text-teal-300" />
             </div>
             <div>
               <p className="text-xl font-semibold text-foreground">{stacks.length}</p>
@@ -150,8 +150,8 @@ export function SavedStacksPage() {
 
       {stacks.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-foreground/10 py-20 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-500/10 ring-1 ring-violet-500/20">
-            <Bookmark className="h-6 w-6 text-violet-300" />
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-500/10 ring-1 ring-teal-500/20">
+            <Bookmark className="h-6 w-6 text-teal-300" />
           </div>
           <h2 className="mt-4 text-lg font-semibold text-foreground">No saved stacks yet</h2>
           <p className="mt-1 max-w-sm text-sm text-muted-foreground">
@@ -159,7 +159,7 @@ export function SavedStacksPage() {
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <Button
-              className="h-10 gap-1.5 bg-gradient-to-r from-violet-500 to-blue-500 text-sm text-white hover:from-violet-600 hover:to-blue-600"
+              className="h-10 gap-1.5 bg-teal-500 text-sm text-white hover:bg-teal-600"
               onClick={() => {
                 const stack = createStack();
                 if (stack) router.push('/workspace');
@@ -169,7 +169,7 @@ export function SavedStacksPage() {
             </Button>
             <Link
               href="/"
-              className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-foreground/5 bg-foreground/[0.02] px-4 text-sm text-muted-foreground transition-colors hover:border-violet-500/20 hover:text-foreground"
+              className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-foreground/5 bg-foreground/[0.02] px-4 text-sm text-muted-foreground transition-colors hover:border-teal-500/25 hover:text-foreground"
             >
               <Play className="h-4 w-4" /> Start a New Build
             </Link>

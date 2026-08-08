@@ -62,8 +62,8 @@ export function RecommendedStack({ analysis }: { analysis?: StackAnalysis }) {
         className="glass rounded-2xl p-6"
       >
         <div className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500/20 to-blue-500/20 ring-1 ring-violet-500/20">
-            <Layers className="h-5 w-5 text-violet-300" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-teal-500/20 to-cyan-500/20 ring-1 ring-teal-500/20">
+            <Layers className="h-5 w-5 text-teal-300" />
           </div>
           <div>
             <h3 className="text-sm font-semibold text-foreground">Recommended Stack</h3>
@@ -78,7 +78,7 @@ export function RecommendedStack({ analysis }: { analysis?: StackAnalysis }) {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 + i * 0.06 }}
-              className="group flex items-center justify-between rounded-lg border border-foreground/5 bg-foreground/[0.02] px-3 py-2.5 transition-colors hover:border-violet-500/20 hover:bg-foreground/[0.04]"
+              className="group flex items-center justify-between rounded-lg border border-foreground/5 bg-foreground/[0.02] px-3 py-2.5 transition-colors hover:border-teal-500/25 hover:bg-foreground/[0.04]"
             >
               <div className="flex items-center gap-2.5">
                 <cat.icon className={`h-4 w-4 ${cat.iconColor}`} />
@@ -97,7 +97,7 @@ export function RecommendedStack({ analysis }: { analysis?: StackAnalysis }) {
         <button
           onClick={handleSave}
           disabled={!canSave}
-          className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-violet-500 to-blue-500 py-2.5 text-xs font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+          className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-teal-500 py-2.5 text-xs font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Sparkles className="h-3.5 w-3.5" />
           Save This Stack

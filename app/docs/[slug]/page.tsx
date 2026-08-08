@@ -89,7 +89,7 @@ function renderBlock(block: DocBlock, index: number) {
         <ul key={index} className="my-4 space-y-2">
           {block.items.map((item, i) => (
             <li key={i} className="flex gap-3 text-[15px] leading-relaxed text-muted-foreground">
-              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-violet-400" />
+              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-teal-400" />
               {item}
             </li>
           ))}

@@ -82,7 +82,7 @@ function StatCell({ label, value }: { label: string; value?: number }) {
       <div className="mt-1.5 flex items-center gap-2">
         <div className="h-1.5 w-full overflow-hidden rounded-full bg-foreground/10">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-violet-500 to-blue-500"
+            className="h-full rounded-full bg-teal-500"
             style={{ width: `${(value / 5) * 100}%` }}
           />
         </div>
@@ -238,8 +238,8 @@ export default async function ProviderDetailPage({
 
         <div className="rounded-2xl glass p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500/20 to-blue-500/20 ring-1 ring-foreground/10">
-              <span className="text-xl font-semibold text-violet-300">{provider.name.charAt(0)}</span>
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-500/20 to-cyan-500/20 ring-1 ring-foreground/10">
+              <span className="text-xl font-semibold text-teal-300">{provider.name.charAt(0)}</span>
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
@@ -262,7 +262,7 @@ export default async function ProviderDetailPage({
                 {category ? (
                   <Link
                     href={`/browse/categories/${category.slug}`}
-                    className="transition-colors hover:text-violet-300"
+                    className="transition-colors hover:text-teal-300"
                   >
                     {category.name}
                   </Link>
@@ -281,7 +281,7 @@ export default async function ProviderDetailPage({
                     href={provider.officialWebsite}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-violet-500 to-blue-500 px-3 py-2 text-xs font-medium text-white transition-opacity hover:opacity-90"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-teal-500 px-3 py-2 text-xs font-medium text-white transition-opacity hover:opacity-90"
                   >
                     <ExternalLink className="h-3.5 w-3.5" /> Website
                   </a>
@@ -291,7 +291,7 @@ export default async function ProviderDetailPage({
                     href={provider.documentation}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-foreground/5 px-3 py-2 text-xs text-muted-foreground transition-all hover:border-violet-500/20 hover:text-foreground"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-foreground/5 px-3 py-2 text-xs text-muted-foreground transition-all hover:border-teal-500/25 hover:text-foreground"
                   >
                     <BookOpen className="h-3.5 w-3.5" /> Documentation
                   </a>
@@ -301,7 +301,7 @@ export default async function ProviderDetailPage({
                     href={provider.github}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-foreground/5 px-3 py-2 text-xs text-muted-foreground transition-all hover:border-violet-500/20 hover:text-foreground"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-foreground/5 px-3 py-2 text-xs text-muted-foreground transition-all hover:border-teal-500/25 hover:text-foreground"
                   >
                     <Github className="h-3.5 w-3.5" /> GitHub
                   </a>
@@ -312,8 +312,8 @@ export default async function ProviderDetailPage({
         </div>
 
         {provider.aiSummary && (
-          <div className="rounded-2xl border border-violet-500/20 bg-violet-500/[0.06] p-5">
-            <p className="flex items-center gap-1.5 text-xs font-medium text-violet-300">
+          <div className="rounded-2xl border border-teal-500/20 bg-teal-500/[0.06] p-5">
+            <p className="flex items-center gap-1.5 text-xs font-medium text-teal-300">
               <Sparkles className="h-3.5 w-3.5" /> AI summary
             </p>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{provider.aiSummary}</p>
@@ -322,7 +322,7 @@ export default async function ProviderDetailPage({
 
         <div>
           <h2 className="mb-3 flex items-center gap-2 text-sm font-medium text-foreground">
-            <DollarSign className="h-4 w-4 text-violet-400" /> Pricing &amp; rating
+            <DollarSign className="h-4 w-4 text-teal-400" /> Pricing &amp; rating
           </h2>
           <FactsGrid provider={provider} />
         </div>
@@ -345,39 +345,39 @@ export default async function ProviderDetailPage({
         <div className="grid gap-4 md:grid-cols-2">
           <CriterionGrid
             title="Features"
-            icon={<Sparkles className="h-3.5 w-3.5 text-violet-400" />}
+            icon={<Sparkles className="h-3.5 w-3.5 text-teal-400" />}
             values={provider.features ?? []}
             emptyText="Features coming soon"
           />
           <CriterionGrid
             title="Integrations"
-            icon={<Layers className="h-3.5 w-3.5 text-violet-400" />}
+            icon={<Layers className="h-3.5 w-3.5 text-teal-400" />}
             values={provider.integrations ?? []}
           />
           <CriterionGrid
             title="APIs"
-            icon={<BookOpen className="h-3.5 w-3.5 text-violet-400" />}
+            icon={<BookOpen className="h-3.5 w-3.5 text-teal-400" />}
             values={provider.apis ?? []}
           />
           <CriterionGrid
             title="SDKs"
-            icon={<Layers className="h-3.5 w-3.5 text-violet-400" />}
+            icon={<Layers className="h-3.5 w-3.5 text-teal-400" />}
             values={provider.sdks ?? []}
           />
           <CriterionGrid
             title="AI features"
-            icon={<Sparkles className="h-3.5 w-3.5 text-violet-400" />}
+            icon={<Sparkles className="h-3.5 w-3.5 text-teal-400" />}
             values={provider.aiFeatures ?? []}
           />
           <CriterionGrid
             title="Languages"
-            icon={<Layers className="h-3.5 w-3.5 text-violet-400" />}
+            icon={<Layers className="h-3.5 w-3.5 text-teal-400" />}
             values={provider.languages ?? []}
           />
           {provider.compatibility && Object.keys(provider.compatibility).length > 0 && (
             <CriterionGrid
               title="Compatibility"
-              icon={<Layers className="h-3.5 w-3.5 text-violet-400" />}
+              icon={<Layers className="h-3.5 w-3.5 text-teal-400" />}
               values={Object.entries(provider.compatibility)
                 .filter(([, value]) => value)
                 .map(([key]) => key)}
@@ -386,13 +386,13 @@ export default async function ProviderDetailPage({
           {provider.compliance && provider.compliance.length > 0 && (
             <CriterionGrid
               title="Compliance"
-              icon={<ShieldCheck className="h-3.5 w-3.5 text-violet-400" />}
+              icon={<ShieldCheck className="h-3.5 w-3.5 text-teal-400" />}
               values={provider.compliance}
             />
           )}
           <CriterionGrid
             title="Tags"
-            icon={<Tag className="h-3.5 w-3.5 text-violet-400" />}
+            icon={<Tag className="h-3.5 w-3.5 text-teal-400" />}
             values={provider.tags ?? []}
             emptyText="Tags coming soon"
           />
@@ -424,14 +424,14 @@ export default async function ProviderDetailPage({
                 <Link
                   key={alt.slug}
                   href={`/browse/providers/${alt.slug}`}
-                  className="group rounded-xl border border-foreground/5 bg-foreground/[0.02] p-4 transition-colors hover:border-violet-500/20"
+                  className="group rounded-xl border border-foreground/5 bg-foreground/[0.02] p-4 transition-colors hover:border-teal-500/25"
                 >
                   <div className="flex items-center gap-2.5">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500/20 to-blue-500/20 ring-1 ring-foreground/10">
-                      <span className="text-xs font-semibold text-violet-300">{alt.name.charAt(0)}</span>
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-teal-500/20 to-cyan-500/20 ring-1 ring-foreground/10">
+                      <span className="text-xs font-semibold text-teal-300">{alt.name.charAt(0)}</span>
                     </div>
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-foreground group-hover:text-violet-300">
+                      <p className="truncate text-sm font-medium text-foreground group-hover:text-teal-300">
                         {alt.name}
                       </p>
                       <p className="flex items-center gap-1 text-[11px] text-muted-foreground">

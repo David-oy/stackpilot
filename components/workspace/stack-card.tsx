@@ -82,8 +82,8 @@ export function StackCard({
       transition={{ delay: index * 0.03 }}
       className={`group flex flex-col rounded-2xl border p-4 transition-colors ${
         active
-          ? 'border-violet-500/30 bg-violet-500/[0.06]'
-          : 'border-foreground/5 bg-foreground/[0.02] hover:border-violet-500/20'
+          ? 'border-teal-500/30 bg-teal-500/[0.06]'
+          : 'border-foreground/5 bg-foreground/[0.02] hover:border-teal-500/25'
       }`}
     >
       <div className="flex items-start justify-between gap-2">
@@ -120,7 +120,7 @@ export function StackCard({
           <DropdownMenuTrigger asChild>
             <button
               aria-label="Stack actions"
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-foreground/5 text-muted-foreground transition-colors hover:border-violet-500/20 hover:text-foreground"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-foreground/5 text-muted-foreground transition-colors hover:border-teal-500/25 hover:text-foreground"
             >
               <MoreHorizontal className="h-3.5 w-3.5" />
             </button>

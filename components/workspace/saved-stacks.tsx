@@ -41,8 +41,8 @@ export function SavedStacks() {
     <section id="saved-stacks" className="scroll-mt-24">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500/20 to-blue-500/20 ring-1 ring-violet-500/20">
-            <Bookmark className="h-4 w-4 text-violet-300" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-teal-500/20 to-cyan-500/20 ring-1 ring-teal-500/20">
+            <Bookmark className="h-4 w-4 text-teal-300" />
           </div>
           <div>
             <h2 className="text-sm font-semibold text-foreground">Saved Stacks</h2>
@@ -93,7 +93,7 @@ export function SavedStacks() {
           </p>
           <Link
             href="/"
-            className="mt-4 inline-flex items-center gap-1.5 text-xs text-violet-400 transition-colors hover:text-violet-300"
+            className="mt-4 inline-flex items-center gap-1.5 text-xs text-teal-400 transition-colors hover:text-teal-300"
           >
             <Play className="h-3.5 w-3.5" /> Start a New Build
           </Link>

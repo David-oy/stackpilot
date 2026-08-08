@@ -18,7 +18,7 @@ function LoginContent() {
       footer={
         <>
           Don&apos;t have an account?{' '}
-          <Link href="/signup" className="font-medium text-violet-400 hover:text-violet-300">
+          <Link href="/signup" className="font-medium text-teal-400 hover:text-teal-300">
             Create one
           </Link>
         </>

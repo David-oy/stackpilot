@@ -63,16 +63,16 @@ function ProviderLink({ provider }: { provider: ProviderWithRelations }) {
   return (
     <Link
       href={`/browse/providers/${provider.slug}`}
-      className="glass glass-hover group flex flex-col rounded-2xl p-5 transition-colors hover:border-violet-500/20"
+      className="glass glass-hover group flex flex-col rounded-2xl p-5 transition-colors hover:border-teal-500/25"
     >
       <div className="flex items-start gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/20 to-blue-500/20 ring-1 ring-foreground/10">
-          <span className="text-sm font-semibold text-violet-300">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500/20 to-cyan-500/20 ring-1 ring-foreground/10">
+          <span className="text-sm font-semibold text-teal-300">
             {provider.name.charAt(0)}
           </span>
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-foreground transition-colors group-hover:text-violet-300">
+          <p className="truncate text-sm font-semibold text-foreground transition-colors group-hover:text-teal-300">
             {provider.name}
           </p>
           <p className="mt-0.5 text-[11px] text-muted-foreground">{provider.pricingModel}</p>
@@ -169,8 +169,8 @@ export default async function BrowseCategoryPage({ params }: PageProps) {
 
         <div className="rounded-2xl glass p-6">
           <div className="flex items-start gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500/20 to-blue-500/20 ring-1 ring-foreground/10">
-              <Icon className="h-7 w-7 text-violet-300" />
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-500/20 to-cyan-500/20 ring-1 ring-foreground/10">
+              <Icon className="h-7 w-7 text-teal-300" />
             </div>
             <div>
               <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
@@ -193,7 +193,7 @@ export default async function BrowseCategoryPage({ params }: PageProps) {
             <p className="mt-3 text-sm text-muted-foreground">No providers found in this category.</p>
             <Link
               href="/browse/categories"
-              className="mt-4 text-sm text-violet-400 transition-colors hover:text-violet-300"
+              className="mt-4 text-sm text-teal-400 transition-colors hover:text-teal-300"
             >
               Browse all categories
             </Link>

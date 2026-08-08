@@ -37,7 +37,7 @@ export function Footer() {
         <div className="grid gap-10 md:grid-cols-5">
           <div className="md:col-span-2">
             <a href="#" className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-blue-500">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-500">
                 <Sparkles className="h-5 w-5 text-white" />
               </div>
               <span className="text-lg font-semibold tracking-tight text-foreground">

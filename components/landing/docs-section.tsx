@@ -7,10 +7,10 @@ const topics = docGroups.flatMap((group) => group.items).slice(0, 6);
 export function DocsSection() {
   return (
     <section id="docs" className="relative py-24 sm:py-28">
-      <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[500px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-700/10 blur-[140px]" />
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[500px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-teal-500/10 blur-[140px]" />
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-sm font-medium text-violet-400">Documentation</p>
+          <p className="text-sm font-medium text-teal-400">Documentation</p>
           <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">
             Learn to build with <span className="gradient-text">Stack2Set</span>
           </h2>
@@ -27,12 +27,12 @@ export function DocsSection() {
               className="group glass glass-hover rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1"
             >
               <div className="flex items-start justify-between">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10 ring-1 ring-violet-500/20">
-                  <BookOpen className="h-5 w-5 text-violet-400" />
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-500/10 ring-1 ring-teal-500/20">
+                  <BookOpen className="h-5 w-5 text-teal-400" />
                 </span>
                 <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
               </div>
-              <h3 className="mt-4 text-sm font-semibold text-foreground group-hover:text-violet-400">
+              <h3 className="mt-4 text-sm font-semibold text-foreground group-hover:text-teal-400">
                 {topic.title}
               </h3>
               <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
@@ -45,7 +45,7 @@ export function DocsSection() {
         <div className="mt-10 text-center">
           <Link
             href="/docs"
-            className="inline-flex items-center gap-2 rounded-full glass glass-hover px-6 py-2.5 text-sm font-medium text-foreground transition-colors hover:text-violet-400"
+            className="inline-flex items-center gap-2 rounded-full glass glass-hover px-6 py-2.5 text-sm font-medium text-foreground transition-colors hover:text-teal-400"
           >
             Browse all documentation
             <ArrowRight className="h-4 w-4" />

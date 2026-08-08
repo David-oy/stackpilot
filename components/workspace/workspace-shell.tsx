@@ -174,12 +174,12 @@ function WorkspaceNavItems({
               collapsed ? 'justify-center px-0' : 'px-3'
             } ${
               active
-                ? 'bg-gradient-to-r from-violet-500/15 to-blue-500/15 font-medium text-foreground ring-1 ring-violet-500/20'
+                ? 'bg-gradient-to-r from-teal-500/15 to-cyan-500/15 font-medium text-foreground ring-1 ring-teal-500/20'
                 : 'text-muted-foreground hover:bg-foreground/[0.04] hover:text-foreground'
             }`}
           >
             <Icon
-              className={`h-4 w-4 shrink-0 ${active ? 'text-violet-300' : 'text-muted-foreground'}`}
+              className={`h-4 w-4 shrink-0 ${active ? 'text-teal-300' : 'text-muted-foreground'}`}
             />
             <AnimatePresence initial={false}>
               {!collapsed && (
@@ -204,7 +204,7 @@ function WorkspaceNavItems({
 function BrandMark({ showLabel }: { showLabel: boolean }) {
   return (
     <div className="flex min-w-0 items-center gap-2.5">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-blue-500 shadow-lg shadow-violet-500/20">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-teal-500 shadow-lg shadow-teal-500/20">
         <Sparkles className="h-4 w-4 text-white" />
       </div>
       <AnimatePresence initial={false}>
@@ -242,7 +242,7 @@ function SidebarFooter({ collapsed = false }: { collapsed?: boolean }) {
             rel="noopener noreferrer"
             aria-label={social.label}
             title={social.label}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-foreground/10 text-muted-foreground transition-colors hover:border-violet-500/20 hover:text-foreground"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-foreground/10 text-muted-foreground transition-colors hover:border-teal-500/25 hover:text-foreground"
           >
             <social.icon className="h-4 w-4" />
           </a>
@@ -351,7 +351,7 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
                   onClick={toggleCollapsed}
                   aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                   title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-                  className={`flex shrink-0 items-center justify-center rounded-lg border border-foreground/10 text-muted-foreground transition-colors hover:border-violet-500/20 hover:text-foreground ${
+                  className={`flex shrink-0 items-center justify-center rounded-lg border border-foreground/10 text-muted-foreground transition-colors hover:border-teal-500/25 hover:text-foreground ${
                     collapsed ? 'h-6 w-6' : 'h-8 w-8'
                   }`}
                 >

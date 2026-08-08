@@ -158,7 +158,7 @@ function WorkspaceFormDialog({
                   className={cn(
                     'flex h-9 w-9 items-center justify-center rounded-lg border text-base transition-colors',
                     icon === candidate
-                      ? 'border-violet-500/50 bg-violet-500/10'
+                      ? 'border-teal-500/50 bg-teal-500/10'
                       : 'border-foreground/10 hover:border-foreground/25',
                   )}
                 >
@@ -266,7 +266,7 @@ export function WorkspaceSwitcher({ collapsed = false }: { collapsed?: boolean }
             aria-label="Switch workspace"
             title={currentWorkspace.name}
             className={cn(
-              'flex w-full items-center gap-2 rounded-lg border border-foreground/5 bg-foreground/[0.02] px-2 py-1.5 text-sm transition-colors hover:border-violet-500/25 hover:bg-foreground/[0.04]',
+              'flex w-full items-center gap-2 rounded-lg border border-foreground/5 bg-foreground/[0.02] px-2 py-1.5 text-sm transition-colors hover:border-teal-500/30 hover:bg-foreground/[0.04]',
               collapsed && 'justify-center px-0 py-2',
             )}
           >
@@ -290,7 +290,7 @@ export function WorkspaceSwitcher({ collapsed = false }: { collapsed?: boolean }
           <DropdownMenuItem onSelect={() => switchWorkspace(currentWorkspace.id)} className="gap-2">
             <WorkspaceIcon workspace={currentWorkspace} size="sm" />
             <span className="min-w-0 flex-1 truncate">{currentWorkspace.name}</span>
-            <Check className="h-4 w-4 shrink-0 text-violet-400" />
+            <Check className="h-4 w-4 shrink-0 text-teal-400" />
           </DropdownMenuItem>
 
           {others.length > 0 && (

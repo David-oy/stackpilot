@@ -92,7 +92,7 @@ export function AuthEmailForm({
         </p>
         <Button
           asChild
-          className="mt-5 h-10 bg-gradient-to-r from-violet-500 to-blue-500 text-sm text-white hover:from-violet-600 hover:to-blue-600"
+          className="mt-5 h-10 bg-teal-500 text-sm text-white hover:bg-teal-600"
         >
           <Link href="/login">Back to sign in</Link>
         </Button>
@@ -150,7 +150,7 @@ export function AuthEmailForm({
             {mode === 'login' && (
               <Link
                 href="/forgot-password"
-                className="text-xs text-violet-400 hover:text-violet-300"
+                className="text-xs text-teal-400 hover:text-teal-300"
               >
                 Forgot password?
               </Link>
@@ -185,7 +185,7 @@ export function AuthEmailForm({
         <Button
           type="submit"
           disabled={submitting || !configured}
-          className="h-10 w-full gap-2 bg-gradient-to-r from-violet-500 to-blue-500 text-sm text-white hover:from-violet-600 hover:to-blue-600"
+          className="h-10 w-full gap-2 bg-teal-500 text-sm text-white hover:bg-teal-600"
         >
           {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
           {mode === 'login' ? 'Sign in' : 'Create account'}
@@ -196,14 +196,14 @@ export function AuthEmailForm({
         <p className="mt-5 text-center text-sm text-muted-foreground">
           {mode === 'login' ? "Don't have an account?" : 'Already have an account?'}{' '}
           {switchHref ? (
-            <Link href={switchHref} className="font-medium text-violet-400 hover:text-violet-300">
+            <Link href={switchHref} className="font-medium text-teal-400 hover:text-teal-300">
               {mode === 'login' ? 'Create one' : 'Sign in'}
             </Link>
           ) : (
             <button
               type="button"
               onClick={onSwitchMode}
-              className="font-medium text-violet-400 hover:text-violet-300"
+              className="font-medium text-teal-400 hover:text-teal-300"
             >
               {mode === 'login' ? 'Create one' : 'Sign in'}
             </button>

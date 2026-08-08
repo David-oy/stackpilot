@@ -92,7 +92,7 @@ export function ShareModal({
           <Button
             onClick={handleCopy}
             size="sm"
-            className="h-9 shrink-0 gap-1.5 bg-gradient-to-r from-violet-500 to-blue-500 text-xs text-white hover:from-violet-600 hover:to-blue-600"
+            className="h-9 shrink-0 gap-1.5 bg-teal-500 text-xs text-white hover:bg-teal-600"
           >
             {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
             {copied ? 'Copied' : 'Copy'}
@@ -123,7 +123,7 @@ export function ShareModal({
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="ml-3 inline-flex shrink-0 items-center gap-1 rounded-lg border border-foreground/5 px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-violet-500/20 hover:text-foreground"
+            className="ml-3 inline-flex shrink-0 items-center gap-1 rounded-lg border border-foreground/5 px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-teal-500/25 hover:text-foreground"
           >
             <ExternalLink className="h-3 w-3" /> Open
           </a>

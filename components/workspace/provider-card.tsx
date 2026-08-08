@@ -27,12 +27,14 @@ export function ProviderCard({
   categoryName,
   index,
   total,
+  delay = 0,
 }: {
   provider: StackProviderItem;
   categoryId: string;
   categoryName: string;
   index: number;
   total: number;
+  delay?: number;
 }) {
   const { moveProvider, removeProvider } = useStack();
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -44,8 +46,8 @@ export function ProviderCard({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.96 }}
-      transition={{ duration: 0.25 }}
-      className="group rounded-xl border border-foreground/5 bg-foreground/[0.02] p-4 transition-all hover:border-violet-500/20 hover:bg-foreground/[0.04]"
+      transition={{ duration: 0.25, delay }}
+      className="group rounded-xl border border-foreground/5 bg-foreground/[0.02] p-4 transition-all hover:border-teal-500/25 hover:bg-foreground/[0.04]"
     >
       <div className="flex items-start gap-3">
         <ProviderLogo name={provider.name} className="h-11 w-11 rounded-lg text-base" />
@@ -65,8 +67,8 @@ export function ProviderCard({
             {provider.description}
           </p>
           {provider.reason && (
-            <p className="mt-1.5 text-[11px] leading-relaxed text-violet-300/80">
-              <span className="font-medium text-violet-300">Why:</span> {provider.reason}
+            <p className="mt-1.5 text-[11px] leading-relaxed text-teal-300/80">
+              <span className="font-medium text-teal-300">Why:</span> {provider.reason}
             </p>
           )}
         </div>
@@ -75,7 +77,7 @@ export function ProviderCard({
             onClick={() => moveProvider(categoryId, provider.providerId, -1)}
             disabled={index === 0}
             aria-label="Move up"
-            className="flex h-7 w-7 items-center justify-center rounded-md border border-foreground/5 text-muted-foreground transition-colors hover:border-violet-500/20 hover:text-foreground disabled:opacity-30"
+            className="flex h-7 w-7 items-center justify-center rounded-md border border-foreground/5 text-muted-foreground transition-colors hover:border-teal-500/25 hover:text-foreground disabled:opacity-30"
           >
             <ArrowUp className="h-3.5 w-3.5" />
           </button>
@@ -83,7 +85,7 @@ export function ProviderCard({
             onClick={() => moveProvider(categoryId, provider.providerId, 1)}
             disabled={index === total - 1}
             aria-label="Move down"
-            className="flex h-7 w-7 items-center justify-center rounded-md border border-foreground/5 text-muted-foreground transition-colors hover:border-violet-500/20 hover:text-foreground disabled:opacity-30"
+            className="flex h-7 w-7 items-center justify-center rounded-md border border-foreground/5 text-muted-foreground transition-colors hover:border-teal-500/25 hover:text-foreground disabled:opacity-30"
           >
             <ArrowDown className="h-3.5 w-3.5" />
           </button>
@@ -109,7 +111,7 @@ export function ProviderCard({
             href={provider.website}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 rounded-lg border border-foreground/5 px-2.5 py-1.5 text-[11px] text-muted-foreground transition-all hover:border-violet-500/20 hover:text-foreground"
+            className="inline-flex items-center gap-1 rounded-lg border border-foreground/5 px-2.5 py-1.5 text-[11px] text-muted-foreground transition-all hover:border-teal-500/25 hover:text-foreground"
           >
             <Globe className="h-3 w-3" /> Website
           </a>
@@ -119,20 +121,20 @@ export function ProviderCard({
             href={provider.documentation}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 rounded-lg border border-foreground/5 px-2.5 py-1.5 text-[11px] text-muted-foreground transition-all hover:border-violet-500/20 hover:text-foreground"
+            className="inline-flex items-center gap-1 rounded-lg border border-foreground/5 px-2.5 py-1.5 text-[11px] text-muted-foreground transition-all hover:border-teal-500/25 hover:text-foreground"
           >
             <BookOpen className="h-3 w-3" /> Docs
           </a>
         )}
         <button
           onClick={() => setDetailsOpen(true)}
-          className="inline-flex items-center gap-1 rounded-lg border border-foreground/5 px-2.5 py-1.5 text-[11px] text-muted-foreground transition-all hover:border-violet-500/20 hover:text-foreground"
+          className="inline-flex items-center gap-1 rounded-lg border border-foreground/5 px-2.5 py-1.5 text-[11px] text-muted-foreground transition-all hover:border-teal-500/25 hover:text-foreground"
         >
           <Info className="h-3 w-3" /> Details
         </button>
         <button
           onClick={() => setReplaceOpen(true)}
-          className="inline-flex items-center gap-1 rounded-lg border border-foreground/5 px-2.5 py-1.5 text-[11px] text-muted-foreground transition-all hover:border-violet-500/20 hover:text-foreground"
+          className="inline-flex items-center gap-1 rounded-lg border border-foreground/5 px-2.5 py-1.5 text-[11px] text-muted-foreground transition-all hover:border-teal-500/25 hover:text-foreground"
         >
           <RefreshCw className="h-3 w-3" /> Replace
         </button>
@@ -177,7 +179,7 @@ export function ProviderLinkIcon({ href, label }: { href?: string; label: string
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-violet-300"
+      className="inline-flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-teal-300"
     >
       <ExternalLink className="h-3 w-3" /> {label}
     </a>

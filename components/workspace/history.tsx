@@ -33,8 +33,8 @@ export function WorkspaceHistory() {
         <section className="rounded-2xl glass p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500/20 to-blue-500/20 ring-1 ring-violet-500/20">
-                <Search className="h-4 w-4 text-violet-300" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-teal-500/20 to-cyan-500/20 ring-1 ring-teal-500/20">
+                <Search className="h-4 w-4 text-teal-300" />
               </div>
               <h2 className="text-sm font-semibold text-foreground">Recent Searches</h2>
             </div>
@@ -58,7 +58,7 @@ export function WorkspaceHistory() {
                 <Link
                   key={item}
                   href={`/search?q=${encodeURIComponent(item)}`}
-                  className="flex items-center gap-2.5 rounded-lg border border-foreground/5 bg-foreground/[0.02] px-3 py-2.5 text-xs text-muted-foreground transition-colors hover:border-violet-500/20 hover:text-foreground"
+                  className="flex items-center gap-2.5 rounded-lg border border-foreground/5 bg-foreground/[0.02] px-3 py-2.5 text-xs text-muted-foreground transition-colors hover:border-teal-500/25 hover:text-foreground"
                 >
                   <Search className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" />
                   <span className="truncate">{item}</span>
@@ -89,7 +89,7 @@ export function WorkspaceHistory() {
                     setActiveStackId(stack.id);
                     router.push('/workspace');
                   }}
-                  className="flex w-full items-center gap-2.5 rounded-lg border border-foreground/5 bg-foreground/[0.02] px-3 py-2.5 text-left transition-colors hover:border-violet-500/20 hover:text-foreground"
+                  className="flex w-full items-center gap-2.5 rounded-lg border border-foreground/5 bg-foreground/[0.02] px-3 py-2.5 text-left transition-colors hover:border-teal-500/25 hover:text-foreground"
                 >
                   <Layers className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" />
                   <span className="min-w-0 flex-1">

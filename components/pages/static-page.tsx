@@ -32,10 +32,10 @@ export function StaticPage({
       <Navbar />
 
       <div className="relative overflow-hidden px-4 pb-20 pt-32 sm:px-6 sm:pt-36">
-        <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-violet-600/10 blur-[120px]" />
+        <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-teal-500/10 blur-[120px]" />
 
         <header className="mx-auto max-w-3xl text-center">
-          <p className="text-sm font-medium text-violet-400">{eyebrow}</p>
+          <p className="text-sm font-medium text-teal-400">{eyebrow}</p>
           <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">
             {title}
             {highlight && <span className="gradient-text"> {highlight}</span>}
@@ -66,7 +66,7 @@ export function StaticPage({
                           {item.body}
                         </p>
                         {item.href && (
-                          <span className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-violet-400">
+                          <span className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-teal-400">
                             Learn more <ArrowRight className="h-3 w-3" />
                           </span>
                         )}

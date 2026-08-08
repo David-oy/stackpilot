@@ -4,20 +4,27 @@ import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
+  ArrowLeft,
   Boxes,
+  Check,
   ChevronRight,
   ExternalLink,
   Github,
   Loader2,
+  Plus,
   Search,
   Scale,
   Star,
   Layers,
 } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import type { ProviderWithRelations } from '@/lib/db/schema';
 import { useBrowseData } from '@/hooks/use-browse-data';
 import { providerCostLabel } from '@/lib/stacks/health';
+import { useStack } from '@/lib/stack-context';
+import { isProviderInCategory, providerInputFromCatalog } from '@/lib/stacks/add-provider';
+import { StackBreadcrumbs } from '@/components/workspace/stack-breadcrumbs';
 import { WorkspaceShell } from '@/components/workspace/workspace-shell';
 import { ProviderCompare } from '@/components/browse/provider-compare';
 import { FavoriteButton } from '@/components/browse/favorite-button';
@@ -51,12 +58,20 @@ function ProviderCard({
   selected,
   onToggleSelect,
   index,
+  addToStack,
+  inStack,
+  adding,
+  onAddToStack,
 }: {
   provider: ProviderWithRelations;
   categoryName?: string;
   selected: boolean;
   onToggleSelect: () => void;
   index: number;
+  addToStack?: boolean;
+  inStack?: boolean;
+  adding?: boolean;
+  onAddToStack?: () => void;
 }) {
   const rating = provider.stack2SetRating ?? provider.communityRating;
   return (
@@ -67,13 +82,13 @@ function ProviderCard({
       className="glass glass-hover group flex flex-col rounded-2xl p-5"
     >
       <div className="flex items-start gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/20 to-blue-500/20 ring-1 ring-foreground/10">
-          <span className="text-sm font-semibold text-violet-300">{provider.name.charAt(0)}</span>
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500/20 to-cyan-500/20 ring-1 ring-foreground/10">
+          <span className="text-sm font-semibold text-teal-300">{provider.name.charAt(0)}</span>
         </div>
         <div className="min-w-0 flex-1">
           <Link
             href={`/browse/providers/${provider.slug}`}
-            className="block truncate text-sm font-semibold text-foreground transition-colors hover:text-violet-300"
+            className="block truncate text-sm font-semibold text-foreground transition-colors hover:text-teal-300"
           >
             {provider.name}
           </Link>
@@ -90,8 +105,8 @@ function ProviderCard({
             title={selected ? 'Remove from comparison' : 'Add to comparison'}
             className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border text-xs transition-colors ${
               selected
-                ? 'border-violet-500/40 bg-violet-500/15 text-violet-300'
-                : 'border-foreground/5 text-muted-foreground hover:border-violet-500/20 hover:text-foreground'
+                ? 'border-teal-500/40 bg-teal-500/15 text-teal-300'
+                : 'border-foreground/5 text-muted-foreground hover:border-teal-500/25 hover:text-foreground'
             }`}
           >
             <Scale className="h-3.5 w-3.5" />
@@ -130,7 +145,7 @@ function ProviderCard({
           <div className="flex items-center gap-2">
             <div className="h-1.5 w-24 overflow-hidden rounded-full bg-foreground/10">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-violet-500 to-blue-500"
+                className="h-full rounded-full bg-teal-500"
                 style={{ width: `${provider.popularityScore ?? 0}%` }}
               />
             </div>
@@ -189,11 +204,35 @@ function ProviderCard({
         <div className="flex-1" />
         <Link
           href={`/browse/providers/${provider.slug}`}
-          className="rounded-lg bg-gradient-to-r from-violet-500 to-blue-500 px-3 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90"
+          className="rounded-lg bg-teal-500 px-3 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90"
         >
           Details
         </Link>
       </div>
+
+      {addToStack && (
+        <div className="mt-4 border-t border-foreground/5 pt-3">
+          {inStack ? (
+            <span className="flex h-9 w-full items-center justify-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 text-xs font-medium text-emerald-300">
+              <Check className="h-3.5 w-3.5" /> In your stack
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={onAddToStack}
+              disabled={adding}
+              className="flex h-9 w-full items-center justify-center gap-1.5 rounded-lg bg-teal-500 text-xs font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {adding ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Plus className="h-3.5 w-3.5" />
+              )}
+              Add to stack
+            </button>
+          )}
+        </div>
+      )}
     </motion.article>
   );
 }
@@ -202,6 +241,7 @@ function ProvidersContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { providers, categories, loading, error } = useBrowseData();
+  const { activeStack, addProvider } = useStack();
 
   const [query, setQuery] = useState(searchParams.get('q') ?? '');
   const [category, setCategory] = useState(searchParams.get('category') ?? 'all');
@@ -212,10 +252,15 @@ function ProvidersContent() {
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [compareOpen, setCompareOpen] = useState(false);
+  const [addingSlug, setAddingSlug] = useState<string | null>(null);
 
   const categoryById = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
 
+  const addToStack = searchParams.get('addToStack') === '1';
   const activeCategory = category ? categoryById.get(category) : undefined;
+
+  const stackCategory = activeStack?.categories.find((c) => c.categoryId === category);
+  const stackCategoryName = stackCategory?.categoryName ?? activeCategory?.name ?? category;
 
   const categoryParam = searchParams.get('category');
 
@@ -226,10 +271,29 @@ function ProvidersContent() {
 
   useEffect(() => {
     if (category !== 'all' && categories.length > 0 && !categoryById.has(category)) {
-      setCategory('all');
-      setPage(1);
+      // In add-to-stack mode preserve the requested category context even when
+      // the catalog has no matching category (integration categories, etc.).
+      if (!addToStack) {
+        setCategory('all');
+        setPage(1);
+      }
     }
-  }, [category, categories, categoryById]);
+  }, [category, categories, categoryById, addToStack]);
+
+  const handleAddToStack = (provider: ProviderWithRelations) => {
+    if (!activeStack) {
+      toast.error('No stack is open. Open a stack from your workspace first.');
+      return;
+    }
+    if (isProviderInCategory(activeStack, category, provider.name, provider.officialWebsite)) {
+      toast.info(`${provider.name} is already in ${stackCategoryName}`);
+      return;
+    }
+    setAddingSlug(provider.slug);
+    addProvider(category, stackCategoryName, providerInputFromCatalog(provider));
+    toast.success(`${provider.name} added to ${stackCategoryName}`);
+    setTimeout(() => router.push('/workspace'), 400);
+  };
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -313,35 +377,73 @@ function ProvidersContent() {
           transition={{ duration: 0.4 }}
           className="rounded-2xl glass p-6"
         >
-          <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500/20 to-blue-500/20 ring-1 ring-violet-500/20">
-              <Boxes className="h-4 w-4 text-violet-300" />
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
+              {addToStack ? (
+                <>
+                  <StackBreadcrumbs
+                    items={[
+                      { label: 'Home', href: '/' },
+                      { label: activeStack?.name ?? 'Stack', href: '/workspace' },
+                      { label: stackCategoryName, href: '/workspace' },
+                      { label: 'Browse providers' },
+                    ]}
+                  />
+                  <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
+                    Browse {stackCategoryName} Providers
+                  </h1>
+                  <p className="mt-1.5 text-sm text-muted-foreground">
+                    Choose a provider to add to your stack.
+                  </p>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {filtered.length} providers in {stackCategoryName}. Click one to add it to{' '}
+                    {activeStack?.name ?? 'your stack'}.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-teal-500/20 to-cyan-500/20 ring-1 ring-teal-500/20">
+                      <Boxes className="h-4 w-4 text-teal-300" />
+                    </div>
+                    <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+                      Browse Providers
+                    </h1>
+                  </div>
+                  {activeCategory && (
+                    <div className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <Link
+                        href="/browse/categories"
+                        className="transition-colors hover:text-foreground"
+                      >
+                        Browse Categories
+                      </Link>
+                      <ChevronRight className="h-3 w-3" />
+                      <Link
+                        href={`/browse/categories/${activeCategory.slug}`}
+                        className="font-medium text-foreground transition-colors hover:text-teal-300"
+                      >
+                        {activeCategory.name}
+                      </Link>
+                    </div>
+                  )}
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {filtered.length} providers
+                    {activeCategory ? ` in ${activeCategory.name}` : ' in our database'}. Select 2–4
+                    to compare side by side.
+                  </p>
+                </>
+              )}
             </div>
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-              Browse Providers
-            </h1>
+            {addToStack && (
+              <Link
+                href="/workspace"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-foreground/5 bg-foreground/[0.02] px-3.5 py-2 text-xs text-muted-foreground transition-colors hover:border-teal-500/25 hover:text-foreground"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" /> Back to {stackCategoryName}
+              </Link>
+            )}
           </div>
-          {activeCategory && (
-            <div className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Link
-                href="/browse/categories"
-                className="transition-colors hover:text-foreground"
-              >
-                Browse Categories
-              </Link>
-              <ChevronRight className="h-3 w-3" />
-              <Link
-                href={`/browse/categories/${activeCategory.slug}`}
-                className="font-medium text-foreground transition-colors hover:text-violet-300"
-              >
-                {activeCategory.name}
-              </Link>
-            </div>
-          )}
-          <p className="mt-2 text-sm text-muted-foreground">
-            {filtered.length} providers{activeCategory ? ` in ${activeCategory.name}` : ' in our database'}
-            . Select 2–4 to compare side by side.
-          </p>
 
           <div className="mt-5 flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center">
             <label className="relative block">
@@ -355,7 +457,7 @@ function ProvidersContent() {
                 }}
                 placeholder="Search providers..."
                 aria-label="Search providers"
-                className="h-10 w-full rounded-lg border border-foreground/5 bg-foreground/[0.02] pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-violet-500/30 focus:outline-none lg:w-64"
+                className="h-10 w-full rounded-lg border border-foreground/5 bg-foreground/[0.02] pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-teal-500/30 focus:outline-none lg:w-64"
               />
             </label>
             <FilterSelect
@@ -399,7 +501,7 @@ function ProvidersContent() {
                   setFreeOnly(e.target.checked);
                   setPage(1);
                 }}
-                className="h-3.5 w-3.5 rounded border-foreground/20 bg-transparent accent-violet-500"
+                className="h-3.5 w-3.5 rounded border-foreground/20 bg-transparent accent-teal-500"
               />
               Free tier only
             </label>
@@ -411,7 +513,7 @@ function ProvidersContent() {
                   setOpenSourceOnly(e.target.checked);
                   setPage(1);
                 }}
-                className="h-3.5 w-3.5 rounded border-foreground/20 bg-transparent accent-violet-500"
+                className="h-3.5 w-3.5 rounded border-foreground/20 bg-transparent accent-teal-500"
               />
               Open source only
             </label>
@@ -420,15 +522,28 @@ function ProvidersContent() {
 
         {loading ? (
           <div className="flex items-center justify-center rounded-2xl glass py-24">
-            <Loader2 className="h-6 w-6 animate-spin text-violet-400" />
+            <Loader2 className="h-6 w-6 animate-spin text-teal-400" />
           </div>
         ) : error ? (
           <div className="rounded-2xl glass py-16 text-center text-sm text-muted-foreground">
             {error}
           </div>
         ) : visible.length === 0 ? (
-          <div className="rounded-2xl glass py-16 text-center text-sm text-muted-foreground">
-            No providers match your filters.
+          <div className="rounded-2xl glass py-16 text-center">
+            <Search className="mx-auto h-8 w-8 text-muted-foreground/50" />
+            <p className="mt-3 text-sm text-muted-foreground">
+              {addToStack
+                ? `No providers found for ${stackCategoryName}. Try adding one manually from your stack.`
+                : 'No providers match your filters.'}
+            </p>
+            {addToStack && (
+              <Link
+                href="/workspace"
+                className="mt-4 inline-flex items-center gap-1.5 text-sm text-teal-400 transition-colors hover:text-teal-300"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" /> Back to your stack
+              </Link>
+            )}
           </div>
         ) : (
           <>
@@ -441,6 +556,16 @@ function ProvidersContent() {
                   selected={selected.has(provider.slug)}
                   onToggleSelect={() => toggleSelect(provider.slug)}
                   index={i}
+                  addToStack={addToStack}
+                  inStack={
+                    addToStack
+                      ? isProviderInCategory(activeStack, category, provider.name, provider.officialWebsite)
+                      : undefined
+                  }
+                  adding={addingSlug === provider.slug}
+                  onAddToStack={
+                    addToStack ? () => handleAddToStack(provider) : undefined
+                  }
                 />
               ))}
             </div>
@@ -477,7 +602,7 @@ function ProvidersContent() {
           <button
             type="button"
             onClick={() => setCompareOpen(true)}
-            className="flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-500 to-blue-500 px-6 py-3 text-sm font-medium text-white shadow-xl shadow-violet-500/30 transition-transform hover:scale-105"
+            className="flex items-center gap-2 rounded-full bg-teal-500 px-6 py-3 text-sm font-medium text-white shadow-xl shadow-teal-500/30 transition-transform hover:scale-105"
           >
             <Scale className="h-4 w-4" />
             Compare ({selected.size})

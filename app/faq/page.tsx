@@ -33,11 +33,11 @@ export default function FAQPage() {
       <Navbar />
 
       <div className="relative overflow-hidden px-4 pb-24 pt-32 sm:px-6 sm:pt-36">
-        <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-violet-600/10 blur-[120px]" />
+        <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-teal-500/10 blur-[120px]" />
 
         <section className="mx-auto max-w-4xl">
           <header className="text-center">
-            <p className="text-sm font-medium text-violet-400">FAQ</p>
+            <p className="text-sm font-medium text-teal-400">FAQ</p>
             <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">
               Frequently Asked <span className="gradient-text">Questions</span>
             </h1>

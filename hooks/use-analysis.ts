@@ -9,6 +9,7 @@ type AnalysisState = {
   data: StackAnalysis | null;
   isLoading: boolean;
   error: string | null;
+  errorCode?: 'NOT_A_PROJECT';
 };
 
 export function useAnalysis(query: string, enabled = true) {
@@ -38,10 +39,15 @@ export function useAnalysis(query: string, enabled = true) {
         setState({ data, isLoading: false, error: null });
       } catch (error) {
         if (controllerRef.current !== controller || controller.signal.aborted) return;
+        const code =
+          error && typeof error === 'object' && 'code' in error
+            ? (error as { code?: 'NOT_A_PROJECT' }).code
+            : undefined;
         setState({
           data: null,
           isLoading: false,
           error: error instanceof Error ? error.message : 'Something went wrong. Please try again.',
+          errorCode: code,
         });
       }
     },

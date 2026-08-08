@@ -45,10 +45,10 @@ export default function PrivacyPage() {
     <main className="relative min-h-screen overflow-x-hidden">
       <Navbar />
       <div className="relative overflow-hidden px-4 pb-24 pt-32 sm:px-6 sm:pt-36">
-        <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-violet-600/10 blur-[120px]" />
+        <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-teal-500/10 blur-[120px]" />
 
         <header className="mx-auto max-w-3xl text-center">
-          <p className="text-sm font-medium text-violet-400">Privacy</p>
+          <p className="text-sm font-medium text-teal-400">Privacy</p>
           <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">
             Privacy <span className="gradient-text">Policy</span>
           </h1>

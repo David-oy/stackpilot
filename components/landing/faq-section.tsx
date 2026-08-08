@@ -9,7 +9,7 @@ export function FaqSection() {
       <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[500px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-700/10 blur-[140px]" />
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-sm font-medium text-violet-400">FAQ</p>
+          <p className="text-sm font-medium text-teal-400">FAQ</p>
           <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">
             Frequently asked <span className="gradient-text">questions</span>
           </h2>
@@ -25,7 +25,7 @@ export function FaqSection() {
         <div className="mt-10 text-center">
           <Link
             href="/faq"
-            className="inline-flex items-center gap-2 rounded-full glass glass-hover px-6 py-2.5 text-sm font-medium text-foreground transition-colors hover:text-violet-400"
+            className="inline-flex items-center gap-2 rounded-full glass glass-hover px-6 py-2.5 text-sm font-medium text-foreground transition-colors hover:text-teal-400"
           >
             Browse all questions
             <ArrowRight className="h-4 w-4" />

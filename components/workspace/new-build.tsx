@@ -28,7 +28,7 @@ export function NewBuild() {
           className="mx-auto max-w-2xl py-6 text-center sm:py-10"
         >
           <div className="mb-6 inline-flex items-center gap-2 rounded-full glass px-4 py-1.5 text-xs text-muted-foreground">
-            <Sparkles className="h-3.5 w-3.5 text-violet-400" />
+            <Sparkles className="h-3.5 w-3.5 text-teal-400" />
             <span>New Build</span>
           </div>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
@@ -52,7 +52,7 @@ export function NewBuild() {
                   key={suggestion}
                   type="button"
                   onClick={() => handleSearch(suggestion)}
-                  className="rounded-full border border-foreground/5 bg-foreground/[0.02] px-3 py-1.5 text-xs text-muted-foreground transition-all hover:border-violet-500/20 hover:text-foreground"
+                  className="rounded-full border border-foreground/5 bg-foreground/[0.02] px-3 py-1.5 text-xs text-muted-foreground transition-all hover:border-teal-500/25 hover:text-foreground"
                 >
                   {suggestion}
                 </button>

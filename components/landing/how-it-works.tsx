@@ -31,7 +31,7 @@ export function HowItWorks() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <Reveal>
           <div className="mx-auto max-w-2xl text-center">
-            <p className="text-sm font-medium text-violet-400">How It Works</p>
+            <p className="text-sm font-medium text-teal-400">How It Works</p>
             <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">
               From idea to stack in <span className="gradient-text">three steps</span>
             </h2>
@@ -42,16 +42,25 @@ export function HowItWorks() {
           </div>
         </Reveal>
 
-        <div className="mt-16 grid gap-6 md:grid-cols-3">
+        <div className="relative mt-16 grid gap-12 md:grid-cols-3 md:gap-6">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-[14%] top-14 hidden h-px bg-gradient-to-r from-teal-500/10 via-teal-500/50 to-teal-500/10 md:block"
+          >
+            <span className="absolute top-1/2 h-1.5 w-1.5 -translate-y-1/2 animate-flow rounded-full bg-teal-400 shadow-[0_0_8px_rgba(45,212,191,0.8)]" />
+          </div>
+
           {steps.map((step, i) => (
             <Reveal key={step.number} delay={i * 0.1}>
               <div className="relative h-full">
-                <div className="glass glass-hover h-full rounded-2xl p-8 transition-all duration-300 hover:-translate-y-1">
+                <div className="glass glass-hover group h-full rounded-2xl p-8 transition-all duration-300 hover:-translate-y-1">
                   <div className="flex items-center justify-between">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/20 to-blue-500/20 ring-1 ring-violet-500/20 transition-transform duration-300 group-hover:scale-110">
-                      <step.icon className="h-6 w-6 text-violet-300" />
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500/20 to-cyan-500/20 ring-1 ring-teal-500/20 transition-transform duration-300 group-hover:scale-110">
+                      <step.icon className="h-6 w-6 text-teal-300" />
                     </div>
-                    <span className="text-4xl font-bold text-foreground/10">{step.number}</span>
+                    <span className="text-sm font-semibold tracking-widest text-teal-400/80">
+                      Step {step.number}
+                    </span>
                   </div>
                   <h3 className="mt-6 text-xl font-semibold tracking-tight text-foreground">
                     {step.title}
@@ -61,7 +70,10 @@ export function HowItWorks() {
                   </p>
                 </div>
                 {i < steps.length - 1 && (
-                  <div className="absolute -right-3 top-1/2 hidden h-px w-6 bg-gradient-to-r from-violet-500/40 to-transparent md:block" />
+                  <div
+                    aria-hidden="true"
+                    className="absolute left-1/2 top-full h-12 w-px -translate-x-1/2 bg-gradient-to-b from-teal-500/50 to-transparent md:hidden"
+                  />
                 )}
               </div>
             </Reveal>

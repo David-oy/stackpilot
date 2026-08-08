@@ -61,14 +61,14 @@ export function ShareActions({
     <div className="flex flex-wrap items-center gap-2">
       <button
         onClick={handleCopy}
-        className="inline-flex h-10 items-center gap-2 rounded-lg bg-gradient-to-r from-violet-500 to-blue-500 px-4 text-sm font-medium text-white transition-opacity hover:opacity-90"
+        className="inline-flex h-10 items-center gap-2 rounded-lg bg-teal-500 px-4 text-sm font-medium text-white transition-opacity hover:opacity-90"
       >
         {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
         {copied ? 'Copied!' : 'Copy link'}
       </button>
       <button
         onClick={handlePrint}
-        className="inline-flex h-10 items-center gap-2 rounded-lg border border-foreground/5 bg-foreground/[0.02] px-4 text-sm text-muted-foreground transition-all hover:border-violet-500/20 hover:text-foreground"
+        className="inline-flex h-10 items-center gap-2 rounded-lg border border-foreground/5 bg-foreground/[0.02] px-4 text-sm text-muted-foreground transition-all hover:border-teal-500/25 hover:text-foreground"
       >
         <Printer className="h-4 w-4" /> Print
       </button>
@@ -79,7 +79,7 @@ export function ShareActions({
           target="_blank"
           rel="noopener noreferrer"
           aria-label={button.label}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-foreground/5 bg-foreground/[0.02] text-muted-foreground transition-all hover:border-violet-500/20 hover:text-foreground"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-foreground/5 bg-foreground/[0.02] text-muted-foreground transition-all hover:border-teal-500/25 hover:text-foreground"
         >
           <button.icon className="h-4 w-4" />
         </a>

@@ -32,8 +32,8 @@ function ShareProvider({
             {provider.description}
           </p>
           {provider.reason && (
-            <p className="mt-1.5 text-xs leading-relaxed text-violet-300/80">
-              <span className="font-medium text-violet-300">Why:</span> {provider.reason}
+            <p className="mt-1.5 text-xs leading-relaxed text-teal-300/80">
+              <span className="font-medium text-teal-300">Why:</span> {provider.reason}
             </p>
           )}
         </div>
@@ -58,7 +58,7 @@ function ShareProvider({
             href={provider.website}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-lg border border-foreground/5 px-2.5 py-1.5 text-[11px] text-muted-foreground transition-all hover:border-violet-500/20 hover:text-foreground"
+            className="rounded-lg border border-foreground/5 px-2.5 py-1.5 text-[11px] text-muted-foreground transition-all hover:border-teal-500/25 hover:text-foreground"
           >
             Website
           </a>
@@ -68,7 +68,7 @@ function ShareProvider({
             href={provider.documentation}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-lg border border-foreground/5 px-2.5 py-1.5 text-[11px] text-muted-foreground transition-all hover:border-violet-500/20 hover:text-foreground"
+            className="rounded-lg border border-foreground/5 px-2.5 py-1.5 text-[11px] text-muted-foreground transition-all hover:border-teal-500/25 hover:text-foreground"
           >
             Documentation
           </a>
@@ -98,7 +98,7 @@ export function ShareView({
 
   return (
     <main className="relative min-h-screen overflow-x-hidden pt-20">
-      <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-violet-600/10 blur-[120px]" />
+      <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-teal-500/10 blur-[120px]" />
 
       <div className="mx-auto max-w-4xl px-6 py-8">
         <header>
@@ -149,7 +149,7 @@ export function ShareView({
               <span className="w-32 shrink-0 text-xs text-muted-foreground">{bar.label}</span>
               <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-foreground/5">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-violet-500 to-blue-500"
+                  className="h-full rounded-full bg-teal-500"
                   style={{ width: `${bar.value}%` }}
                 />
               </div>
@@ -195,7 +195,7 @@ export function ShareView({
         <footer className="mt-12 border-t border-foreground/5 pt-6 text-center">
           <p className="text-xs text-muted-foreground">
             Want to build and share your own stack?{' '}
-            <Link href="/" className="text-violet-400 transition-colors hover:text-violet-300">
+            <Link href="/" className="text-teal-400 transition-colors hover:text-teal-300">
               Try {siteConfig.name}
             </Link>
           </p>

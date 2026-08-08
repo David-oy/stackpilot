@@ -44,7 +44,7 @@ export function FaqAccordion({
               className={cn(
                 'rounded-full px-4 py-1.5 text-xs font-medium transition-all',
                 activeCategory === category
-                  ? 'bg-gradient-to-r from-violet-500 to-blue-500 text-white shadow-md shadow-violet-500/20'
+                  ? 'bg-teal-500 text-white shadow-md shadow-teal-500/20'
                   : 'glass glass-hover text-muted-foreground hover:text-foreground',
               )}
             >
@@ -78,8 +78,8 @@ export function FaqAccordion({
                 className={cn(
                   'overflow-hidden rounded-2xl border transition-all duration-300',
                   isOpen
-                    ? 'border-violet-500/30 bg-foreground/[0.03] shadow-lg shadow-violet-500/5'
-                    : 'border-foreground/5 bg-foreground/[0.02] hover:border-violet-500/20',
+                    ? 'border-teal-500/30 bg-foreground/[0.03] shadow-lg shadow-teal-500/5'
+                    : 'border-foreground/5 bg-foreground/[0.02] hover:border-teal-500/25',
                 )}
               >
                 <AccordionPrimitive.Header>
@@ -94,7 +94,7 @@ export function FaqAccordion({
                       className={cn(
                         'flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-all duration-300',
                         isOpen
-                          ? 'bg-gradient-to-r from-violet-500 to-blue-500 text-white'
+                          ? 'bg-teal-500 text-white'
                           : 'bg-foreground/5 text-muted-foreground group-hover:bg-foreground/10',
                       )}
                     >

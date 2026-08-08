@@ -9,6 +9,7 @@ import type { StackAnalysis } from '@/lib/types';
 import {
   analyzeProjectIntent,
   fetchFallbackProviders,
+  isLikelyGibberish,
   AnalysisError,
 } from '@/lib/gemini';
 
@@ -70,6 +71,19 @@ async function handleAnalyze(request: NextRequest) {
   }
   trace('validation ok');
 
+  // Reject obvious gibberish before touching the cache or paying for AI.
+  if (isLikelyGibberish(parsed.data.description)) {
+    trace('rejected — not a project (heuristic)');
+    return NextResponse.json(
+      {
+        error:
+          'That doesn\u2019t look like a software project. Try describing what you want to build, e.g. "a video streaming app like Netflix".',
+        code: 'NOT_A_PROJECT',
+      },
+      { status: 422 },
+    );
+  }
+
   const cacheKey = normalizeCacheKey(parsed.data.description);
 
   const cacheReadStart = Date.now();
@@ -110,6 +124,19 @@ async function handleAnalyze(request: NextRequest) {
     Array.from(slugIndex.keys()),
   );
   trace(`gemini intent analysis (${Date.now() - geminiStart}ms)`);
+
+  if (intent.isProject === false) {
+    trace(`rejected — not a project (${intent.isProjectReason})`);
+    return NextResponse.json(
+      {
+        error:
+          intent.isProjectReason ||
+          'That doesn\u2019t look like a software project. Try describing what you want to build, e.g. "a video streaming app like Netflix".',
+        code: 'NOT_A_PROJECT',
+      },
+      { status: 422 },
+    );
+  }
 
   const categories: StackAnalysis['categories'] = [];
   const fallbackNeeded: Array<{ id: string; name: string; description: string }> = [];

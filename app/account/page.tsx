@@ -78,9 +78,9 @@ export default function AccountPage() {
 
   return (
     <main className="relative min-h-screen overflow-hidden px-6 pt-24 pb-16">
-      <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-violet-600/10 blur-[120px]" />
+      <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-teal-500/10 blur-[120px]" />
       <div className="mx-auto max-w-2xl">
-        <p className="text-xs font-medium uppercase tracking-wide text-violet-400">Account</p>
+        <p className="text-xs font-medium uppercase tracking-wide text-teal-400">Account</p>
         <h1 className="mt-1.5 text-3xl font-semibold tracking-tight text-foreground">
           Your profile
         </h1>
@@ -88,7 +88,7 @@ export default function AccountPage() {
         <div className="mt-8 space-y-6">
           <section className="glass rounded-2xl p-6">
             <div className="flex items-center gap-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-blue-500 text-2xl font-bold text-white shadow-lg">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-teal-500 text-2xl font-bold text-white shadow-lg">
                 {initial}
               </div>
               <div className="min-w-0">
@@ -115,7 +115,7 @@ export default function AccountPage() {
               Your stacks are synced to the cloud and stay available on any device.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <Button asChild className="h-9 gap-1.5 bg-gradient-to-r from-violet-500 to-blue-500 text-xs text-white hover:from-violet-600 hover:to-blue-600">
+              <Button asChild className="h-9 gap-1.5 bg-teal-500 text-xs text-white hover:bg-teal-600">
                 <Link href="/workspace">
                   <Sparkles className="h-3.5 w-3.5" /> Open Workspace
                 </Link>
@@ -182,7 +182,7 @@ export default function AccountPage() {
               <Button
                 type="submit"
                 disabled={updatingPassword}
-                className="h-9 gap-1.5 bg-gradient-to-r from-violet-500 to-blue-500 text-xs text-white hover:from-violet-600 hover:to-blue-600"
+                className="h-9 gap-1.5 bg-teal-500 text-xs text-white hover:bg-teal-600"
               >
                 {updatingPassword && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                 Update password

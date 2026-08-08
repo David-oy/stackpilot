@@ -64,7 +64,7 @@ export default function DocsPage() {
       />
       <div className="mx-auto max-w-3xl">
         <header className="text-center">
-          <p className="text-sm font-medium text-violet-400">Documentation</p>
+          <p className="text-sm font-medium text-teal-400">Documentation</p>
           <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">
             Build smarter with <span className="gradient-text">Stack2Set</span>
           </h1>
@@ -75,7 +75,7 @@ export default function DocsPage() {
 
         <section className="mt-16">
           <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-            <Sparkles className="h-4 w-4 text-violet-400" />
+            <Sparkles className="h-4 w-4 text-teal-400" />
             Popular topics
           </h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
@@ -85,10 +85,10 @@ export default function DocsPage() {
                 href={`/docs/${item.slug}`}
                 className="group glass glass-hover rounded-2xl p-5 transition-all hover:-translate-y-0.5"
               >
-                <BookOpen className="h-5 w-5 text-violet-400" />
+                <BookOpen className="h-5 w-5 text-teal-400" />
                 <h3 className="mt-3 text-sm font-semibold text-foreground">{item.title}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">{item.description}</p>
-                <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-violet-400 opacity-0 transition-opacity group-hover:opacity-100">
+                <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-teal-400 opacity-0 transition-opacity group-hover:opacity-100">
                   Read guide <ArrowRight className="h-3 w-3" />
                 </span>
               </Link>
@@ -98,7 +98,7 @@ export default function DocsPage() {
 
         <section className="mt-16">
           <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-            <Terminal className="h-4 w-4 text-violet-400" />
+            <Terminal className="h-4 w-4 text-teal-400" />
             Quick start
           </h2>
           <p className="mt-3 text-sm text-muted-foreground">
@@ -110,7 +110,7 @@ export default function DocsPage() {
 
         <section className="mt-16">
           <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-            <ListChecks className="h-4 w-4 text-violet-400" />
+            <ListChecks className="h-4 w-4 text-teal-400" />
             Categories
           </h2>
           <p className="mt-3 text-sm text-muted-foreground">
@@ -143,7 +143,7 @@ export default function DocsPage() {
 
         <section className="mt-16">
           <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-            <GitCompare className="h-4 w-4 text-violet-400" />
+            <GitCompare className="h-4 w-4 text-teal-400" />
             API reference
           </h2>
           <div className="mt-4 flex items-center justify-between gap-4 rounded-2xl glass p-6">
@@ -155,7 +155,7 @@ export default function DocsPage() {
             </div>
             <Link
               href="/docs/api"
-              className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-blue-500 px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
+              className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-teal-500 px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
             >
               View reference <ArrowRight className="h-4 w-4" />
             </Link>
@@ -170,7 +170,7 @@ export default function DocsPage() {
 
         <section className="mt-16">
           <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-            <GraduationCap className="h-4 w-4 text-violet-400" />
+            <GraduationCap className="h-4 w-4 text-teal-400" />
             Tutorials
           </h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -180,9 +180,9 @@ export default function DocsPage() {
                 href={`/docs/${link.slug}`}
                 className="group flex items-start gap-3 rounded-2xl glass p-4 transition-all hover:-translate-y-0.5"
               >
-                <BookOpen className="mt-0.5 h-4 w-4 shrink-0 text-violet-400" />
+                <BookOpen className="mt-0.5 h-4 w-4 shrink-0 text-teal-400" />
                 <span>
-                  <span className="block text-sm font-semibold text-foreground group-hover:text-violet-400">
+                  <span className="block text-sm font-semibold text-foreground group-hover:text-teal-400">
                     {link.title}
                   </span>
                   <span className="block text-xs text-muted-foreground">{link.description}</span>
@@ -194,7 +194,7 @@ export default function DocsPage() {
 
         <section className="mt-16">
           <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-            <Lightbulb className="h-4 w-4 text-violet-400" />
+            <Lightbulb className="h-4 w-4 text-teal-400" />
             Best practices
           </h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -222,7 +222,7 @@ export default function DocsPage() {
             className="flex items-center justify-between rounded-2xl glass p-5 transition-all hover:-translate-y-0.5"
           >
             <span className="flex items-center gap-3">
-              <FileText className="h-5 w-5 text-violet-400" />
+              <FileText className="h-5 w-5 text-teal-400" />
               <span>
                 <span className="block text-sm font-semibold text-foreground">Changelog</span>
                 <span className="block text-xs text-muted-foreground">See what&apos;s new</span>
@@ -235,7 +235,7 @@ export default function DocsPage() {
             className="flex items-center justify-between rounded-2xl glass p-5 transition-all hover:-translate-y-0.5"
           >
             <span className="flex items-center gap-3">
-              <HelpCircle className="h-5 w-5 text-violet-400" />
+              <HelpCircle className="h-5 w-5 text-teal-400" />
               <span>
                 <span className="block text-sm font-semibold text-foreground">FAQ</span>
                 <span className="block text-xs text-muted-foreground">Frequently asked questions</span>

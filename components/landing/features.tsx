@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import {
   Brain,
   Plug,
@@ -17,9 +17,9 @@ const features = [
     icon: Brain,
     title: 'AI Project Planner',
     description: 'Describe your idea in plain English and get a complete project blueprint with recommended technologies.',
-    gradient: 'from-violet-500 to-purple-500',
-    iconColor: 'text-violet-300',
-    tint: 'bg-violet-500/10',
+    gradient: 'from-teal-500 to-cyan-500',
+    iconColor: 'text-teal-300',
+    tint: 'bg-teal-500/10',
   },
   {
     icon: Plug,
@@ -65,7 +65,7 @@ const features = [
     icon: GitCompare,
     title: 'Compare Providers',
     description: 'Side-by-side comparisons of pricing, features, and performance across every category.',
-    gradient: 'from-violet-500 to-fuchsia-500',
+    gradient: 'from-teal-500 to-cyan-500',
     iconColor: 'text-fuchsia-300',
     tint: 'bg-fuchsia-500/10',
   },
@@ -80,12 +80,13 @@ const features = [
 ];
 
 export function Features() {
+  const reduceMotion = useReducedMotion();
   return (
     <section id="features" className="relative py-24 sm:py-28">
-      <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-700/10 blur-[140px]" />
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-teal-500/10 blur-[140px]" />
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-sm font-medium text-violet-400">Features</p>
+          <p className="text-sm font-medium text-teal-400">Features</p>
           <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">
             Everything you need to <span className="gradient-text">build smarter</span>
           </h2>
@@ -99,15 +100,15 @@ export function Features() {
           {features.map((feature, index) => (
             <motion.div
               key={feature.title}
-              initial={{ opacity: 0, y: 28 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={reduceMotion ? false : { opacity: 0, y: 28 }}
+              whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-40px' }}
               transition={{ duration: 0.5, delay: (index % 4) * 0.08, ease: 'easeOut' }}
             >
-              <div className="group relative h-full overflow-hidden rounded-2xl glass p-6 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-violet-500/10">
+              <div className="group relative h-full overflow-hidden rounded-2xl glass p-6 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-teal-500/10">
                 <div
                   aria-hidden="true"
-                  className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/60 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                  className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-teal-500/60 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
                 />
                 <div
                   aria-hidden="true"

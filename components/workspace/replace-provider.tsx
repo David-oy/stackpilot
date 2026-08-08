@@ -62,7 +62,7 @@ export function ReplaceProviderDialog({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg">
-            <RefreshCw className="h-4 w-4 text-violet-400" />
+            <RefreshCw className="h-4 w-4 text-teal-400" />
             Replace {current.name}
           </DialogTitle>
           <DialogDescription>
@@ -87,7 +87,7 @@ export function ReplaceProviderDialog({
                 className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-all ${
                   selected
                     ? 'cursor-default border-emerald-500/20 bg-emerald-500/[0.04] opacity-60'
-                    : 'border-foreground/5 bg-foreground/[0.02] hover:border-violet-500/20 hover:bg-foreground/[0.04]'
+                    : 'border-foreground/5 bg-foreground/[0.02] hover:border-teal-500/25 hover:bg-foreground/[0.04]'
                 }`}
               >
                 <ProviderLogo name={provider.name} className="h-9 w-9 rounded-lg text-sm" />

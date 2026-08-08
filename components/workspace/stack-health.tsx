@@ -102,8 +102,8 @@ export function StackHealth() {
               {stackCategoryCount(activeStack)} categories · {stackProviderCount(activeStack)} providers
             </p>
           </div>
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500/20 to-blue-500/20 ring-1 ring-violet-500/20">
-            <Activity className="h-5 w-5 text-violet-300" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-teal-500/20 to-cyan-500/20 ring-1 ring-teal-500/20">
+            <Activity className="h-5 w-5 text-teal-300" />
           </div>
         </div>
 
@@ -127,7 +127,7 @@ export function StackHealth() {
                   type="button"
                   aria-label="View monthly cost breakdown"
                   title="View cost breakdown"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-foreground/5 text-muted-foreground transition-colors hover:border-violet-500/20 hover:text-foreground"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-foreground/5 text-muted-foreground transition-colors hover:border-teal-500/25 hover:text-foreground"
                 >
                   <MoreHorizontal className="h-4 w-4" />
                 </button>
@@ -146,7 +146,7 @@ export function StackHealth() {
             transition={{ delay: i * 0.05 }}
             className="flex items-center gap-3"
           >
-            <metric.icon className={`h-4 w-4 shrink-0 ${metric.key === 'ai' ? 'text-violet-300' : 'text-muted-foreground'}`} />
+            <metric.icon className={`h-4 w-4 shrink-0 ${metric.key === 'ai' ? 'text-teal-300' : 'text-muted-foreground'}`} />
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground">{metric.label}</span>

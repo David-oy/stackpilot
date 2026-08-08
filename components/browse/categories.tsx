@@ -107,8 +107,8 @@ export function BrowseCategories() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <div className="flex items-center gap-2">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500/20 to-blue-500/20 ring-1 ring-violet-500/20">
-                  <LayoutGrid className="h-4 w-4 text-violet-300" />
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-teal-500/20 to-cyan-500/20 ring-1 ring-teal-500/20">
+                  <LayoutGrid className="h-4 w-4 text-teal-300" />
                 </div>
                 <h1 className="text-2xl font-semibold tracking-tight text-foreground">
                   Browse Categories
@@ -129,7 +129,7 @@ export function BrowseCategories() {
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search categories..."
                   aria-label="Search categories"
-                  className="h-10 w-full rounded-lg border border-foreground/5 bg-foreground/[0.02] pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-violet-500/30 focus:outline-none sm:w-64"
+                  className="h-10 w-full rounded-lg border border-foreground/5 bg-foreground/[0.02] pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-teal-500/30 focus:outline-none sm:w-64"
                 />
               </label>
               <FilterSelect
@@ -144,7 +144,7 @@ export function BrowseCategories() {
 
         {loading ? (
           <div className="flex items-center justify-center rounded-2xl glass py-24">
-            <Loader2 className="h-6 w-6 animate-spin text-violet-400" />
+            <Loader2 className="h-6 w-6 animate-spin text-teal-400" />
           </div>
         ) : error ? (
           <div className="rounded-2xl glass py-16 text-center text-sm text-muted-foreground">
@@ -182,7 +182,7 @@ export function BrowseCategories() {
                   <h2 className="mt-5 text-lg font-semibold text-foreground">
                     <Link
                       href={`/browse/categories/${category.slug}`}
-                      className="transition-colors hover:text-violet-300"
+                      className="transition-colors hover:text-teal-300"
                     >
                       {category.name}
                     </Link>
@@ -200,7 +200,7 @@ export function BrowseCategories() {
 
                   <Link
                     href={`/browse/categories/${category.slug}`}
-                    className="mt-5 flex w-full items-center justify-between rounded-lg border border-foreground/5 bg-foreground/[0.02] px-4 py-2.5 text-sm text-muted-foreground transition-all hover:border-violet-500/20 hover:bg-foreground/[0.04] hover:text-foreground"
+                    className="mt-5 flex w-full items-center justify-between rounded-lg border border-foreground/5 bg-foreground/[0.02] px-4 py-2.5 text-sm text-muted-foreground transition-all hover:border-teal-500/25 hover:bg-foreground/[0.04] hover:text-foreground"
                   >
                     Browse providers
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />

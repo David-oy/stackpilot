@@ -28,8 +28,8 @@ export function MergeStacksDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/20 to-blue-500/20 ring-1 ring-violet-500/20">
-            <CloudUpload className="h-5 w-5 text-violet-300" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500/20 to-cyan-500/20 ring-1 ring-teal-500/20">
+            <CloudUpload className="h-5 w-5 text-teal-300" />
           </div>
           <DialogTitle className="text-lg">Merge your stacks into the cloud?</DialogTitle>
           <DialogDescription>
@@ -57,7 +57,7 @@ export function MergeStacksDialog({
           </Button>
           <Button
             type="button"
-            className="h-9 gap-1.5 bg-gradient-to-r from-violet-500 to-blue-500 text-xs text-white hover:from-violet-600 hover:to-blue-600"
+            className="h-9 gap-1.5 bg-teal-500 text-xs text-white hover:bg-teal-600"
             onClick={onMerge}
           >
             <CloudUpload className="h-3.5 w-3.5" /> Merge my stacks

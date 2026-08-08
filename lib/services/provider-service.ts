@@ -8,6 +8,24 @@ import type {
 } from '@/lib/db/schema';
 import { getConfiguredStore } from '@/lib/db/store';
 import type { CategoryInput, ProviderInput } from '@/lib/db/store';
+import { normalizeProviderName, normalizeWebsiteForMatch, sanitizeProviderInput } from '@/lib/db/validate';
+import { slugify } from '@/lib/db/seed/helpers';
+import type { PricingModel } from '@/lib/db/schema';
+
+export type NewProviderInput = {
+  name: string;
+  description: string;
+  website?: string;
+  documentation?: string;
+  github?: string;
+  tags?: string[];
+  features?: string[];
+  pricingModel?: string;
+  freeTier?: boolean;
+  openSource?: boolean;
+  reason?: string;
+  aiSuggested?: boolean;
+};
 
 type StoreLike = {
   getAllCategories(): Promise<CategoryRecord[]>;
@@ -149,4 +167,74 @@ export const providerService = {
   async setAnalysis(cacheKey: string, analysis: unknown, description?: string): Promise<void> {
     await setPersistedAnalysis(cacheKey, description ?? cacheKey, analysis);
   },
+
+  /**
+   * Persist a single provider into the shared catalog for a category.
+   * Refuses to create duplicates: matches against the whole catalog by
+   * normalized name and normalized domain. When a match exists in another
+   * category, it links the provider to this category (idempotent) and returns
+   * it with `duplicate: true` instead of writing a new row.
+   */
+  async upsertProvider(
+    categorySlug: string,
+    input: NewProviderInput,
+  ): Promise<{ provider: ProviderWithRelations | null; created: boolean; duplicate: boolean }> {
+    const nameKey = normalizeProviderName(input.name);
+    const websiteKey = input.website ? normalizeWebsiteForMatch(input.website) : '';
+    const all = await this.getAllProviders();
+    const match = all.find(
+      (p) =>
+        normalizeProviderName(p.name) === nameKey ||
+        (websiteKey && p.officialWebsite
+          ? normalizeWebsiteForMatch(p.officialWebsite) === websiteKey
+          : false),
+    );
+    if (match) {
+      if (match.categoryId !== categorySlug) {
+        const s = await store();
+        await s.saveProviders(categorySlug, [buildProviderRecord(categorySlug, input)]);
+        providerCache.delete(`providers:category:${categorySlug}`);
+      }
+      return { provider: match, created: false, duplicate: true };
+    }
+
+    const s = await store();
+    await s.saveProviders(categorySlug, [buildProviderRecord(categorySlug, input)]);
+    providerCache.delete(`providers:category:${categorySlug}`);
+    searchCache.clear();
+
+    const provider = await this.getProviderBySlug(slugify(input.name) || 'provider');
+    return { provider, created: true, duplicate: false };
+  },
 };
+
+function buildProviderRecord(categorySlug: string, input: NewProviderInput): ProviderInput {
+  const now = new Date().toISOString();
+  const slug = slugify(input.name) || 'provider';
+  return sanitizeProviderInput({
+    id: slug,
+    categoryId: categorySlug,
+    name: input.name,
+    slug,
+    shortDescription: input.description || input.name,
+    longDescription: input.reason || input.description || '',
+    logo: null,
+    officialWebsite: input.website ?? '',
+    documentation: input.documentation ?? '',
+    github: input.github ?? null,
+    pricingModel: (input.pricingModel ?? 'freemium') as PricingModel,
+    freeTier: input.freeTier ?? false,
+    openSource: input.openSource ?? false,
+    popularityScore: 50,
+    featured: false,
+    status: 'active',
+    createdAt: now,
+    updatedAt: now,
+    features: input.features ?? [],
+    tags: input.tags ?? [],
+    alternatives: [],
+    aiSuggested: input.aiSuggested ?? false,
+    source: input.aiSuggested ? 'ai-add' : 'user',
+    lastSyncedAt: now,
+  });
+}

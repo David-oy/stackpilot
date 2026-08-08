@@ -42,8 +42,8 @@ export function ProviderDetail({
           <p className="text-sm leading-relaxed text-muted-foreground">{provider.description}</p>
 
           {provider.reason && (
-            <div className="rounded-xl border border-violet-500/20 bg-violet-500/[0.06] p-4">
-              <p className="flex items-center gap-1.5 text-xs font-medium text-violet-300">
+            <div className="rounded-xl border border-teal-500/20 bg-teal-500/[0.06] p-4">
+              <p className="flex items-center gap-1.5 text-xs font-medium text-teal-300">
                 <Sparkles className="h-3.5 w-3.5" /> Why this was selected
               </p>
               <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{provider.reason}</p>
@@ -79,13 +79,13 @@ export function ProviderDetail({
 
           <div>
             <p className="flex items-center gap-1.5 text-xs font-medium text-foreground">
-              <Sparkles className="h-3.5 w-3.5 text-violet-400" /> Features
+              <Sparkles className="h-3.5 w-3.5 text-teal-400" /> Features
             </p>
             {provider.features && provider.features.length > 0 ? (
               <ul className="mt-2 grid gap-1.5 sm:grid-cols-2">
                 {provider.features.map((feature) => (
                   <li key={feature} className="flex items-start gap-1.5 text-xs text-muted-foreground">
-                    <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-violet-400" />
+                    <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-teal-400" />
                     {feature}
                   </li>
                 ))}
@@ -97,7 +97,7 @@ export function ProviderDetail({
 
           <div>
             <p className="flex items-center gap-1.5 text-xs font-medium text-foreground">
-              <Tag className="h-3.5 w-3.5 text-violet-400" /> Tags
+              <Tag className="h-3.5 w-3.5 text-teal-400" /> Tags
             </p>
             {provider.tags && provider.tags.length > 0 ? (
               <div className="mt-2 flex flex-wrap gap-1.5">
@@ -121,7 +121,7 @@ export function ProviderDetail({
                 href={provider.website}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-lg border border-foreground/5 px-3 py-2 text-xs text-muted-foreground transition-all hover:border-violet-500/20 hover:text-foreground"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-foreground/5 px-3 py-2 text-xs text-muted-foreground transition-all hover:border-teal-500/25 hover:text-foreground"
               >
                 <Globe className="h-3.5 w-3.5" /> Official Website
               </a>
@@ -131,7 +131,7 @@ export function ProviderDetail({
                 href={provider.documentation}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-lg border border-foreground/5 px-3 py-2 text-xs text-muted-foreground transition-all hover:border-violet-500/20 hover:text-foreground"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-foreground/5 px-3 py-2 text-xs text-muted-foreground transition-all hover:border-teal-500/25 hover:text-foreground"
               >
                 <BookOpen className="h-3.5 w-3.5" /> Documentation
               </a>
@@ -141,7 +141,7 @@ export function ProviderDetail({
                 href={provider.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-lg border border-foreground/5 px-3 py-2 text-xs text-muted-foreground transition-all hover:border-violet-500/20 hover:text-foreground"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-foreground/5 px-3 py-2 text-xs text-muted-foreground transition-all hover:border-teal-500/25 hover:text-foreground"
               >
                 <Github className="h-3.5 w-3.5" /> GitHub
               </a>

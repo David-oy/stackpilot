@@ -51,7 +51,7 @@ export function Navbar() {
     user?.user_metadata?.name ?? user?.email?.split('@')[0] ?? 'Account';
 
   const avatar = (
-    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-blue-500 text-xs font-bold text-white">
+    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-500 text-xs font-bold text-white">
       {displayName.charAt(0).toUpperCase()}
     </span>
   );
@@ -77,7 +77,7 @@ export function Navbar() {
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         <div className="flex items-center gap-3 sm:gap-5">
           <Link href="/" className="flex items-center gap-2" onClick={() => setMobileOpen(false)}>
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-blue-500">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-500">
               <Sparkles className="h-5 w-5 text-white" />
             </div>
             <span className="text-lg font-semibold tracking-tight text-foreground">
@@ -115,7 +115,7 @@ export function Navbar() {
             <DropdownMenu>
               <DropdownMenuTrigger
                 aria-label="Account menu"
-                className="flex items-center gap-2 rounded-full border border-foreground/5 p-1 pr-2 transition-colors hover:border-violet-500/20"
+                className="flex items-center gap-2 rounded-full border border-foreground/5 p-1 pr-2 transition-colors hover:border-teal-500/25"
               >
                 {avatar}
                 <span className="max-w-[120px] truncate text-sm text-foreground">
@@ -144,7 +144,7 @@ export function Navbar() {
               </Button>
               <Button
                 asChild
-                className="bg-gradient-to-r from-violet-500 to-blue-500 text-sm text-white shadow-lg shadow-violet-500/20 transition-all hover:from-violet-600 hover:to-blue-600 hover:shadow-violet-500/30"
+                className="bg-teal-500 text-sm text-white shadow-lg shadow-teal-500/20 transition-all hover:bg-teal-600 hover:shadow-teal-500/30"
               >
                 <Link href="/signup">Get Started</Link>
               </Button>
@@ -199,7 +199,7 @@ export function Navbar() {
                       <UserRound className="h-4 w-4" /> Account
                     </Link>
                   </Button>
-                  <Button asChild className="bg-gradient-to-r from-violet-500 to-blue-500 text-white">
+                  <Button asChild className="bg-teal-500 text-white">
                     <Link href="/workspace">
                       <Sparkles className="h-4 w-4" /> Workspace
                     </Link>
@@ -210,7 +210,7 @@ export function Navbar() {
                   <Button asChild variant="outline" className="border-foreground/10 text-foreground">
                     <Link href="/login">Login</Link>
                   </Button>
-                  <Button asChild className="bg-gradient-to-r from-violet-500 to-blue-500 text-white">
+                  <Button asChild className="bg-teal-500 text-white">
                     <Link href="/signup">Get Started</Link>
                   </Button>
                 </>

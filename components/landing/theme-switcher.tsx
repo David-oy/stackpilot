@@ -66,7 +66,7 @@ export function ThemeSwitcher() {
             className={cn(
               'relative z-10 flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background',
               selected
-                ? 'text-violet-600 dark:text-white'
+                ? 'text-teal-600 dark:text-white'
                 : 'text-muted-foreground hover:text-foreground',
             )}
           >

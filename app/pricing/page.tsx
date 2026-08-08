@@ -68,10 +68,10 @@ export default function PricingPage() {
     <main className="relative min-h-screen overflow-x-hidden">
       <Navbar />
       <div className="relative overflow-hidden px-4 pb-24 pt-32 sm:px-6 sm:pt-36">
-        <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-violet-600/10 blur-[120px]" />
+        <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-teal-500/10 blur-[120px]" />
 
         <header className="mx-auto max-w-3xl text-center">
-          <p className="text-sm font-medium text-violet-400">Pricing</p>
+          <p className="text-sm font-medium text-teal-400">Pricing</p>
           <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">
             Start <span className="gradient-text">free</span>, scale when you&apos;re ready
           </h1>
@@ -87,17 +87,17 @@ export default function PricingPage() {
               className={cn(
                 'relative rounded-3xl p-8 transition-all hover:-translate-y-1',
                 plan.highlighted
-                  ? 'glass shadow-xl shadow-violet-500/10 ring-1 ring-violet-500/40'
+                  ? 'glass shadow-xl shadow-teal-500/10 ring-1 ring-teal-500/40'
                   : 'glass',
               )}
             >
               {plan.highlighted && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-500 to-blue-500 px-3 py-1 text-xs font-medium text-white">
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-teal-500 px-3 py-1 text-xs font-medium text-white">
                   Most popular
                 </span>
               )}
               <div className="flex items-center gap-2">
-                <plan.icon className="h-5 w-5 text-violet-400" />
+                <plan.icon className="h-5 w-5 text-teal-400" />
                 <h2 className="text-lg font-semibold text-foreground">{plan.name}</h2>
               </div>
               <div className="mt-4 flex items-baseline gap-2">
@@ -115,10 +115,10 @@ export default function PricingPage() {
                     <span
                       className={cn(
                         'mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full',
-                        plan.highlighted ? 'bg-violet-500/20' : 'bg-emerald-500/15',
+                        plan.highlighted ? 'bg-teal-500/20' : 'bg-emerald-500/15',
                       )}
                     >
-                      <Check className={cn('h-2.5 w-2.5', plan.highlighted ? 'text-violet-400' : 'text-emerald-400')} />
+                      <Check className={cn('h-2.5 w-2.5', plan.highlighted ? 'text-teal-400' : 'text-emerald-400')} />
                     </span>
                     {feature}
                   </li>
@@ -129,8 +129,8 @@ export default function PricingPage() {
                 className={cn(
                   'mt-8 flex h-11 w-full items-center justify-center rounded-xl text-sm font-medium transition-all',
                   plan.highlighted
-                    ? 'bg-gradient-to-r from-violet-500 to-blue-500 text-white shadow-lg shadow-violet-500/20 hover:from-violet-600 hover:to-blue-600'
-                    : 'glass text-foreground hover:border-violet-500/30',
+                    ? 'bg-teal-500 text-white shadow-lg shadow-teal-500/20 hover:bg-teal-600'
+                    : 'glass text-foreground hover:border-teal-500/30',
                 )}
               >
                 {plan.cta.label}

@@ -78,7 +78,7 @@ export function ComparisonModal({
       <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg">
-            <Scale className="h-4 w-4 text-violet-400" /> Compare Providers
+            <Scale className="h-4 w-4 text-teal-400" /> Compare Providers
           </DialogTitle>
           <DialogDescription>
             Select 2–4 providers to compare pricing, open source status, popularity, pros and cons.
@@ -101,8 +101,8 @@ export function ComparisonModal({
                         onClick={() => toggle(provider)}
                         className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-xs transition-all ${
                           active
-                            ? 'border-violet-500/30 bg-violet-500/10 text-foreground'
-                            : 'border-foreground/5 bg-foreground/[0.02] text-muted-foreground hover:border-violet-500/20'
+                            ? 'border-teal-500/30 bg-teal-500/10 text-foreground'
+                            : 'border-foreground/5 bg-foreground/[0.02] text-muted-foreground hover:border-teal-500/25'
                         }`}
                       >
                         <Checkbox checked={active} className="h-3.5 w-3.5" />
@@ -149,7 +149,7 @@ export function ComparisonModal({
                                 href={value.slice(value.indexOf('(') + 1, value.lastIndexOf(')'))}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-violet-300 underline-offset-2 hover:underline"
+                                className="text-teal-300 underline-offset-2 hover:underline"
                               >
                                 Link
                               </a>
@@ -185,7 +185,7 @@ export function ComparisonModal({
 
         <div className="mt-2 flex items-center justify-between">
           <p className="truncate text-xs text-muted-foreground">
-            {canCompare ? <span className="text-violet-300">{selectedNames}</span> : ' '}
+            {canCompare ? <span className="text-teal-300">{selectedNames}</span> : ' '}
           </p>
           <div className="flex items-center gap-2">
             {canCompare && (

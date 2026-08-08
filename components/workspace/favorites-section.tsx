@@ -51,7 +51,7 @@ export function FavoritesSection() {
 
       {!hydrated || loading ? (
         <div className="mt-4 flex items-center justify-center py-8">
-          <Loader2 className="h-5 w-5 animate-spin text-violet-400" />
+          <Loader2 className="h-5 w-5 animate-spin text-teal-400" />
         </div>
       ) : items.length === 0 ? (
         <p className="mt-4 rounded-xl border border-dashed border-foreground/10 py-6 text-center text-xs text-muted-foreground">
@@ -62,17 +62,17 @@ export function FavoritesSection() {
           {items.map(({ favorite, provider }) => (
             <li
               key={favorite.slug}
-              className="flex items-center gap-3 rounded-xl border border-foreground/5 bg-foreground/[0.02] p-2.5 transition-colors hover:border-violet-500/20"
+              className="flex items-center gap-3 rounded-xl border border-foreground/5 bg-foreground/[0.02] p-2.5 transition-colors hover:border-teal-500/25"
             >
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500/20 to-blue-500/20 ring-1 ring-foreground/10">
-                <span className="text-xs font-semibold text-violet-300">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-teal-500/20 to-cyan-500/20 ring-1 ring-foreground/10">
+                <span className="text-xs font-semibold text-teal-300">
                   {provider.name.charAt(0)}
                 </span>
               </div>
               <div className="min-w-0 flex-1">
                 <Link
                   href={`/browse/providers/${provider.slug}`}
-                  className="block truncate text-xs font-medium text-foreground transition-colors hover:text-violet-300"
+                  className="block truncate text-xs font-medium text-foreground transition-colors hover:text-teal-300"
                 >
                   {provider.name}
                 </Link>

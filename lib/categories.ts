@@ -372,10 +372,3 @@ export const fallbackCategory: Category = {
 export function getCategoryMeta(id: string): Category {
   return categories.find((c) => c.id === id) ?? fallbackCategory;
 }
-
-export const loadingSteps = [
-  'Understanding your project...',
-  'Identifying required technologies...',
-  'Finding the best providers...',
-  'Building your stack...',
-];

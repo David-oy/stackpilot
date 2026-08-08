@@ -64,10 +64,10 @@ export default function BlogPage() {
     <main className="relative min-h-screen overflow-x-hidden">
       <Navbar />
       <div className="relative overflow-hidden px-4 pb-24 pt-32 sm:px-6 sm:pt-36">
-        <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-violet-600/10 blur-[120px]" />
+        <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-teal-500/10 blur-[120px]" />
 
         <header className="mx-auto max-w-3xl text-center">
-          <p className="text-sm font-medium text-violet-400">Blog</p>
+          <p className="text-sm font-medium text-teal-400">Blog</p>
           <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">
             Build better <span className="gradient-text">stacks</span>
           </h1>
@@ -85,7 +85,7 @@ export default function BlogPage() {
               className="group block glass glass-hover rounded-2xl p-6 transition-all hover:-translate-y-1"
             >
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span className="rounded-full bg-violet-500/10 px-2.5 py-0.5 font-medium text-violet-400">
+                <span className="rounded-full bg-teal-500/10 px-2.5 py-0.5 font-medium text-teal-400">
                   {post.tag}
                 </span>
                 <span className="inline-flex items-center gap-1">
@@ -97,11 +97,11 @@ export default function BlogPage() {
                   {post.readTime}
                 </span>
               </div>
-              <h2 className="mt-3 text-lg font-semibold text-foreground transition-colors group-hover:text-violet-400">
+              <h2 className="mt-3 text-lg font-semibold text-foreground transition-colors group-hover:text-teal-400">
                 {post.title}
               </h2>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{post.excerpt}</p>
-              <span className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-violet-400">
+              <span className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-teal-400">
                 Read guide <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
               </span>
             </Link>

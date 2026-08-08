@@ -40,7 +40,7 @@ export default function ForgotPasswordPage() {
       subtitle="We'll email you a link to set a new password."
       footer={
         <>
-          <Link href="/login" className="font-medium text-violet-400 hover:text-violet-300">
+          <Link href="/login" className="font-medium text-teal-400 hover:text-teal-300">
             Back to sign in
           </Link>
         </>
@@ -54,7 +54,7 @@ export default function ForgotPasswordPage() {
             If an account exists for <span className="text-foreground">{email}</span>, you&apos;ll
             receive a password reset link shortly.
           </p>
-          <Button asChild className="mt-5 h-10 bg-gradient-to-r from-violet-500 to-blue-500 text-sm text-white hover:from-violet-600 hover:to-blue-600">
+          <Button asChild className="mt-5 h-10 bg-teal-500 text-sm text-white hover:bg-teal-600">
             <Link href="/login">Back to sign in</Link>
           </Button>
         </div>
@@ -91,7 +91,7 @@ export default function ForgotPasswordPage() {
           <Button
             type="submit"
             disabled={submitting || !configured}
-            className="h-10 w-full gap-2 bg-gradient-to-r from-violet-500 to-blue-500 text-sm text-white hover:from-violet-600 hover:to-blue-600"
+            className="h-10 w-full gap-2 bg-teal-500 text-sm text-white hover:bg-teal-600"
           >
             {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
             Send reset link
