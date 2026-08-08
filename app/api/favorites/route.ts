@@ -5,6 +5,13 @@ import { getProviderIdBySlug, getProviderSlugsByIds } from '@/lib/supabase/provi
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** True when the id is safe to pass to a Postgres `uuid` column. */
+function isUuid(value: string | null | undefined): boolean {
+  return typeof value === 'string' && UUID_RE.test(value);
+}
+
 export async function GET(request: NextRequest) {
   const session = await getRouteSession();
   if (!session?.user) {
@@ -13,6 +20,9 @@ export async function GET(request: NextRequest) {
   const { supabase, user } = session;
 
   const workspaceId = request.nextUrl.searchParams.get('workspaceId')?.trim() || null;
+  if (workspaceId && !isUuid(workspaceId)) {
+    return NextResponse.json({ favorites: [] });
+  }
 
   let query = supabase
     .from('favorites')
@@ -68,7 +78,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Provider slug is required.' }, { status: 400 });
   }
   const workspaceId = typeof payload.workspaceId === 'string' ? payload.workspaceId.trim() : '';
-  if (!workspaceId) {
+  if (!isUuid(workspaceId)) {
     return NextResponse.json({ error: 'Workspace is required.' }, { status: 400 });
   }
 
@@ -104,11 +114,8 @@ export async function DELETE(request: NextRequest) {
 
   const slug = request.nextUrl.searchParams.get('slug')?.trim() ?? '';
   const workspaceId = request.nextUrl.searchParams.get('workspaceId')?.trim() ?? '';
-  if (!slug || !workspaceId) {
-    return NextResponse.json(
-      { error: 'Provider slug and workspace are required.' },
-      { status: 400 },
-    );
+  if (!slug || !isUuid(workspaceId)) {
+    return NextResponse.json({ success: true });
   }
 
   const providerId = await getProviderIdBySlug(supabase, slug);

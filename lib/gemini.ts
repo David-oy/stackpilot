@@ -1,5 +1,8 @@
 import { z } from 'zod';
 import type { AnalysisProvider, Complexity } from './types';
+import { isLikelyGibberish, MAX_DESCRIPTION_LENGTH } from './analysis-validation';
+
+export { isLikelyGibberish, MAX_DESCRIPTION_LENGTH };
 
 const MODEL = process.env.GEMINI_MODEL ?? 'gemini-3.5-flash-lite';
 
@@ -30,38 +33,6 @@ export type GeminiIntent = {
   integrations: GeminiIntegrationCategory[];
 };
 
-/**
- * Fast-path heuristic that rejects obvious gibberish before any paid
- * AI call. The LLM's `isProject` decision is authoritative; this only
- * saves a Gemini round-trip on clearly meaningless input.
- */
-export function isLikelyGibberish(input: string): boolean {
-  const text = input.trim();
-  if (!text) return true;
-  if (text.length < 4) return true;
-
-  const lower = text.toLowerCase();
-  const letters = lower.replace(/[^a-z]/g, '');
-
-  // No real letters at all (e.g. "1234 5678").
-  if (!/[a-z]/.test(letters)) return true;
-
-  // Keyboard rows / repeated keystroke runs.
-  if (/qwerty|asdf|zxcv/.test(letters)) return true;
-  if (/(.)\1{4,}/.test(letters)) return true;
-
-  // Consonant mash with almost no vowels (e.g. "asdkjfhasjkdfh").
-  const vowels = (letters.match(/[aeiouy]/g) ?? []).length;
-  if (letters.length >= 8 && vowels / letters.length < 0.18) return true;
-
-  // Require at least one real word (a token containing a vowel).
-  const words = text.split(/\s+/);
-  const wordy = words.filter((w) => /[a-z]/i.test(w) && /[aeiouy]/i.test(w.toLowerCase()));
-  if (wordy.length === 0) return true;
-
-  return false;
-}
-
 function slugify(value: string): string {
   return value
     .toLowerCase()
@@ -81,7 +52,13 @@ STEP 1 — UNDERSTAND THE PROJECT DOMAIN
 Identify the domain the project belongs to, e.g.: Game Deals, AI Chatbot, Food Delivery, Video Streaming, E-commerce, Social Network, Finance, Healthcare, Education, Music, Maps, Travel, Real Estate, IoT, Cybersecurity, DevTools, Productivity, Blockchain, etc.
 
 DECISION RULE — IS THIS A SOFTWARE PROJECT?
-Before anything else, decide whether the user's text actually describes a software project (or a request to plan one). It is NOT a project if it is: gibberish or random keystrokes (e.g. "asdkjfhasjkdfh qwerty123"), a single random word with no context, an unrelated topic (e.g. "how to cook pasta"), a shopping list, or a nonsensical phrase. If it is not a project, set "isProject": false, set "isProjectReason" to a short human explanation, and still return "projectType": "Not a project" with an empty "technologyCategories" array. Otherwise set "isProject": true.
+Before anything else, decide whether the user's text actually describes a software project (or a request to plan one). It is NOT a project if it is: gibberish or random keystrokes (e.g. "asdkjfhasjkdfh qwerty123", "hdhehsjshebsk88"), a single random word with no context, an unrelated topic (e.g. "how to cook pasta"), a shopping list, or a nonsensical phrase. If it is not a project, set "isProject": false, set "isProjectReason" to a short human explanation, and still return "projectType": "Not a project" with an empty "technologyCategories" array. Otherwise set "isProject": true.
+
+VALID EXAMPLE (isProject: true): "a video streaming platform like Netflix with recommendations" → streaming video, user profiles, payment, hosting, database.
+VALID EXAMPLE (isProject: true): "a SaaS dashboard with AI chat for customer support" → AI, chat, dashboard, analytics, hosting, database.
+INVALID EXAMPLE (isProject: false): "hdhehsjshebsk88" → random keystrokes, not a project.
+INVALID EXAMPLE (isProject: false): "buy milk" → a shopping task, not a project.
+INVALID EXAMPLE (isProject: false): "how to cook pasta" → unrelated topic, not a project.
 
 STEP 2 — DETECT ALL EXTERNAL INTEGRATIONS
 Determine every external API, SDK, official platform API, public dataset, search API, AI provider, payment provider, authentication provider, analytics, notifications, email provider, maps, cloud service, CDN, search engine, web scraping tool, monitoring, logging, media service, video API, OCR API, translation API, speech API, image API, gaming API, weather API, finance API, sports API, news API, government API, and open data API the project would realistically integrate with. Only include categories genuinely relevant to the project's domain.
@@ -364,27 +341,48 @@ export async function analyzeProjectIntent(
   description: string,
   knownCategorySlugs: string[],
 ): Promise<GeminiIntent> {
-  const parsed = await callGemini(
-    buildIntentSystemPrompt(knownCategorySlugs),
-    `Project to analyze:\n${description}`,
-  );
+  const systemPrompt = buildIntentSystemPrompt(knownCategorySlugs);
+  const userText = `Project to analyze:\n${description}`;
 
-  const result = intentSchema.safeParse(parsed);
-  if (!result.success) {
-    throw new AnalysisError('Gemini returned a response that did not match the expected schema.');
+  const parsed = await callGemini(systemPrompt, userText);
+  const firstPass = intentSchema.safeParse(parsed);
+  if (!firstPass.success) {
+    // One controlled retry on schema failures — the model occasionally
+    // returns malformed JSON. Never retry more than once per request.
+    console.warn('[gemini] intent schema failed, retrying once');
+    const retry = await callGemini(systemPrompt, userText);
+    const secondPass = intentSchema.safeParse(retry);
+    if (!secondPass.success) {
+      console.error('[gemini] intent schema failed on retry:', secondPass.error.issues);
+      throw new AnalysisError(
+        'We couldn\u2019t interpret the AI\u2019s response for this project. Please try again or rephrase your description.',
+        502,
+      );
+    }
+    return buildIntentResult(secondPass.data, description);
   }
+  return buildIntentResult(firstPass.data, description);
+}
 
-  const techCategories = result.data.technologyCategories ?? result.data.categories ?? [];
+function buildIntentResult(
+  result: z.infer<typeof intentSchema>,
+  description: string,
+): GeminiIntent {
+  const techCategories = result.technologyCategories ?? result.categories ?? [];
   if (techCategories.length === 0) {
-    throw new AnalysisError('Gemini returned a response that did not match the expected schema.');
+    console.warn('[gemini] intent returned no categories for:', description.slice(0, 200));
+    throw new AnalysisError(
+      'We couldn\u2019t find any technology categories for this project. Please try again or rephrase your description.',
+      422,
+    );
   }
 
   return {
-    projectType: result.data.projectType,
-    summary: result.data.summary,
-    complexity: result.data.complexity,
-    isProject: result.data.isProject,
-    isProjectReason: result.data.isProjectReason,
+    projectType: result.projectType,
+    summary: result.summary,
+    complexity: result.complexity,
+    isProject: result.isProject,
+    isProjectReason: result.isProjectReason,
     categories: techCategories.map((cat) => ({
       id: cat.id,
       name: cat.name,
@@ -392,7 +390,7 @@ export async function analyzeProjectIntent(
       confidence: cat.confidence,
       reasoning: cat.reasoning || undefined,
     })),
-    integrations: result.data.projectIntegrations.map(toIntegrationCategory),
+    integrations: result.projectIntegrations.map(toIntegrationCategory),
   };
 }
 

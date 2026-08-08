@@ -54,7 +54,7 @@ export function Hero() {
     <section
       id="hero"
       onPointerMove={onPointerMove}
-      className="relative overflow-hidden pb-24 pt-32 sm:pb-32 sm:pt-40"
+      className="relative flex min-h-svh flex-col justify-center overflow-hidden pb-24 pt-28 sm:pb-32 sm:pt-32"
     >
       {/* Generative technology backdrop */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">

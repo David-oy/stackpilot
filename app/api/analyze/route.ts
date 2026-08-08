@@ -4,14 +4,10 @@ import { providerService } from '@/lib/services/provider-service';
 import { normalizeCacheKey } from '@/lib/db/cache';
 import { getRouteSession } from '@/lib/supabase/route-user';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { MAX_DESCRIPTION_LENGTH, isLikelyGibberish } from '@/lib/analysis-validation';
 import type { AnalysisProvider } from '@/lib/types';
 import type { StackAnalysis } from '@/lib/types';
-import {
-  analyzeProjectIntent,
-  fetchFallbackProviders,
-  isLikelyGibberish,
-  AnalysisError,
-} from '@/lib/gemini';
+import { analyzeProjectIntent, fetchFallbackProviders, AnalysisError } from '@/lib/gemini';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -24,7 +20,10 @@ const requestSchema = z.object({
     .string()
     .trim()
     .min(1, 'Please describe your project.')
-    .max(2000, 'Project description is too long.')
+    .max(
+      MAX_DESCRIPTION_LENGTH,
+      `That description is too long. Keep it under ${MAX_DESCRIPTION_LENGTH.toLocaleString()} characters.`,
+    )
     .default(''),
 });
 

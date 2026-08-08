@@ -10,6 +10,7 @@ import { FavoritesProvider } from '@/lib/favorites-context';
 import { siteConfig } from '@/lib/site';
 import { Analytics } from '@vercel/analytics/next';
 import { Toaster } from '@/components/ui/sonner';
+import { SmoothScroll } from '@/components/ui/smooth-scroll';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 const spaceGrotesk = Space_Grotesk({
@@ -112,6 +113,7 @@ export default function RootLayout({
           <Toaster position="bottom-center" />
         </ThemeProvider>
         <Analytics />
+        <SmoothScroll />
       </body>
     </html>
   );

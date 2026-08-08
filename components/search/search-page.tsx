@@ -13,6 +13,7 @@ import {
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { LoadingScreen } from '@/components/landing/loading-screen';
+import { DynamicIsland } from '@/components/landing/dynamic-island';
 import { SearchBar } from '@/components/search/search-bar';
 import { RecentSearches } from '@/components/search/recent-searches';
 import { AuthModal } from '@/components/auth/auth-modal';
@@ -21,6 +22,7 @@ import { useAnalysis } from '@/hooks/use-analysis';
 import { useProjectSearch } from '@/hooks/use-project-search';
 import { useStack } from '@/lib/stack-context';
 import { clearPendingQuery, getPendingQuery } from '@/lib/auth/pending-query';
+import { setIslandPhase } from '@/lib/island-store';
 
 const SUGGESTIONS = [
   'I want to build a video streaming platform like Netflix',
@@ -32,12 +34,10 @@ const SUGGESTIONS = [
 ];
 
 function ErrorState({
-  message,
   onRetry,
   notProject = false,
   onSearch,
 }: {
-  message: string;
   onRetry: () => void;
   notProject?: boolean;
   onSearch?: (query: string) => void;
@@ -56,12 +56,12 @@ function ErrorState({
           <AlertTriangle className={`h-6 w-6 ${notProject ? 'text-amber-400' : 'text-rose-400'}`} />
         </div>
         <h2 className="mt-4 text-lg font-semibold text-foreground">
-          {notProject ? 'Couldn\u2019t understand that.' : 'Analysis failed'}
+          {notProject ? 'Couldn\u2019t understand that.' : 'Something went wrong'}
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
           {notProject
             ? 'Tell me what you\u2019re trying to build and I\u2019ll identify the technology stack.'
-            : message}
+            : 'Something went wrong while understanding your idea. Please try again.'}
         </p>
         {notProject && onSearch && (
           <div className="mt-6 text-left">
@@ -212,6 +212,20 @@ function SearchPageContent() {
 
   const { data: analysis, isLoading, error, errorCode, retry } = useAnalysis(query, !!user);
 
+  // The LoadingScreen publishes the per-step analyzing states; once the
+  // analysis resolves we flip the island to its completed state.
+  useEffect(() => {
+    if (!isLoading) setIslandPhase('idle');
+  }, [isLoading]);
+
+  useEffect(() => {
+    if (analysis) setIslandPhase('complete');
+  }, [analysis]);
+
+  useEffect(() => {
+    return () => setIslandPhase('idle');
+  }, []);
+
   useEffect(() => {
     if (!query || !user || !analysis) return;
     const key = `${query}:${analysis.projectType}`;
@@ -269,16 +283,22 @@ function SearchPageContent() {
   }
 
   if (isLoading || (analysis && builtStackFor.current === `${query}:${analysis.projectType}`)) {
-    return <LoadingScreen query={query} />;
+    return (
+      <>
+        <LoadingScreen query={query} />
+        <DynamicIsland variant="status" />
+      </>
+    );
   }
 
   if (error || !analysis) {
+    const inputError =
+      errorCode === 'NOT_A_PROJECT' || errorCode === 'INVALID_INPUT' || errorCode === 'TOO_LONG';
     return (
       <ErrorState
-        message={error ?? 'No analysis available for this project.'}
         onRetry={retry}
-        notProject={errorCode === 'NOT_A_PROJECT'}
-        onSearch={errorCode === 'NOT_A_PROJECT' ? handleSearch : undefined}
+        notProject={inputError}
+        onSearch={inputError ? handleSearch : undefined}
       />
     );
   }

@@ -4,12 +4,15 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { StackAnalysis } from '@/lib/types';
 import { analyzeProject } from '@/lib/api';
 import { useAnalysisContext } from '@/lib/analysis-context';
+import { validateDescription } from '@/lib/analysis-validation';
+
+type AnalysisErrorCode = 'NOT_A_PROJECT' | 'INVALID_INPUT' | 'TOO_LONG';
 
 type AnalysisState = {
   data: StackAnalysis | null;
   isLoading: boolean;
   error: string | null;
-  errorCode?: 'NOT_A_PROJECT';
+  errorCode?: AnalysisErrorCode;
 };
 
 export function useAnalysis(query: string, enabled = true) {
@@ -23,9 +26,21 @@ export function useAnalysis(query: string, enabled = true) {
   const controllerRef = useRef<AbortController | null>(null);
 
   const load = useCallback(
-    async (q = query) => {
-      if (!q.trim()) {
+    async (next?: string) => {
+      const q = typeof next === 'string' ? next : query;
+      const trimmed = q.trim();
+      if (!trimmed) {
         setState({ data: null, isLoading: false, error: null });
+        return;
+      }
+      const issue = validateDescription(trimmed);
+      if (!issue.ok) {
+        setState({
+          data: null,
+          isLoading: false,
+          error: issue.message,
+          errorCode: issue.code,
+        });
         return;
       }
       controllerRef.current?.abort();
@@ -33,7 +48,7 @@ export function useAnalysis(query: string, enabled = true) {
       controllerRef.current = controller;
       setState({ data: null, isLoading: true, error: null });
       try {
-        const data = await analyzeProject(q, controller.signal);
+        const data = await analyzeProject(trimmed, controller.signal);
         if (controllerRef.current !== controller) return;
         saveAnalysis(q, data);
         setState({ data, isLoading: false, error: null });
@@ -41,7 +56,7 @@ export function useAnalysis(query: string, enabled = true) {
         if (controllerRef.current !== controller || controller.signal.aborted) return;
         const code =
           error && typeof error === 'object' && 'code' in error
-            ? (error as { code?: 'NOT_A_PROJECT' }).code
+            ? (error as { code?: AnalysisErrorCode }).code
             : undefined;
         setState({
           data: null,
@@ -61,6 +76,11 @@ export function useAnalysis(query: string, enabled = true) {
 
     if (!query.trim()) {
       setState({ data: null, isLoading: false, error: null });
+      return;
+    }
+    const issue = validateDescription(query.trim());
+    if (!issue.ok) {
+      setState({ data: null, isLoading: false, error: issue.message, errorCode: issue.code });
       return;
     }
     if (cached && cachedQuery === query) {

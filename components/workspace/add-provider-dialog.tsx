@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import {
@@ -18,8 +18,10 @@ import {
   isProviderInCategory,
   normalizeWebsite,
   persistProviderToCatalog,
+  providerInputFromCatalog,
   splitTags,
 } from '@/lib/stacks/add-provider';
+import type { ProviderWithRelations } from '@/lib/db/schema';
 import { slugify } from '@/lib/db/seed/helpers';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,7 +35,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-type Mode = 'menu' | 'ai' | 'manual';
+type Mode = 'menu' | 'search' | 'ai' | 'manual';
 
 export function AddProviderDialog({
   open,
@@ -105,24 +107,37 @@ export function AddProviderDialog({
         <DialogHeader>
           <DialogTitle>
             {mode === 'menu' && 'How would you like to add?'}
+            {mode === 'search' && `Add to ${categoryName}`}
             {mode === 'ai' && `Suggest providers for ${categoryName}`}
             {mode === 'manual' && `Add a provider to ${categoryName}`}
           </DialogTitle>
           <DialogDescription>
             {mode === 'menu'
               ? `Add a provider to ${categoryName}`
-              : mode === 'ai'
-                ? 'Gemini considers your project and the providers already in this category.'
-                : 'Add a provider you already know and use.'}
+              : mode === 'search'
+                ? 'Search the provider catalog and add a match directly to your stack.'
+                : mode === 'ai'
+                  ? 'Gemini considers your project and the providers already in this category.'
+                  : 'Add a provider you already know and use.'}
           </DialogDescription>
         </DialogHeader>
 
         <div className="max-h-[60vh] space-y-4 overflow-y-auto pr-1">
           {mode === 'menu' && (
             <MenuOptions
+              onSearch={() => setMode('search')}
               onSuggest={() => setMode('ai')}
               onBrowse={handleBrowse}
               onManual={() => setMode('manual')}
+            />
+          )}
+
+          {mode === 'search' && (
+            <CatalogSearch
+              categoryId={categoryId}
+              categoryName={categoryName}
+              onAdd={addToStack}
+              onBack={() => setMode('menu')}
             />
           )}
 
@@ -175,10 +190,12 @@ export function AddProviderDialog({
 }
 
 function MenuOptions({
+  onSearch,
   onSuggest,
   onBrowse,
   onManual,
 }: {
+  onSearch: () => void;
   onSuggest: () => void;
   onBrowse: () => void;
   onManual: () => void;
@@ -186,15 +203,21 @@ function MenuOptions({
   return (
     <div className="space-y-2.5">
       <OptionButton
+        icon={<Search className="cat-text-accent h-4 w-4" />}
+        title="Search the catalog"
+        description="Find an existing provider and add it in a click."
+        onClick={onSearch}
+      />
+      <OptionButton
         icon={<Sparkles className="cat-text-accent h-4 w-4" />}
         title="Suggest with AI"
         description="Let Gemini find providers suitable for this category and project."
         onClick={onSuggest}
       />
       <OptionButton
-        icon={<Search className="cat-text-accent h-4 w-4" />}
-        title="Browse providers"
-        description="Browse existing providers in this category."
+        icon={<ArrowLeft className="cat-text-accent h-4 w-4" />}
+        title="Browse all providers"
+        description="Browse every provider in this category."
         onClick={onBrowse}
       />
       <OptionButton
@@ -234,6 +257,157 @@ function OptionButton({
         <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{description}</p>
       </div>
     </button>
+  );
+}
+
+function CatalogSearch({
+  categoryId,
+  categoryName,
+  onAdd,
+  onBack,
+}: {
+  categoryId: string;
+  categoryName: string;
+  onAdd: (
+    name: string,
+    data: {
+      description: string;
+      reason?: string;
+      website?: string;
+      documentation?: string;
+      tags?: string[];
+      aiSuggested?: boolean;
+    },
+  ) => void;
+  onBack: () => void;
+}) {
+  const { activeStack } = useStack();
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<ProviderWithRelations[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = async (q: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const params = q.trim()
+        ? `q=${encodeURIComponent(q.trim().slice(0, 120))}`
+        : `category=${encodeURIComponent(categoryId)}`;
+      const res = await fetch(`/api/providers?${params}`);
+      const data = (await res.json()) as { providers?: ProviderWithRelations[]; error?: string };
+      if (!res.ok) throw new Error(data?.error ?? 'Failed to load providers.');
+      setResults(
+        (data?.providers ?? []).filter(
+          (provider) =>
+            !isProviderInCategory(
+              activeStack,
+              categoryId,
+              provider.name,
+              provider.officialWebsite,
+            ),
+        ),
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load providers.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void load('');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categoryId]);
+
+  const debounceRef = useRef<number | null>(null);
+  const onQueryChange = (value: string) => {
+    setQuery(value);
+    if (debounceRef.current) window.clearTimeout(debounceRef.current);
+    debounceRef.current = window.setTimeout(() => void load(value), 300);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) window.clearTimeout(debounceRef.current);
+    };
+  }, []);
+
+  return (
+    <div className="space-y-2.5">
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          value={query}
+          onChange={(e) => onQueryChange(e.target.value)}
+          placeholder={`Search providers${categoryName ? ` in ${categoryName}` : ''}...`}
+          className="h-9 pl-9"
+          autoFocus
+        />
+      </div>
+
+      {loading && (
+        <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-foreground/5 bg-foreground/[0.02] py-8">
+          <Loader2 className="h-5 w-5 animate-spin text-teal-400" />
+          <p className="text-xs text-muted-foreground">Searching the catalog…</p>
+        </div>
+      )}
+
+      {!loading && error && (
+        <div className="flex flex-col items-center gap-3 rounded-xl border border-rose-500/20 bg-rose-500/[0.05] px-4 py-6 text-center">
+          <p className="text-xs leading-relaxed text-muted-foreground">{error}</p>
+          <Button variant="outline" size="sm" onClick={() => void load(query)} className="h-8 text-xs">
+            Try again
+          </Button>
+        </div>
+      )}
+
+      {!loading && !error && results.length === 0 && (
+        <div className="flex flex-col items-center gap-3 rounded-xl border border-foreground/5 bg-foreground/[0.02] px-4 py-6 text-center">
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            No matching providers found{query.trim() ? ` for "${query.trim()}"` : ''}.
+          </p>
+          <Button variant="outline" size="sm" onClick={onBack} className="h-8 text-xs">
+            Back to menu
+          </Button>
+        </div>
+      )}
+
+      {!loading && !error && results.length > 0 && (
+        <div className="space-y-2">
+          {results.slice(0, 12).map((provider) => (
+            <div
+              key={provider.slug}
+              className="flex items-start justify-between gap-3 rounded-xl border border-foreground/5 bg-foreground/[0.02] p-3 transition-all hover:bg-foreground/[0.04]"
+            >
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-foreground">{provider.name}</p>
+                <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+                  {provider.shortDescription || provider.longDescription}
+                </p>
+              </div>
+              <Button
+                size="sm"
+                onClick={() => {
+                  const input = providerInputFromCatalog(provider);
+                  onAdd(input.name, {
+                    description: input.description,
+                    reason: input.reason,
+                    website: input.website,
+                    documentation: input.documentation,
+                    tags: input.tags,
+                    aiSuggested: input.aiSuggested,
+                  });
+                }}
+                className="h-8 shrink-0 gap-1.5 bg-teal-500 text-xs text-white hover:bg-teal-600"
+              >
+                <Plus className="h-3.5 w-3.5" /> Add
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 

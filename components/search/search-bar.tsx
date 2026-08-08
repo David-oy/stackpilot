@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { ArrowRight, Search } from 'lucide-react';
+import { MAX_DESCRIPTION_LENGTH } from '@/lib/analysis-validation';
 
 /**
  * Reusable search input used on the home page and the results page. Owns its
@@ -27,6 +28,7 @@ export function SearchBar({
   inputId?: string;
 }) {
   const [query, setQuery] = useState(initialQuery);
+  const overLimit = query.trim().length > MAX_DESCRIPTION_LENGTH;
 
   useEffect(() => {
     setQuery(initialQuery);
@@ -37,6 +39,7 @@ export function SearchBar({
       role="search"
       onSubmit={(e) => {
         e.preventDefault();
+        if (overLimit) return;
         onSearch(query);
       }}
       className={`group relative ${className ?? ''}`}
@@ -58,18 +61,34 @@ export function SearchBar({
           placeholder={placeholder}
           autoFocus={autoFocus}
           aria-label="Describe your project"
+          maxLength={MAX_DESCRIPTION_LENGTH + 200}
+          aria-invalid={overLimit}
           className="w-full bg-transparent text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
         />
+        <div
+          className={`shrink-0 text-right ${
+            size === 'lg' ? 'min-w-12 text-[11px]' : 'min-w-10 text-[10px]'
+          } ${overLimit ? 'font-medium text-rose-400' : 'text-muted-foreground/60'}`}
+          aria-live="polite"
+        >
+          {query.trim().length.toLocaleString()}/{MAX_DESCRIPTION_LENGTH.toLocaleString()}
+        </div>
         <button
           type="submit"
           aria-label="Search"
-          className={`flex shrink-0 items-center justify-center rounded-xl bg-teal-500 text-white shadow-md shadow-teal-500/25 transition-transform hover:scale-105 active:scale-95 ${
+          disabled={overLimit}
+          className={`flex shrink-0 items-center justify-center rounded-xl bg-teal-500 text-white shadow-md shadow-teal-500/25 transition-transform hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100 ${
             size === 'lg' ? 'h-9 w-9' : 'h-8 w-8'
           }`}
         >
           <ArrowRight className={size === 'lg' ? 'h-4 w-4' : 'h-3.5 w-3.5'} />
         </button>
       </div>
+      {overLimit && (
+        <p className="mt-1.5 text-right text-xs text-rose-400" role="alert">
+          Too long — describe it in under {MAX_DESCRIPTION_LENGTH.toLocaleString()} characters.
+        </p>
+      )}
     </form>
   );
 }

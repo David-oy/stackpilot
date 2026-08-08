@@ -5,6 +5,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import { categoryCssVars, getCategoryMeta } from '@/lib/categories';
 import { CanvasParticles } from '@/components/ui/canvas-particles';
+import { setIslandPhase, type IslandPhase } from '@/lib/island-store';
 
 const phases = [
   'Understanding your project idea',
@@ -12,6 +13,9 @@ const phases = [
   'Ranking the best-fit providers',
   'Assembling your stack',
 ];
+
+/** The island phase that mirrors each loading step. */
+const ISLAND_PHASES: IslandPhase[] = ['understanding', 'database', 'providers', 'assembling'];
 
 const NODES = ['frontend', 'backend', 'database', 'authentication', 'payments'];
 
@@ -36,15 +40,19 @@ export function LoadingScreen({ query }: { query: string }) {
     }
     const interval = setInterval(() => {
       setProgress((p) => (p >= 100 ? 0 : p + 1));
-    }, 160);
+    }, 90);
     return () => clearInterval(interval);
   }, [reduceMotion]);
 
   useEffect(() => {
     if (reduceMotion) return;
-    const timer = setInterval(() => setPhase((p) => (p + 1) % phases.length), 5200);
+    const timer = setInterval(() => setPhase((p) => (p + 1) % phases.length), 2600);
     return () => clearInterval(timer);
   }, [reduceMotion]);
+
+  useEffect(() => {
+    setIslandPhase(ISLAND_PHASES[phase] ?? 'assembling');
+  }, [phase]);
 
   const litCount = Math.min(NODES.length, Math.floor((progress / 100) * NODES.length));
 

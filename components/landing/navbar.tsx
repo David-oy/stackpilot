@@ -76,7 +76,7 @@ export function Navbar() {
     >
       <nav
         className={cn(
-          'mx-auto flex max-w-7xl items-center justify-between px-4 transition-[height] duration-300 sm:px-6',
+          'relative mx-auto flex max-w-7xl items-center justify-between px-4 transition-[height] duration-300 sm:px-6',
           scrolled ? 'h-14' : 'h-16',
         )}
       >
@@ -89,12 +89,9 @@ export function Navbar() {
               Stack<span className="gradient-text">2set</span>
             </span>
           </Link>
-          <div className="hidden md:block">
-            <ThemeSwitcher />
-          </div>
         </div>
 
-        <div className="hidden items-center gap-1 md:flex">
+        <div className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-1 md:flex">
           {navLinks.map((link) => (
             <Link
               key={link.label}
@@ -116,6 +113,7 @@ export function Navbar() {
         </div>
 
         <div className="hidden items-center gap-3 md:flex">
+          <ThemeSwitcher />
           {!loading && user ? (
             <DropdownMenu>
               <DropdownMenuTrigger

@@ -49,23 +49,25 @@ function writeLocal(key: string, favorites: Favorite[]): void {
 export function FavoritesProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const { currentWorkspace } = useWorkspaces();
-  const workspaceId = currentWorkspace?.id ?? LOCAL_WORKSPACE_ID;
+  const workspaceId = user ? (currentWorkspace?.id ?? null) : LOCAL_WORKSPACE_ID;
   const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const loadKeyRef = useRef<string | null>(null);
 
   // Signed-in favorites live in the account (cloud) scoped per workspace;
   // signed-out favorites are stored per-workspace on the device so each
-  // workspace keeps its own list.
+  // workspace keeps its own list. Until a signed-in user's cloud workspace
+  // resolves, `workspaceId` is null — we keep the on-device list and never
+  // send the local id to the API (its workspace_id column is a Postgres uuid).
   useEffect(() => {
-    const key = user ? `cloud:${user.id}:${workspaceId}` : `local:${workspaceId}`;
+    const key = user ? `cloud:${user.id}:${workspaceId ?? 'pending'}` : `local:${workspaceId}`;
     if (loadKeyRef.current === key) return;
     loadKeyRef.current = key;
     setFavorites([]);
     setHydrated(false);
     let cancelled = false;
 
-    if (user) {
+    if (user && workspaceId) {
       void (async () => {
         try {
           const res = await fetch(
@@ -94,7 +96,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
         }
       })();
     } else {
-      const stored = readLocal(localKey(workspaceId));
+      const stored = readLocal(localKey(workspaceId ?? LOCAL_WORKSPACE_ID));
       if (!cancelled) {
         setFavorites(stored);
         setHydrated(true);
@@ -124,7 +126,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
         wasFavorite ? prev.filter((f) => f.slug !== slug) : [optimistic, ...prev],
       );
 
-      if (user) {
+      if (user && workspaceId) {
         try {
           const res = wasFavorite
             ? await fetch(
@@ -154,7 +156,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
           const next = wasFavorite
             ? prev.filter((f) => f.slug !== slug)
             : [optimistic, ...prev];
-          writeLocal(localKey(workspaceId), next);
+          writeLocal(localKey(workspaceId ?? LOCAL_WORKSPACE_ID), next);
           return next;
         });
       }
